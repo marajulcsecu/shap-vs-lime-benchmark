@@ -93,15 +93,22 @@ class Paths:
 
 
 def paths() -> Paths:
+    """Project paths, with an env override so tests cannot clobber a reported run.
+
+    The stage tests call main(force=True), which regenerates results/. Without
+    XAIB_OUTPUT_ROOT a `pytest` invocation would overwrite the FULL-profile artefacts
+    the documents are built from -- a footgun that costs two hours to undo.
+    """
     root = Path(__file__).resolve().parents[2]
+    out = Path(os.environ["XAIB_OUTPUT_ROOT"]) if os.environ.get("XAIB_OUTPUT_ROOT") else root
     return Paths(
         root=root,
-        data_raw=root / "data" / "raw",
-        data_processed=root / "data" / "processed",
-        results=root / "results",
-        attributions=root / "results" / "attributions",
-        figures=root / "figures",
-        tables=root / "tables",
-        docs=root / "docs",
-        logs=root / "logs",
+        data_raw=root / "data" / "raw",          # always the vendored source data
+        data_processed=out / "data" / "processed",
+        results=out / "results",
+        attributions=out / "results" / "attributions",
+        figures=out / "figures",
+        tables=out / "tables",
+        docs=root / "docs",                      # always the committed protocol
+        logs=out / "logs",
     )
