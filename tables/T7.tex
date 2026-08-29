@@ -1,0 +1,19 @@
+\begin{table}[t]
+\centering
+\caption{RQ4 --- cost per explanation and the fidelity it buys. Single-threaded, identical hardware for every measurement.}
+\label{tab:runtime}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Explainer & Median s & IQR s & Slowest cell s & AOPC per s \\
+\midrule
+SHAP & 0.0019 & 0.0000 & 0.3292 & 145.88 \\
+LIME & 0.0462 & 0.0030 & 0.1375 & 3.47 \\
+Fusion: mean-rank & 0.0487 & 0.0030 & 0.4515 & 4.73 \\
+Fusion: RRF & 0.0487 & 0.0030 & 0.4515 & 4.25 \\
+Fusion: fidelity-wt. & 0.0487 & 0.0030 & 0.4515 & 4.95 \\
+Random control & 1.0e-6 & 0.0000 & 1.0e-6 & 81798.76 \\
+\bottomrule
+\end{tabular}
+\par\vspace{2pt}\footnotesize Fusion rules consume both base explanations, so their cost is the sum. The random control is free by construction.
+\end{table}

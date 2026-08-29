@@ -1,0 +1,15 @@
+\begin{table}[t]
+\centering
+\caption{RQ2 --- explanation stability decomposed into three sources: explainer randomness (re-run), input perturbation (Lipschitz), and model retraining. Medians over all cells.}
+\label{tab:stability}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Explainer & Re-run CV & Re-run $\rho$ & Lipschitz $\hat L$ & Retrain $\rho$ \\
+\midrule
+SHAP & 0.000 & 1.000 & 0.184 & 0.829 \\
+LIME & 0.682 & 0.907 & 0.652 & 0.763 \\
+\bottomrule
+\end{tabular}
+\par\vspace{2pt}\footnotesize SHAP's re-run CV is exactly zero for the four tree backends by construction, declared a priori in the protocol and not presented as a finding. Retraining figures cover the three ensemble models only (protocol R3). Lower Lipschitz is more robust.
+\end{table}

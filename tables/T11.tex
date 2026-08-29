@@ -1,0 +1,23 @@
+\begin{table}[t]
+\centering
+\caption{Design axes of this benchmark against typical practice in prior SHAP-versus-LIME comparisons on tabular data \cite{man2021best,salih2024perspective,elshawi2019interpretability,duell2021comparison,amparore2021trust}.}
+\label{tab:positioning}
+\small
+\begin{tabular}{p{0.30\columnwidth}p{0.28\columnwidth}p{0.30\columnwidth}}
+\toprule
+Design axis & This study & Typical prior practice \\
+\midrule
+Model families varied & 6 & usually 1--4, often a single family \\
+Datasets varied & 3 & usually 1, occasionally several \\
+Explainers compared & 6 (incl.\ random control) & 2, control rarely included \\
+Model--dataset cells & 18 & typically 1--4 \\
+Interpretability measures & 16 across 5 families & 2--5, definitions not standardised \\
+Pre-registered hypotheses & 11 & none reported \\
+Multiple-comparison correction & Holm within family & rarely reported \\
+Effect sizes and interval estimates & on every test and estimate & rarely reported \\
+Attribution space verified comparable & yes, by additivity check & not discussed \\
+Reproducibility package & pinned, checksummed, one command & partial or absent \\
+\bottomrule
+\end{tabular}
+\par\vspace{2pt}\footnotesize The right-hand column characterises the cited literature in aggregate rather than tabulating each paper: metric and model counts are not consistently recoverable from these sources, and some are commentary rather than empirical comparison. Readers should consult the individual works for their exact scope.
+\end{table}

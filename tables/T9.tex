@@ -1,0 +1,31 @@
+\begin{table}[t]
+\centering
+\caption{RQ6 --- does rank fusion beat the \emph{better} of SHAP and LIME? Tested on evaluation instances only; the fidelity weight was fitted on a disjoint calibration split.}
+\label{tab:consensus}
+\small
+\begin{tabular}{lllrrrrl}
+\toprule
+Dataset & Model & Best rule & $\Delta$AOPC & $r$ & $p$ & $p_{\text{adj}}$ & Decision \\
+\midrule
+PIMA & LogReg & rankavg & -0.0017 & -0.785 & 1.000 & 1.000 & fail to reject H0 \\
+PIMA & DecTree & fidwt & 0.0000 & -0.772 & 1.000 & 1.000 & fail to reject H0 \\
+PIMA & RF & rrf & -0.0074 & -0.801 & 1.000 & 1.000 & fail to reject H0 \\
+PIMA & XGBoost & rankavg & -0.0115 & -0.755 & 1.000 & 1.000 & fail to reject H0 \\
+PIMA & LightGBM & fidwt & -0.0172 & -0.822 & 1.000 & 1.000 & fail to reject H0 \\
+PIMA & Stacking & rrf & -0.0132 & -0.843 & 1.000 & 1.000 & fail to reject H0 \\
+Heart & LogReg & rankavg & -0.0175 & -0.867 & 1.000 & 1.000 & fail to reject H0 \\
+Heart & DecTree & rankavg & 0.0000 & -0.870 & 1.000 & 1.000 & fail to reject H0 \\
+Heart & RF & rankavg & -0.0080 & -0.932 & 1.000 & 1.000 & fail to reject H0 \\
+Heart & XGBoost & rankavg & -0.0161 & -0.793 & 1.000 & 1.000 & fail to reject H0 \\
+Heart & LightGBM & fidwt & -0.0002 & -0.533 & 0.999 & 1.000 & fail to reject H0 \\
+Heart & Stacking & rrf & -0.0154 & -0.918 & 1.000 & 1.000 & fail to reject H0 \\
+Chronic & LogReg & fidwt & -0.0331 & -0.649 & 1.000 & 1.000 & fail to reject H0 \\
+Chronic & DecTree & rankavg & 0.0000 & -1.000 & 1.000 & 1.000 & fail to reject H0 \\
+Chronic & RF & rrf & -0.0312 & -0.910 & 1.000 & 1.000 & fail to reject H0 \\
+Chronic & XGBoost & rrf & -0.0122 & -0.727 & 1.000 & 1.000 & fail to reject H0 \\
+Chronic & LightGBM & fidwt & -0.0111 & -0.252 & 0.949 & 1.000 & fail to reject H0 \\
+Chronic & Stacking & fidwt & -0.0075 & -0.708 & 1.000 & 1.000 & fail to reject H0 \\
+\bottomrule
+\end{tabular}
+\par\vspace{2pt}\footnotesize $\Delta$AOPC is the median per-instance difference (fusion $-$ best single). $r$ is the rank-biserial correlation. $p_{\text{adj}}$ is Holm-corrected within the family of 18 cells.
+\end{table}

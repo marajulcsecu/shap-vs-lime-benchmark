@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\caption{Hyperparameter search spaces and SHAP backend assignment. Grids are capped at 12 combinations to fit the compute budget.}
+\label{tab:grids}
+\small
+\begin{tabular}{llrl}
+\toprule
+Model & Search space & Combinations & SHAP backend \\
+\midrule
+Logistic Regression & C $\in$ \{0.01, 0.1, 1.0, 10.0\} & 4 & permutation \\
+Decision Tree & max\_depth $\in$ \{3, 5, 8\}; min\_samples\_leaf $\in$ \{2, 5, 10\} & 9 & tree \\
+Random Forest & max\_depth $\in$ \{unlimited, 8\}; min\_samples\_leaf $\in$ \{1, 2, 5\} & 6 & tree \\
+XGBoost & max\_depth $\in$ \{2, 3, 5\}; learning\_rate $\in$ \{0.05, 0.1\} & 6 & tree-prob \\
+LightGBM & num\_leaves $\in$ \{7, 15, 31\}; learning\_rate $\in$ \{0.05, 0.1\} & 6 & tree-prob \\
+Stacking & final\_estimator\_\_C $\in$ \{0.1, 1.0, 10.0\} & 3 & permutation \\
+\bottomrule
+\end{tabular}
+\end{table}

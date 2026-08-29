@@ -1,0 +1,12 @@
+hypothesis,cells_all,rejected_all,cells_excl,rejected_excl,excluded_cells
+H1,18,15,17,15,pima/lgbm
+H1b,1,0,1,0,pima/lgbm
+H1c,1,0,1,0,pima/lgbm
+H2a,18,18,17,17,pima/lgbm
+H2b,18,15,17,14,pima/lgbm
+H2c,9,9,8,8,pima/lgbm
+H3a,18,13,17,12,pima/lgbm
+H3b,36,36,34,34,pima/lgbm
+H4,18,15,17,14,pima/lgbm
+H5,1,0,1,0,pima/lgbm
+H6,18,0,17,0,pima/lgbm

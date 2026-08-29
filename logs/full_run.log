@@ -1,0 +1,62 @@
+### stage1_performance 15:27:32
+[stage1] pima   logreg  nested CV (5x3)
+[stage1] pima   dtree   nested CV (5x3)
+[stage1] pima   rf      nested CV (5x3)
+[stage1] pima   xgb     nested CV (5x3)
+[stage1] pima   lgbm    nested CV (5x3)
+[stage1] pima   stack   nested CV (5x3)
+[stage1] heart  logreg  nested CV (5x3)
+[stage1] heart  dtree   nested CV (5x3)
+[stage1] heart  rf      nested CV (5x3)
+[stage1] heart  xgb     nested CV (5x3)
+[stage1] heart  lgbm    nested CV (5x3)
+[stage1] heart  stack   nested CV (5x3)
+[stage1] ckd    logreg  nested CV (5x3)
+[stage1] ckd    dtree   nested CV (5x3)
+[stage1] ckd    rf      nested CV (5x3)
+[stage1] ckd    xgb     nested CV (5x3)
+[stage1] ckd    lgbm    nested CV (5x3)
+[stage1] ckd    stack   nested CV (5x3)
+[stage1] wrote /home/marajul/AI_WorkShop/Undergrade_Thesis/results/performance.csv and /home/marajul/AI_WorkShop/Undergrade_Thesis/results/best_params.json
+### stage2_explain 15:29:13
+[stage2] pima   logreg  explaining (profile=FULL)
+[stage2] pima   dtree   explaining (profile=FULL)
+[stage2] pima   rf      explaining (profile=FULL)
+[stage2] pima   xgb     explaining (profile=FULL)
+[stage2] pima   lgbm    explaining (profile=FULL)
+[stage2] pima   stack   explaining (profile=FULL)
+[stage2] heart  logreg  explaining (profile=FULL)
+[stage2] heart  dtree   explaining (profile=FULL)
+[stage2] heart  rf      explaining (profile=FULL)
+[stage2] heart  xgb     explaining (profile=FULL)
+[stage2] heart  lgbm    explaining (profile=FULL)
+[stage2] heart  stack   explaining (profile=FULL)
+[stage2] ckd    logreg  explaining (profile=FULL)
+[stage2] ckd    dtree   explaining (profile=FULL)
+[stage2] ckd    rf      explaining (profile=FULL)
+[stage2] ckd    xgb     explaining (profile=FULL)
+[stage2] ckd    lgbm    explaining (profile=FULL)
+[stage2] ckd    stack   explaining (profile=FULL)
+[stage2] done
+### stage3_metrics 15:53:06
+[stage3] agreement
+[stage3] fidelity
+[stage3] plausibility
+[stage3] runtime
+[stage3] stability
+[stage3] deletion curves
+[stage3] done
+### stage4_stats 15:57:12
+[stage4] hypotheses
+[stage4] interval estimates
+[stage4] done
+### stage5_outputs 15:57:40
+/home/marajul/AI_WorkShop/Undergrade_Thesis/src/xaibench/stats/report.py:433: SyntaxWarning: invalid escape sequence '\ '
+  ("Explainers compared", f"{len(ALL_EXPLAINERS)} (incl.\ random control)",
+[stage5] figures
+[stage5] 14 figures -> /home/marajul/AI_WorkShop/Undergrade_Thesis/figures
+[stage5] tables
+[stage5] 12 tables -> /home/marajul/AI_WorkShop/Undergrade_Thesis/tables
+[stage5] headline macros -> /home/marajul/AI_WorkShop/Undergrade_Thesis/tables/findings.tex
+[stage5] manifest: 138 artefacts, commit 3ac05d8b, profile FULL
+### FULL RUN COMPLETE 15:57:49
