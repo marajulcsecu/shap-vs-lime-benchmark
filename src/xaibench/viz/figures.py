@@ -441,15 +441,21 @@ def fig_consensus_forest(profile: Profile):
     ax.axvline(0.0, color="#333333", lw=1.0)
     ax.set_yticks(y)
     ax.set_yticklabels(stats.cell, fontsize=7.2)
+    from xaibench.viz.theme import EXPLAINER_LABELS
+    right = ax.get_xlim()[1]
     for yi, (rule, decision) in enumerate(zip(stats.best_rule, stats.decision)):
         marker = "*" if decision == "reject H0" else ""
-        ax.text(ax.get_xlim()[1], yi, f" {rule}{marker}", fontsize=6.6,
-                va="center", color="#555555")
+        label = EXPLAINER_LABELS.get(rule, rule).replace("Fusion: ", "")
+        ax.text(right, yi, f" {label}{marker}", fontsize=6.6, va="center",
+                color="#555555")
     _label(ax, x="$\\Delta$AOPC:  best fusion rule $-$ max(SHAP, LIME)",
-           title="Does fusion beat the better of the two? (evaluation instances only)")
+           title="Does fusion beat the better of the two?\n(evaluation instances only)")
     ax.grid(axis="x", alpha=0.25)
-    ax.text(0.02, 0.02, "right of zero = fusion wins;  * = Holm-adjusted $p < 0.05$",
-            transform=ax.transAxes, fontsize=6.8, color="#555555")
+    ax.locator_params(axis="x", nbins=5)
+    ax.margins(y=0.04)
+    # Below the axis, not inside it: at 18 rows the caption collided with the bottom label.
+    ax.set_xlabel("$\\Delta$AOPC:  best fusion rule $-$ max(SHAP, LIME)\n"
+                  "right of zero = fusion wins;  * = Holm-adjusted $p < 0.05$")
     return fig
 
 

@@ -12,7 +12,7 @@
 \contentsline {table}{\numberline {4.5}{\ignorespaces RQ4 --- cost per explanation and the fidelity it buys. Single-threaded, identical hardware for every measurement.}}{24}{table.caption.21}%
 \contentsline {table}{\numberline {4.6}{\ignorespaces RQ5 --- pre-registered plausibility reference sets and top-5 overlap.}}{24}{table.caption.23}%
 \contentsline {table}{\numberline {4.7}{\ignorespaces RQ6 --- does rank fusion beat the \emph {better} of SHAP and LIME? Tested on evaluation instances only; the fidelity weight was fitted on a disjoint calibration split.}}{28}{table.caption.25}%
-\contentsline {table}{\numberline {4.8}{\ignorespaces Decision table for all eleven pre-registered hypotheses. Every entry is auditable against the frozen protocol, which was committed before any result existed.}}{29}{table.caption.27}%
+\contentsline {table}{\numberline {4.8}{\ignorespaces Decision table for all eleven pre-registered hypotheses. Every entry is auditable against the frozen protocol, which was committed before any result existed.}}{28}{table.caption.27}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
