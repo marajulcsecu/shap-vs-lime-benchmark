@@ -17,6 +17,7 @@ narwhals==2.25.0
 networkx==3.6.1
 numba==0.67.0
 numpy==1.26.4
+nvidia-nccl-cu12==2.31.2
 nvidia-nccl-cu13==2.31.2
 packaging==26.3
 pandas==3.0.5
@@ -43,4 +44,4 @@ tifffile==2026.3.3
 tqdm==4.70.0
 typing-extensions==4.16.0
 wrapt==2.3.0
-xgboost==3.4.1
+xgboost==2.1.4

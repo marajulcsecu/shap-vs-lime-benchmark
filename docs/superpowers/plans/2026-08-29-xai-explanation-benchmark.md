@@ -16,6 +16,7 @@
 
 - Python 3.12.3, virtualenv at `.venv/`, created with `uv venv`. Never install into system Python.
 - `numpy<2` — pinned. numpy 2.x breaks the numba/llvmlite chain that `shap` depends on; a two-day schedule has no room for that debugging.
+- `xgboost==2.1.4` — pinned. XGBoost 3.x serialises `base_score` as a JSON array string (`'[3.485342E-1]'`), which `shap` 0.49's `TreeExplainer` parses with a bare `float()` and crashes on. Falling back to a model-agnostic explainer for XGBoost would forfeit both the determinism claim in RQ2a and a fair runtime comparison in RQ4, so the library is pinned instead. Verified: additivity error 4.5e-08.
 - Exact resolved versions captured to `requirements.lock.txt` via `uv pip freeze` after install. That file, not `pyproject.toml`, is the reproducibility artefact.
 - Global seed `42`. Repeat *r* uses seed `1000 + r`. Bootstrap resample *b* uses seed `2000 + b`. Every seed used is recorded in `results/MANIFEST.json`.
 - Two profiles, one code path: `QUICK` (≈5 min, validates the whole chain including LaTeX) and `FULL` (≈2 h, the reported results). Profile is selected by `XAIB_PROFILE` env var or `--profile`; it defaults to `QUICK` so an accidental run is never the expensive one.
