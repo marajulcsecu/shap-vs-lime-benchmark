@@ -1,0 +1,24 @@
+\chapter{Discussion}\label{ch:discussion}
+
+\input{../paper/sections/05_discussion}
+
+\section{Practical guidance}
+Compressing the results into advice a practitioner can act on:
+
+\begin{enumerate}
+  \item \textbf{If the model is a tree ensemble, use SHAP.} It was more faithful,
+    roughly \SpeedFactor{}$\times$ cheaper, deterministic given a fixed background, and
+    more robust to input perturbation. LIME's remaining advantage is that it works when
+    no tree backend exists.
+  \item \textbf{Fix and record the background distribution.} SHAP's attributions depend
+    on it, and constructing it from synthetic summary points rather than real rows can
+    break additivity outright (Section~\ref{sec:pitfalls}).
+  \item \textbf{Do not read agreement between the two as validation.} At median
+    $\rho = \MedianRho{}$, taking the intersection of two top-five lists discards about
+    half of each.
+  \item \textbf{Report which stability you measured.} Re-run determinism, perturbation
+    robustness, and retraining stability are different properties with different
+    remedies, and the first is the least informative.
+  \item \textbf{Always include a random-ranking control} when reporting any
+    perturbation-based fidelity number.
+\end{enumerate}

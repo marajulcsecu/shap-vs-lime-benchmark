@@ -1,0 +1,28 @@
+\chapter{Literature Review}\label{ch:literature}
+
+\input{../paper/sections/02_related_work}
+
+\section{Synthesis: what this literature leaves open}
+Three gaps recur across the work surveyed above, and each maps to a design decision in
+Chapter~\ref{ch:method}.
+
+\textbf{Scope.} Most comparisons vary one axis --- several models on one dataset, or
+several datasets with one model. Because explanation behaviour plausibly depends on
+both the model's functional form and the data's feature redundancy, a single-axis
+result cannot separate the two. We vary both, giving eighteen cells.
+
+\textbf{Inference.} Point differences are reported without hypothesis tests, effect
+sizes, or correction for multiplicity. With per-instance metrics running to hundreds of
+observations per cell, almost any difference is `significant', so the absence of effect
+sizes is the more serious omission. We report effect sizes and intervals on every
+comparison and correct within hypothesis family.
+
+\textbf{Comparability.} No surveyed comparison states which output space its
+attributions live in. Since LIME explains predicted probability while tree SHAP
+defaults to a log-odds margin, a comparison that does not fix this is contrasting two
+different quantities. We fix it and verify it (Section~\ref{sec:pitfalls}).
+
+A fourth observation concerns the evaluation metrics themselves. Fidelity is reported
+without a random baseline in every comparison we surveyed, which leaves the absolute
+numbers uninterpretable, and stability is reported as a single quantity even though at
+least three distinct notions are in circulation. Both shape our design.

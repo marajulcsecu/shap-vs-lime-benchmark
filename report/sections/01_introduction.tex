@@ -1,0 +1,43 @@
+\chapter{Introduction}\label{ch:intro}
+
+\input{../paper/sections/01_introduction}
+
+\section{Problem statement}
+Two post-hoc explanation methods dominate practice on tabular data, they rest on
+different theory, they routinely disagree about the same prediction, and the published
+comparisons between them vary too few axes to generalise from. A practitioner choosing
+between them has no controlled evidence to consult. This thesis supplies that evidence.
+
+\section{Objectives}
+The work is organised around six research questions, each with a measurable outcome:
+
+\begin{enumerate}
+  \item[\textbf{O1}] Quantify how far SHAP and LIME agree on feature rankings, and
+    whether agreement depends on model family or task difficulty (\RQ{1}).
+  \item[\textbf{O2}] Separate explanation stability into explainer randomness, input
+    perturbation, and model retraining variance, and measure each (\RQ{2}).
+  \item[\textbf{O3}] Measure how faithfully each explanation reflects the model's
+    decision function, against a random-ranking control (\RQ{3}).
+  \item[\textbf{O4}] Measure the computational cost of each explanation and the
+    fidelity that cost buys (\RQ{4}).
+  \item[\textbf{O5}] Check top-ranked features against a pre-registered,
+    literature-derived reference set (\RQ{5}).
+  \item[\textbf{O6}] Test whether rank-level fusion of the two beats the better of them
+    (\RQ{6}).
+\end{enumerate}
+
+\section{Scope and delimitations}
+This is a computer-science methodology study. It covers post-hoc feature-attribution
+methods for binary classification on small tabular datasets. It does not cover
+counterfactual explainers, rule extraction, attention-based methods, image or text
+modalities, deep tabular architectures, or human evaluation of explanation
+usefulness. It makes no medical claim of any kind; the three diseases are benchmarks.
+
+\section{Structure of this thesis}
+Chapter~\ref{ch:literature} surveys the two methods, their evaluation, their known
+failure modes, and prior comparisons. Chapter~\ref{ch:method} states the full protocol.
+Chapter~\ref{ch:results} reports results per research question, with all eighteen cells
+in Appendix~\ref{app:fullresults}. Chapter~\ref{ch:discussion} interprets them,
+Chapter~\ref{ch:limitations} bounds them, and Chapter~\ref{ch:conclusion} closes.
+Appendices give the reference feature sets with citations, the recorded environment,
+and instructions for reproducing every number.

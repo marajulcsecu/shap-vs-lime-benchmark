@@ -1,0 +1,13 @@
+\section{Conclusion}\label{sec:conclusion}
+
+Across \NumCells{} model--dataset cells, \shap{} and \lime{} agree on feature rankings
+only moderately (median $\rho = \MedianRho{}$), and \shap{} is the more faithful,
+cheaper, and more perturbation-robust of the two wherever a tree backend exists.
+Explanation stability separates into three sources that are routinely conflated, and
+the one that survives a deterministic explainer --- variance from retraining the model
+--- is the one that a determinism guarantee cannot address. Rank-level fusion of the
+two did not clear the pre-registered bar of beating the better of them, which follows
+from their moderate agreement and \shap{}'s consistent advantage.
+
+The protocol, code, data, and every figure and table in this paper regenerate from a
+single command, against hypotheses frozen in version control before any result existed.

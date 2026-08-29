@@ -1,0 +1,59 @@
+\section{Introduction}\label{sec:intro}
+
+Machine-learning models now inform decisions that affect people directly, in
+healthcare, credit, and public administration, and the models that perform best on
+tabular data are gradient-boosted and bagged tree ensembles whose reasoning no human
+reads off the weights~\cite{grinsztajn2022why}. Regulation has followed: the EU AI Act
+obliges providers of high-risk systems to make their operation
+interpretable~\cite{euaiact2024}, and comparable duties are emerging
+elsewhere~\cite{goodman2017european}. Post-hoc explanation methods are the standard
+answer. Two dominate: \shap{}, which attributes a prediction to features through
+cooperative-game theory~\cite{lundberg2017unified,lundberg2020local}, and \lime{},
+which fits an interpretable surrogate in the neighbourhood of a single
+prediction~\cite{ribeiro2016why}.
+
+The two do not have to agree, and they frequently do not. Their theoretical
+foundations differ, one is deterministic on trees while the other samples, and their
+known failure modes are unrelated~\cite{slack2020fooling,kumar2020problems}. A
+practitioner who runs both and sees two different top-five lists has no principled
+way to choose between them.
+
+Prior comparisons do not settle this, because they hold too much fixed. The typical
+study evaluates one model family, or one dataset, defines its own fidelity metric,
+and reports point differences without a hypothesis test or released code
+(Table~\ref{tab:positioning}). Nothing in that literature is wrong; the aggregate is
+simply too heterogeneous to generalise from. The gap is not a missing algorithm, it
+is a missing controlled comparison --- and that is a gap an experiment can close.
+
+We close it with a benchmark that varies model family, dataset, and explainer
+simultaneously under one protocol, and we fix that protocol in version control before
+computing any result. Concretely, this paper contributes:
+
+\begin{enumerate}
+  \item \textbf{A reproducible multi-axis benchmark.} Two post-hoc explainers, three
+    rank-fusion rules, and a random-ranking control, across six classifiers and three
+    public clinical datasets --- \NumCells{} model--dataset cells and \NumExplained{}
+    explained instances --- with eleven pre-registered hypotheses, non-parametric
+    tests, Holm correction within family, effect sizes, and bootstrap intervals
+    (Table~\ref{tab:hypotheses}).
+  \item \textbf{A three-way decomposition of explanation stability.} We separate
+    explainer randomness, sensitivity to input perturbation, and variance induced by
+    retraining the model itself (Section~\ref{sec:rq2}). Studies that report a single
+    stability number conflate these, and the distinction matters: an explanation can
+    be bit-for-bit reproducible and still fragile, because the model beneath it moves
+    when the training sample does.
+  \item \textbf{A controlled evaluation of rank-level fusion.} We implement mean-rank
+    fusion, reciprocal-rank fusion, and a fidelity-weighted variant whose weights are
+    fitted on a disjoint calibration split, and test each against a deliberately
+    strict bar: beat the \emph{better} of \shap{} and \lime{} on the same cell, not
+    their average (Section~\ref{sec:rq6}). Aggregating explanations is not a new
+    idea~\cite{bhatt2020aggregating,rieger2020simple} and we do not claim it; the
+    contribution is the controlled evaluation, including the null outcome, which was
+    pre-registered as a valid result.
+\end{enumerate}
+
+Section~\ref{sec:method} states the protocol, including a subsection
+(\ref{sec:pitfalls}) on four methodological traps that silently invalidate
+comparisons of this kind and how each is handled here. Section~\ref{sec:results}
+reports one subsection per research question. Sections~\ref{sec:discussion}
+and~\ref{sec:limitations} set out what the results support and what they do not.

@@ -1,0 +1,49 @@
+\begin{frame}{The models that work best on tabular data are the ones nobody can read}
+\begin{columns}[T]
+\begin{column}{0.54\textwidth}
+\begin{itemize}\setlength\itemsep{0.6em}
+  \item Tree ensembles win on tabular data --- and their reasoning is not in the weights
+  \item Regulation now requires explanations, not just accuracy (EU AI Act, 2024)
+  \item Two methods dominate practice: \shap{} and \lime{}
+\end{itemize}
+\end{column}
+\begin{column}{0.44\textwidth}
+\small
+\begin{block}{They rest on different theory}
+\shap{}: cooperative-game attribution of the output.\\[0.4em]
+\lime{}: a linear surrogate fitted near one prediction.
+\end{block}
+\end{column}
+\end{columns}
+\takeaway{So they can disagree about the same prediction --- and a practitioner
+who sees two different top-five lists has no principled way to choose.}
+\end{frame}
+
+\begin{frame}{Existing comparisons vary one axis, so nothing generalises}
+\begin{itemize}\setlength\itemsep{0.7em}
+  \item Typically \textbf{one model family}, or \textbf{one dataset}
+  \item Fidelity metrics \textbf{defined differently} in every paper
+  \item \textbf{No hypothesis tests}, no effect sizes, no correction for multiplicity
+  \item \textbf{No random control}, so fidelity numbers have no scale
+  \item Output space never stated --- often comparing log-odds against probability
+\end{itemize}
+\takeaway{The gap is not a missing algorithm. It is a missing controlled comparison ---
+and that is something an experiment can actually close.}
+\end{frame}
+
+\begin{frame}{Our question, and what we claim}
+\begin{block}{Question}
+Across model families and datasets, how far do \shap{} and \lime{} agree, how stable and
+faithful is each, what does each cost --- and does combining them help?
+\end{block}
+\medskip
+\begin{enumerate}\setlength\itemsep{0.5em}
+  \item A \textbf{reproducible benchmark}: \NumCells{} model--dataset cells,
+    \NumExplained{} explained instances, 11 pre-registered hypotheses
+  \item A \textbf{three-way decomposition of stability}: explainer randomness,
+    input perturbation, model retraining
+  \item A \textbf{controlled evaluation of three rank-fusion rules} against a strict bar
+\end{enumerate}
+\takeaway{We do not claim to have invented explanation fusion --- that exists and we
+cite it. The contribution is the evaluation.}
+\end{frame}

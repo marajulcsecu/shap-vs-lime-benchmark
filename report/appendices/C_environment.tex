@@ -1,0 +1,17 @@
+\chapter{Recorded Environment}\label{app:environment}
+
+\input{../tables/T12}
+
+Exact versions of every dependency are pinned in \texttt{requirements.lock.txt}, and
+\texttt{results/MANIFEST.json} additionally records a SHA-256 digest for every generated
+artefact together with the git commit, the complete seed set, and the wall-clock
+duration of the run.
+
+Two library pins deserve explanation, because both were forced by real
+incompatibilities rather than chosen. \texttt{numpy} is held below 2.0 because the
+numba chain \texttt{shap} depends on does not build against 2.x. \texttt{xgboost} is
+pinned to 2.1.4 because XGBoost 3.x serialises its \texttt{base\_score} as a JSON array
+string, which \texttt{shap}'s tree explainer parses with a bare \texttt{float()} call
+and fails on. Substituting a model-agnostic explainer for XGBoost would have forfeited
+both the determinism measurement in \RQ{2}a and a fair cost comparison in \RQ{4}, so the
+library is pinned instead.

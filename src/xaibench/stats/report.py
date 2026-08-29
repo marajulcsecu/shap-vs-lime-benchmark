@@ -334,7 +334,8 @@ def T8(profile) -> str:
               "They are literature-derived, incomplete, and not causal; a low score is "
               "as consistent with an incomplete reference set as with a poor "
               "explanation. RQ5 is the weakest metric in this study and is reported as "
-              "corroborating evidence only. Full citations in Appendix~\\ref{app:refsets}.")
+              "corroborating evidence only. The machine-readable sets, with full "
+              "citation strings, are in \\texttt{docs/reference\\_features.yaml}.")
 
 
 def T9(profile) -> str:
@@ -414,26 +415,49 @@ def T10(profile) -> str:
 
 
 def T11(profile) -> str:
-    """Positioning against prior SHAP-vs-LIME comparisons."""
+    """Design axes of this study against typical prior practice.
+
+    Deliberately NOT a per-paper count table. Asserting "study X used 4 models and 3
+    metrics" for work we have not read line by line would be fabrication, and the
+    counts are not consistently recoverable from abstracts -- some of the cited work
+    is commentary rather than empirical comparison. The rows below state this study's
+    design exactly and characterise prior practice at a level the citations support.
+    """
+    from xaibench.config import ALL_EXPLAINERS, CELLS, DATASETS, MODELS
+    stats = _results("stats_hypotheses.csv")
     rows = [
-        ("This study", "6", "3", "16", "Yes (11, Holm)", "Yes"),
-        ("Man \\& Chan~\\cite{man2021best}", "4", "2", "3", "No", "Partial"),
-        ("Salih et al.~\\cite{salih2024perspective}", "2", "1", "2", "No", "No"),
-        ("ElShawi et al.~\\cite{elshawi2019interpretability}", "3", "1", "5", "No", "No"),
-        ("Duell et al.~\\cite{duell2021comparison}", "3", "1", "3", "No", "No"),
-        ("Vieira \\& Digiampietri~\\cite{vieira2020study}", "2", "1", "2", "No", "No"),
-        ("Amparore et al.~\\cite{amparore2021trust}", "3", "4", "4", "Partial", "Yes"),
+        ("Model families varied", str(len(MODELS)),
+         "usually 1--4, often a single family"),
+        ("Datasets varied", str(len(DATASETS)),
+         "usually 1, occasionally several"),
+        ("Explainers compared", f"{len(ALL_EXPLAINERS)} (incl.\ random control)",
+         "2, control rarely included"),
+        ("Model--dataset cells", str(len(CELLS)), "typically 1--4"),
+        ("Interpretability measures", "16 across 5 families",
+         "2--5, definitions not standardised"),
+        ("Pre-registered hypotheses", str(stats.hypothesis.nunique()),
+         "none reported"),
+        ("Multiple-comparison correction", "Holm within family", "rarely reported"),
+        ("Effect sizes and interval estimates", "on every test and estimate",
+         "rarely reported"),
+        ("Attribution space verified comparable", "yes, by additivity check",
+         "not discussed"),
+        ("Reproducibility package", "pinned, checksummed, one command",
+         "partial or absent"),
     ]
-    frame = pd.DataFrame(
-        [{"Study": s, "Models": m, "Datasets": d, "Metrics": k,
-          "Statistical testing": t, "Code released": c} for s, m, d, k, t, c in rows])
+    frame = pd.DataFrame([{"Design axis": escape(a), "This study": escape(b),
+                           "Typical prior practice": escape(c)} for a, b, c in rows])
     return to_booktabs(
-        frame, caption="This study against prior SHAP-versus-LIME comparisons on "
-                       "tabular data.",
-        label="tab:positioning", column_format="lrrrll",
-        notes=_quick_note(profile) + "Metric counts are as reported by each study; "
-              "definitions are not standardised across this literature, which is part "
-              "of the gap this benchmark addresses.")
+        frame,
+        caption="Design axes of this benchmark against typical practice in prior "
+                "SHAP-versus-LIME comparisons on tabular data "
+                "\\cite{man2021best,salih2024perspective,elshawi2019interpretability,duell2021comparison,amparore2021trust}.",
+        label="tab:positioning", column_format="p{0.30\\columnwidth}p{0.28\\columnwidth}p{0.30\\columnwidth}",
+        notes=_quick_note(profile) + "The right-hand column characterises the cited "
+              "literature in aggregate rather than tabulating each paper: metric and "
+              "model counts are not consistently recoverable from these sources, and "
+              "some are commentary rather than empirical comparison. Readers should "
+              "consult the individual works for their exact scope.")
 
 
 def T12(profile) -> str:
@@ -464,3 +488,84 @@ def T12(profile) -> str:
 
 TABLES = {"T1": T1, "T2": T2, "T3": T3, "T4": T4, "T5": T5, "T6": T6,
           "T7": T7, "T8": T8, "T9": T9, "T10": T10, "T11": T11, "T12": T12}
+
+
+# ------------------------------------------------------------- headline macros
+# Prose needs numbers too -- an abstract that says "median agreement was 0.62" is a
+# hand-typed result unless that 0.62 comes from here. Every such value is emitted as
+# a LaTeX macro and \input by the documents, so the "no number is typed by hand"
+# rule covers running text, not just tables.
+
+def _macro(name: str, value: str) -> str:
+    return rf"\newcommand{{\{name}}}{{{value}}}"
+
+
+def findings_macros(profile) -> str:
+    agreement = _results("metrics_agreement.csv").query("instance_id >= 0")
+    fidelity = _results("metrics_fidelity.csv").query("baseline == 'median'")
+    stability = _results("metrics_stability.csv")
+    runtime = _results("metrics_runtime.csv")
+    stats = _results("stats_hypotheses.csv")
+    config = _results("explainer_config.csv")
+    budget = _results("instance_budget.csv")
+    perf = _results("performance.csv")
+
+    primary = runtime[(runtime.explainer != "lime")
+                      | (runtime.num_samples == profile.lime_num_samples[0])]
+
+    def med(frame, column, **filters):
+        subset = frame
+        for key, value in filters.items():
+            subset = subset[subset[key] == value]
+        series = subset[column].dropna()
+        return series.median() if len(series) else float("nan")
+
+    def rejected(hypothesis):
+        group = stats.query("hypothesis == @hypothesis")
+        return int((group.decision == "reject H0").sum()), len(group)
+
+    shap_seconds = med(primary, "median_seconds", explainer="shap")
+    lime_seconds = med(primary, "median_seconds", explainer="lime")
+    h6_reject, h6_total = rejected("H6")
+    h3b_reject, h3b_total = rejected("H3b")
+    h1_reject, h1_total = rejected("H1")
+
+    lines = [
+        "% Generated by xaibench.stats.report.findings_macros -- do not edit.",
+        _macro("ProfileName", str(profile.name)),
+        _macro("NumCells", str(len(config))),
+        _macro("NumExplained", str(int(budget.n_explained.sum()))),
+        _macro("MedianRho", fmt(med(agreement, "spearman"), 2)),
+        _macro("MedianJaccardFive", fmt(med(agreement, "jaccard5"), 2)),
+        _macro("MedianRboNorm", fmt(med(agreement, "rbo_norm"), 2)),
+        _macro("RhoPima", fmt(med(agreement, "spearman", dataset="pima"), 2)),
+        _macro("RhoHeart", fmt(med(agreement, "spearman", dataset="heart"), 2)),
+        _macro("RhoCkd", fmt(med(agreement, "spearman", dataset="ckd"), 2)),
+        _macro("AucPima", fmt(med(perf, "roc_auc", dataset="pima"), 2)),
+        _macro("AucHeart", fmt(med(perf, "roc_auc", dataset="heart"), 2)),
+        _macro("AucCkd", fmt(med(perf, "roc_auc", dataset="ckd"), 2)),
+        _macro("AopcShap", fmt(med(fidelity, "aopc", explainer="shap"), 3)),
+        _macro("AopcLime", fmt(med(fidelity, "aopc", explainer="lime"), 3)),
+        _macro("AopcRandom", fmt(med(fidelity, "aopc", explainer="random"), 3)),
+        _macro("AopcBestFusion", fmt(max(
+            med(fidelity, "aopc", explainer=rule) for rule in
+            ("rankavg", "rrf", "fidwt")), 3)),
+        _macro("LipschitzShap", fmt(med(stability, "lipschitz", explainer="shap"), 2)),
+        _macro("LipschitzLime", fmt(med(stability, "lipschitz", explainer="lime"), 2)),
+        _macro("RerunCvLime", fmt(med(stability, "rerun_cv", explainer="lime"), 2)),
+        _macro("RetrainShap", fmt(med(stability, "retrain_agreement", explainer="shap"), 2)),
+        _macro("RetrainLime", fmt(med(stability, "retrain_agreement", explainer="lime"), 2)),
+        _macro("SecondsShap", fmt(shap_seconds, 4)),
+        _macro("SecondsLime", fmt(lime_seconds, 4)),
+        _macro("SpeedFactor", fmt(lime_seconds / shap_seconds
+                                  if shap_seconds else float("nan"), 1)),
+        _macro("HOneRejected", f"{h1_reject}"),
+        _macro("HOneTotal", f"{h1_total}"),
+        _macro("HThreeBRejected", f"{h3b_reject}"),
+        _macro("HThreeBTotal", f"{h3b_total}"),
+        _macro("HSixRejected", f"{h6_reject}"),
+        _macro("HSixTotal", f"{h6_total}"),
+        _macro("AdditivityMedianMax", fmt(config.additivity_median.max(), 3)),
+        _macro("AdditivityOutlierCells", str(int((config.additivity_n_over_tol > 0).sum()))),
+    ]
+    return "\n".join(lines) + "\n"

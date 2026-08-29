@@ -1,0 +1,44 @@
+\chapter{Methodology}\label{ch:method}
+
+\input{../paper/sections/03_method}
+
+\section{Notation}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Symbol & Meaning \\
+\midrule
+$d$ & number of original features in a dataset \\
+$x$ & one instance, in transformed model-input space \\
+$\phi(x) \in \mathbb{R}^{d}$ & attribution vector, aggregated to original features \\
+$\pi(x)$ & ranking of features by $|\phi(x)|$, ties broken by index \\
+$f_c(\cdot)$ & model probability for the instance's own predicted class $c$ \\
+$K$ & deletion depth, $\min(d, 10)$ \\
+$R$ & explainer re-runs per instance, 10 \\
+$m$ & perturbation neighbours per instance, 5 \\
+$B$ & bootstrap model refits, 10 \\
+$w$ & weight given to SHAP by the fidelity-weighted fusion rule \\
+$\hat{L}(x)$ & local Lipschitz estimate of explanation robustness \\
+\bottomrule
+\end{tabular}
+
+\section{Hyperparameter search spaces}
+\input{../tables/T2}
+
+\section{Complete preprocessing specification}
+Numeric columns are median-imputed then standardised; categorical columns are
+mode-imputed then one-hot encoded with binary features collapsed to a single column and
+unseen categories at transform time encoded as all-zero. Every step is fitted inside a
+\texttt{Pipeline}, so under Track A the statistics come from the inner-training rows of
+each fold and under Track B from the 80\,\% training partition alone. The mapping from
+output columns back to original features is derived from the fitted encoder's own
+category lists rather than by parsing generated column names --- the Chronic Kidney
+Disease data contains both \texttt{pc} and \texttt{pcc}, and any name-prefix heuristic
+assigns one's columns to the other.
+
+\section{Compute budget and profiles}
+The pipeline runs under two configuration profiles sharing one code path: a QUICK
+profile that validates the entire chain including document builds in about five
+minutes, and the FULL profile that produces the reported results. Every figure carries
+a visible watermark under any non-reporting profile, so a draft cannot be mistaken for
+a result. Recorded settings for the run that produced this document are in
+Appendix~\ref{app:environment}.

@@ -1,0 +1,39 @@
+\chapter{Reproducing Every Number}\label{app:repository}
+
+\section{One command}
+\begin{verbatim}
+make setup     # create the virtualenv from requirements.lock.txt
+make data      # download the three datasets, verify SHA-256
+make test      # run the test suite
+make smoke     # validate the whole pipeline in ~5 minutes (QUICK profile)
+make all       # FULL run, then build paper, report, and slides
+\end{verbatim}
+
+\section{Repository map}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Path & Contents \\
+\midrule
+\texttt{docs/PROTOCOL.md} & the frozen protocol, with its amendment log \\
+\texttt{docs/reference\_features.yaml} & \RQ{5} reference sets, frozen with citations \\
+\texttt{src/xaibench/data/} & acquisition, checksums, per-dataset semantics fixes \\
+\texttt{src/xaibench/models/} & preprocessing, model zoo, per-cell fitting \\
+\texttt{src/xaibench/explain/} & SHAP, LIME, fusion rules, random control \\
+\texttt{src/xaibench/metrics/} & agreement, stability, fidelity, plausibility \\
+\texttt{src/xaibench/stats/} & tests, corrections, intervals, table generation \\
+\texttt{src/xaibench/viz/} & one visual system, one function per figure \\
+\texttt{src/xaibench/pipeline/} & the five stages \\
+\texttt{tests/} & metric correctness against analytically known answers \\
+\texttt{results/} & tidy CSV and Parquet, plus \texttt{MANIFEST.json} \\
+\texttt{figures/}, \texttt{tables/} & everything the documents \texttt{\textbackslash input} \\
+\bottomrule
+\end{tabular}
+
+\section{Why the protocol commit order matters}
+\texttt{docs/PROTOCOL.md} was committed in its own commit, before any commit containing
+a result. The repository history is therefore itself evidence that the hypotheses,
+metrics, tests, and correction procedure were fixed in advance rather than adjusted
+after seeing outcomes. Every subsequent change to the protocol appears in its \S10
+amendment log with a date and a reason; five such amendments were made during
+implementation, three of them triggered by tests catching genuine errors that would
+otherwise have been invisible in the output.

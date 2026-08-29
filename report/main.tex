@@ -1,0 +1,43 @@
+\documentclass[11pt,a4paper,oneside]{report}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\input{../paper/preamble}
+\graphicspath{{../figures/}}
+
+\title{SHAP versus LIME on Clinical Tabular Data:\\[0.3em]
+A Reproducible Benchmark of Explanation Agreement,\\
+Stability, Fidelity, and Rank-Level Consensus}
+\author{Samira Oasela Antika \and Yeasmin Akter Shuchona \and\\
+        MD.\ Marajul Haque \and Gian Juti Tripura}
+\date{Department of Computer Science and Engineering\\
+University of Chittagong, Chittagong-4331\\[1.2em]
+Supervisor: Dr.\ M.\ Jamshed Alam Patwary\\
+Lecturer, Computer Science \& Engineering\\[1.2em]
+Submitted for ENG 672 --- Technical Communication and Writing\\[1.2em]
+\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\listoffigures
+\listoftables
+
+\input{sections/00_abstract}
+\input{sections/01_introduction}
+\input{sections/02_literature_review}
+\input{sections/03_methodology}
+\input{sections/04_results}
+\input{sections/05_discussion}
+\input{sections/06_limitations}
+\input{sections/07_conclusion}
+
+\appendix
+\input{appendices/A_full_results}
+\input{appendices/B_reference_features}
+\input{appendices/C_environment}
+\input{appendices/D_repository}
+
+\bibliographystyle{IEEEtran}
+\bibliography{../paper/refs}
+\end{document}

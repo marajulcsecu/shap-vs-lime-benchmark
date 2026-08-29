@@ -1,0 +1,34 @@
+\chapter{Limitations and Threats to Validity}\label{ch:limitations}
+
+\input{../paper/sections/06_limitations}
+
+\section{What we would do differently}
+Writing this up surfaced choices we would revisit.
+
+\textbf{Widen the dataset axis before widening the model axis.} Six models across three
+datasets gave eighteen cells, but the binding constraint on generalisation is the three
+datasets, not the six models. Four models across eight datasets would have supported a
+stronger claim for the same compute.
+
+\textbf{Choose a plausibility reference differently, or not at all.} \RQ{5} did not
+discriminate between explainers and could not have, given that top-5 overlap on an
+eight-feature dataset has almost no room to vary. Either use datasets with enough
+features for the metric to move, or replace it with a synthetic dataset whose true
+feature importances are known by construction --- which would give real ground truth
+instead of a literature proxy.
+
+\textbf{Budget for retraining stability from the start.} \RQ{2}c turned out to be the
+most interesting stability result and it is the one we had to restrict to three of six
+models on cost grounds. Had we known, we would have traded some of \RQ{2}a's re-run
+repeats --- which for tree SHAP are provably zero --- for wider retraining coverage.
+
+\textbf{Design the fusion evaluation around complementarity.} With hindsight, testing
+fusion between two methods where one is consistently better was testing it under
+conditions where it should not help. A more informative design would first identify
+cells where the two explainers are close in fidelity but disagree in ranking, and test
+fusion there.
+
+\textbf{Keep the amendment log from the first line of code.} We began it only when the
+first correction was needed. Three of the amendments in the frozen protocol arose from
+tests catching real errors, and recording them from the outset would have made the
+sequence clearer.

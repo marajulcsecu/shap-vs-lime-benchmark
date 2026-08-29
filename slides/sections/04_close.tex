@@ -1,0 +1,36 @@
+\begin{frame}{Limitations --- stated before anyone has to ask}
+\begin{itemize}\setlength\itemsep{0.55em}
+  \item \textbf{Three datasets.} Per-cell tests have power; generalisation across
+    datasets rests on three points.
+  \item \textbf{Perturbation baselines are off-manifold.} A marginal-draw sensitivity
+    check did not reverse the ordering, but both variants assume independence.
+  \item \textbf{Reference sets are not ground truth} --- incomplete, non-causal,
+    shaped by what the source literature measured.
+  \item \textbf{Retraining stability covers 3 of 6 models}, restricted in advance on
+    compute grounds and disclosed.
+  \item \textbf{One additivity outlier retained}, not removed --- forcing that cell to
+    log-odds would have been the larger distortion.
+  \item \textbf{No human evaluation.} Whether an explanation helps a person decide
+    better is a different question.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{What to take away}
+\begin{enumerate}\setlength\itemsep{0.6em}
+  \item \shap{} and \lime{} agree only moderately ($\rho = \MedianRho{}$) --- the choice
+    of explainer is part of the decision.
+  \item Where a tree backend exists, \shap{} won on fidelity, cost, and robustness.
+    \lime{}'s case is model-agnosticism.
+  \item Stability has three separable sources. The one a deterministic explainer cannot
+    fix --- retraining variance --- is the one that matters.
+  \item Rank fusion did not beat the better of the two, and the null result was
+    pre-registered as valid.
+\end{enumerate}
+\vfill
+{\small Everything reproduces with \texttt{make all}: pinned dependencies, checksummed
+data, a SHA-256 per artefact, and a protocol frozen in version control.}
+\end{frame}
+
+\begin{frame}[standout]
+Questions
+\end{frame}

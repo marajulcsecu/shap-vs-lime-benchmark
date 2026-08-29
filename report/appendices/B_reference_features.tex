@@ -1,0 +1,29 @@
+\chapter{Pre-Registered Plausibility Reference Sets}\label{app:refsets}
+
+These sets were compiled from the sources below and committed to version control
+\emph{before} any explanation was computed, which is what makes \RQ{5} a pre-registered
+check rather than a post-hoc rationalisation. They are not ground truth: they are
+incomplete, they are not causal, and they reflect what their source literature chose to
+measure. A low overlap score is as consistent with an incomplete reference set as with a
+poor explanation.
+
+\input{../tables/T8}
+
+\section{Sources}
+\textbf{PIMA Indian Diabetes} --- plasma glucose concentration is the diagnostic basis
+for type 2 diabetes, and BMI and age are the most consistently reported risk factors in
+this cohort. Compiled from the American Diabetes Association standards of care and the
+dataset's originating study~\cite{smith1988using}.
+
+\textbf{Heart Disease (Cleveland)} --- chest-pain type, exercise-induced ST depression,
+maximum achieved heart rate, and the vessel and thalassemia indicators dominate the
+Cleveland literature, beginning with the study that produced the
+data~\cite{detrano1989international}.
+
+\textbf{Chronic Kidney Disease} --- serum creatinine and haemoglobin are central to CKD
+staging under the KDIGO guideline; albumin, specific gravity, and packed cell volume are
+the next most frequently reported. Compiled from the KDIGO clinical practice guideline
+and the dataset's documentation~\cite{rubini2015ckd}.
+
+The machine-readable version, with full citation strings, is
+\texttt{docs/reference\_features.yaml}.
