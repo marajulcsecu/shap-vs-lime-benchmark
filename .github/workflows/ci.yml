@@ -124,19 +124,23 @@ jobs:
             echo "::endgroup::"
           done
 
-      - name: Enforce the 6-page conference limit and check for placeholders
-        run: |
-          pages=$(pdfinfo paper/main.pdf | awk '/^Pages:/ {print $2}')
-          echo "paper: $pages pages"
-          [ "$pages" -le 6 ] || { echo "::error::paper is $pages pages, limit is 6"; exit 1; }
-          for doc in paper report; do
-            if pdftotext "$doc/main.pdf" - | grep -qE 'Table \?\?|Fig\. \?\?|PROFILE=QUICK|STUB'; then
-              echo "::error::$doc contains a placeholder or broken cross-reference"; exit 1
-            fi
-            if grep -qE 'Reference .* undefined|Citation .* undefined' "$doc/main.log"; then
-              echo "::error::$doc has undefined references"; exit 1
-            fi
-          done
+      - name: Set up Python for the document checks
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.lock.txt
+
+      - name: Check page limits, placeholders, and references
+        # These assertions live in the test suite, not in YAML. Three of them read
+        # main.log and main.bbl, which .gitignore excludes, so they skip in a fresh
+        # clone and only run here -- after the documents have actually been built.
+        env:
+          PYTHONPATH: src
+          MPLBACKEND: Agg
+        run: pytest tests/test_paper_build.py -v -m "not slow"
 
       - uses: actions/upload-artifact@v4
         with:

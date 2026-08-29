@@ -43,6 +43,11 @@ what the documents are built from.
 make test && make docs && ./verify.sh
 ```
 
+Three tests in `tests/test_paper_build.py` read LaTeX build logs, which `.gitignore`
+excludes, so they skip until you have run `make docs`. CI runs them in its document job
+after the build; if you are changing anything that affects the page count, run `make docs`
+locally before `make test`.
+
 `verify.sh` asserts the things that, if false, would make the documents wrong in a way a
 reader could not detect: the run really was `FULL`, the additivity gate passed in every
 cell (or the failure is disclosed and sensitivity-checked), no figure carries a draft
