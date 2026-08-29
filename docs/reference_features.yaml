@@ -1,0 +1,46 @@
+# Pre-registered plausibility reference sets. FROZEN 2026-08-29.
+#
+# These are NOT ground truth. They are literature-derived reference sets used only
+# as a corroborating plausibility check (protocol §5.5). They are incomplete, they
+# are not causal, and they reflect the measurement and publication conventions of
+# their source literature. A low overlap score is as consistent with an incomplete
+# reference set as with a poor explanation. RQ5 is the weakest metric in this study
+# and is reported as such.
+pima:
+  features: [Glucose, BMI, Age, DiabetesPedigreeFunction, Insulin]
+  citations:
+    - "American Diabetes Association, 'Classification and diagnosis of diabetes:
+       Standards of Medical Care in Diabetes-2021,' Diabetes Care, vol. 44,
+       suppl. 1, pp. S15-S33, 2021."
+    - "J. W. Smith, J. E. Everhart, W. C. Dickson, W. C. Knowler, and R. S.
+       Johannes, 'Using the ADAP learning algorithm to forecast the onset of
+       diabetes mellitus,' in Proc. Annu. Symp. Comput. Appl. Med. Care, 1988,
+       pp. 261-265."
+  note: >
+    Plasma glucose concentration is the diagnostic basis for type 2 diabetes, and
+    BMI and age are the most consistently reported risk factors in this cohort.
+heart:
+  features: [cp, thalach, oldpeak, ca, thal]
+  citations:
+    - "R. Detrano, A. Janosi, W. Steinbrunn, M. Pfisterer, J.-J. Schmid,
+       S. Sandhu, K. H. Guppy, S. Lee, and V. Froelicher, 'International
+       application of a new probability algorithm for the diagnosis of coronary
+       artery disease,' Am. J. Cardiol., vol. 64, no. 5, pp. 304-310, 1989."
+    - "S. Nashif, M. R. Raihan, M. R. Islam, and M. H. Imam, 'Heart disease
+       detection by using machine learning algorithms and a real-time
+       cardiovascular health monitoring system,' World J. Eng. Technol., vol. 6,
+       no. 4, pp. 854-873, 2018."
+  note: >
+    Chest-pain type, exercise-induced ST depression, maximum achieved heart rate,
+    and the vessel and thalassemia indicators dominate the Cleveland literature.
+ckd:
+  features: [hemo, sc, al, sg, pcv]
+  citations:
+    - "L. J. Rubini, P. Soundarapandian, and P. Eswaran, 'Chronic Kidney Disease,'
+       UCI Machine Learning Repository, 2015, doi:10.24432/C5G020."
+    - "Kidney Disease: Improving Global Outcomes (KDIGO) CKD Work Group, 'KDIGO
+       2012 clinical practice guideline for the evaluation and management of
+       chronic kidney disease,' Kidney Int. Suppl., vol. 3, no. 1, pp. 1-150, 2013."
+  note: >
+    Serum creatinine and haemoglobin are central to CKD staging; albumin, specific
+    gravity, and packed cell volume are the next most frequently reported.
