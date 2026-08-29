@@ -230,7 +230,7 @@ the reproducibility claim honest.
 | Risk | Mitigation |
 |------|-----------|
 | Probability-space TreeSHAP too slow on some cell | Pre-registered fallback to log-odds for that cell, recorded per cell in `results/explainer_config.csv`, disclosed in the paper; spaces never pooled in one comparison |
-| CKD is near-separable (AUC ≈ 0.99) → degenerate explanations | Treated as a finding about easy tasks, not a defect; the difficulty gradient across the three datasets becomes RQ1c |
+| CKD is near-separable (AUC ≈ 0.99) → degenerate explanations | Treated as a finding about easy tasks, not a defect; the difficulty gradient across the three datasets is what H1c tests |
 | No fusion rule beats max(SHAP, LIME) | Pre-registered as a valid outcome; paper structure and contribution list do not depend on rejecting H6 |
 | LightGBM warns/overfits on <1000 rows | `num_leaves=15`, small `min_child_samples`, `verbose=-1`, tuned inside the inner CV loop |
 | Disk at 95 % (26 GB free) | Parquet not CSV for attributions; no pickled model zoo beyond the 18 fitted cells; venv ≈ 1.5 GB; artefacts total < 200 MB |

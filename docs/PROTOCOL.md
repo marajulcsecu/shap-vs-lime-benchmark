@@ -156,6 +156,12 @@ test instances per cell, or the whole test partition when smaller. Expected: `pi
 
 ## 5. Metric definitions
 
+**Count, for the record.** 8 predictive-performance metrics (Accuracy, Precision, Recall, F1,
+ROC-AUC, PR-AUC, MCC, Brier) and 16 interpretability measures in five families: agreement 4
+(Spearman ρ, Kendall τ_b, Jaccard@k, RBO); stability 4 (repeat-pair ρ, repeat CV, local Lipschitz
+L̂, retraining agreement); fidelity 4 (AOPC, AUC-ins, comprehensiveness, sufficiency); cost 2
+(seconds/explanation, fidelity-per-second); plausibility 2 (Jaccard@5, Precision@5).
+
 Let *f* be the fitted classifier, *x* an instance with *d* original features, and φ(x) ∈ ℝ^d the
 attribution vector produced by an explainer (after one-hot aggregation). Let `rank(x)` be the
 ranking of features by |φ(x)|, descending, ties broken by average rank.
@@ -174,8 +180,10 @@ Computed **locally** (per instance, then summarised as median and IQR over insta
 ### 5.2 Stability (RQ2)
 
 - **2a — Re-run stability.** Explain the same instance *R = 10* times with different RNG seeds.
-  Report mean pairwise Spearman ρ across repeats and the mean per-feature coefficient of variation
-  CV = σ(φ_j) / (|μ(φ_j)| + ε), ε = 1e-12.
+  Report mean pairwise Spearman ρ across the R(R−1)/2 repeat pairs, and the instance-level
+  coefficient of variation CV(x) = mean over features j of σ_r(φ_j) / (|μ_r(φ_j)| + ε), ε = 1e-12,
+  where σ_r and μ_r are taken across the R repeats. H2a's unit of analysis is CV(x), one value per
+  explained instance.
   *Pre-registered expectation:* SHAP with TreeExplainer and LinearExplainer is deterministic, so
   ρ = 1.000 and CV = 0.000 exactly for `dtree`, `rf`, `xgb`, `lgbm`, `logreg`. This is stated a
   priori as a property of the method, **not** presented as an empirical discovery. The informative
@@ -258,7 +266,7 @@ cheap and the effect size is the actual finding.
 
 | ID | Null hypothesis H0 | Alternative H1 | Test | Unit of analysis | Family size |
 |----|--------------------|----------------|------|------------------|-------------|
-| **H1** | median local Spearman ρ(SHAP, LIME) ≤ 0.50 | > 0.50 | one-sample Wilcoxon signed-rank, one-sided | instance, within cell | 18 cells |
+| **H1** | median local Spearman ρ(SHAP, LIME) ≤ 0.50 | > 0.50 | Wilcoxon signed-rank on (ρ_i − 0.50), one-sided | instance, within cell | 18 cells |
 | **H1b** | ρ does not differ between linear/single-tree and ensemble models | differs | Mann–Whitney U | cell | 1 |
 | **H1c** | ρ is uncorrelated with task difficulty (1 − ROC-AUC) | correlated | Spearman ρ over cells + permutation test | cell | 1 |
 | **H2a** | LIME re-run CV = 0 | > 0 | one-sample Wilcoxon, one-sided | instance, within cell | 18 |

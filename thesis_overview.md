@@ -85,7 +85,7 @@ Full formulas, all 11 hypotheses with named tests and α, and the pre-registered
 | **Datasets** | PIMA Diabetes (768×8, hard), Heart Disease/Cleveland (303×13, medium), Chronic Kidney Disease (400×24, easy) — spanning a deliberate **difficulty gradient** |
 | **Models** | Logistic Regression, Decision Tree, Random Forest, XGBoost, LightGBM, Stacking |
 | **Explainers** | SHAP (Tree/Linear/Permutation backends), LIME (tabular), 3 fusion rules, 1 random control |
-| **Metrics** | 8 performance + 12 interpretability |
+| **Metrics** | 8 predictive-performance + 16 interpretability measures across 5 families |
 | **Protocol** | Two tracks: nested 5×3 CV for performance; a single fixed 80/20 split for explanations |
 | **Statistics** | Non-parametric throughout, Holm-corrected within family, effect sizes and 95 % BCa CIs on everything |
 | **Framing** | Computer-science methodology study; no medical claims |
