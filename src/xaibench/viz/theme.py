@@ -13,6 +13,16 @@ PALETTE = {
     "fidwt": "#56B4E9",    # sky blue
     "random": "#7F7F7F",   # grey
 }
+# Colour alone cannot separate six series in greyscale: Okabe-Ito is chosen for
+# hue safety under deuteranopia, and within it the fusion rules and the control sit
+# close in luminance. Rather than abandon a validated palette, every series also
+# carries a distinct line style and marker, so the encoding is redundant and the
+# figures stay readable in a black-and-white print.
+LINESTYLES = {"shap": "-", "lime": "-", "rankavg": "--", "rrf": "-.",
+              "fidwt": (0, (3, 1, 1, 1)), "random": ":"}
+MARKERS = {"shap": "o", "lime": "s", "rankavg": "^", "rrf": "D",
+           "fidwt": "v", "random": "x"}
+
 DATASET_ORDER = ("pima", "heart", "ckd")
 MODEL_ORDER = ("logreg", "dtree", "rf", "xgb", "lgbm", "stack")
 EXPLAINER_ORDER = ("shap", "lime", "rankavg", "rrf", "fidwt", "random")
@@ -49,3 +59,15 @@ def watermark(fig, profile) -> None:
 
 def colour(explainer: str) -> str:
     return PALETTE.get(explainer, "#333333")
+
+
+def style(explainer: str) -> dict:
+    """Colour plus the redundant channels, ready to splat into a plot call."""
+    return {"color": colour(explainer),
+            "linestyle": LINESTYLES.get(explainer, "-"),
+            "marker": MARKERS.get(explainer, "o")}
+
+
+def relative_luminance(hexcode: str) -> float:
+    r, g, b = (int(hexcode[i:i + 2], 16) / 255 for i in (1, 3, 5))
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b

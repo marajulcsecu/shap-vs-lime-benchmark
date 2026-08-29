@@ -35,6 +35,7 @@ from xaibench.metrics.agreement import (
 )
 from xaibench.metrics.fidelity import (
     batched_curve_metrics,
+    deletion_curve_grouped,
     marginal_baselines,
     median_baseline,
 )
@@ -232,11 +233,48 @@ def stability_summary(profile: Profile) -> pd.DataFrame:
     return merged
 
 
+def deletion_curves(profile: Profile) -> pd.DataFrame:
+    """Mean deletion curve per (dataset, model, explainer), median baseline.
+
+    Stored rather than recomputed at figure time: figure F10 plots the curve itself,
+    and AOPC alone cannot reconstruct it.
+    """
+    p = paths()
+    primary_n = profile.lime_num_samples[0]
+    params = json.loads((p.results / "best_params.json").read_text())
+    rows = []
+    for dataset_id, model_id in CELLS:
+        cell = build_cell(dataset_id, model_id,
+                          params.get(f"{dataset_id}|{model_id}", {}), profile)
+        frame = _load_cell_attributions(p, dataset_id, model_id)
+        baseline = median_baseline(cell.X_train_t)
+        for explainer in ALL_EXPLAINERS:
+            vectors = _attribution_matrix(_primary(frame, explainer, primary_n),
+                                          cell.feature_order)
+            curves = []
+            for instance_id, attribution in vectors.items():
+                groups = transformed_ranking(
+                    cell, _FakeExplanation(attribution, cell.feature_order))
+                curves.append(deletion_curve_grouped(
+                    cell.predict_proba, cell.X_test_t[instance_id], groups,
+                    baseline, AOPC_MAX_K))
+            if not curves:
+                continue
+            width = min(len(c) for c in curves)
+            mean_curve = np.mean([c[:width] for c in curves], axis=0)
+            for k, value in enumerate(mean_curve):
+                rows.append({"dataset": dataset_id, "model": model_id,
+                             "explainer": explainer, "k": k,
+                             "mean_prob": float(value), "n": len(curves)})
+    return pd.DataFrame(rows)
+
+
 def main(force: bool = False) -> None:
     profile, p = get_profile(), paths()
     p.mkdirs()
     targets = {name: p.results / f"metrics_{name}.csv"
-               for name in ["agreement", "fidelity", "plausibility", "runtime", "stability"]}
+               for name in ["agreement", "fidelity", "plausibility", "runtime",
+                            "stability", "curves"]}
     if all(t.exists() for t in targets.values()) and not force:
         print("[stage3] metrics exist; skipping (use --force to recompute)")
         return
@@ -251,6 +289,8 @@ def main(force: bool = False) -> None:
     runtime_metrics(profile).to_csv(targets["runtime"], index=False)
     print("[stage3] stability", flush=True)
     stability_summary(profile).to_csv(targets["stability"], index=False)
+    print("[stage3] deletion curves", flush=True)
+    deletion_curves(profile).to_csv(targets["curves"], index=False)
     print("[stage3] done")
 
 
