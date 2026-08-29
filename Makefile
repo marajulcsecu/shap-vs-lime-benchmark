@@ -2,6 +2,7 @@ PY := .venv/bin/python
 PROFILE ?= QUICK
 export OMP_NUM_THREADS = 1
 export PYTHONHASHSEED = 42
+export PYTHONPATH = src
 
 .PHONY: setup data test smoke full pipeline all figures tables paper report slides docs clean
 
