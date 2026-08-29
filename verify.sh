@@ -84,12 +84,15 @@ done
 PYTHONPATH=src $PY - <<'PYEOF'
 import sys
 from pypdf import PdfReader
-want = {"paper": (8, 12), "report": (28, 60), "slides": (18, 40)}
+# 6 pages is the supervisor's stated IEEE conference limit, including references.
+want = {"paper": (5, 6), "report": (28, 60), "slides": (18, 40)}
 bad = []
 for name, (low, high) in want.items():
     n = len(PdfReader(f"{name}/main.pdf").pages)
     print(f"  {name}: {n} pages (target {low}-{high})")
-    if not low <= n <= high: bad.append(name)
+    if not low <= n <= high:
+        bad.append(f"{name} ({n} pages, allowed {low}-{high})")
+if bad: print("  OVER/UNDER LIMIT:", "; ".join(bad))
 sys.exit(1 if bad else 0)
 PYEOF
 check $? "page counts are within target"

@@ -1,6 +1,66 @@
 \chapter{Limitations and Threats to Validity}\label{ch:limitations}
 
-\input{../paper/sections/06_limitations}
+% --- inlined from paper/sections/06_limitations.tex so the report no longer
+% --- depends on the paper's prose, which is cut to the 6-page limit.
+\section{Limitations and Threats to Validity}\label{sec:limitations}
+
+We state these before a reader has to raise them.
+
+\textbf{Three datasets, all small and all clinical.} With \NumCells{} cells the
+per-cell tests have real power, but generalisation across \emph{datasets} rests on
+three points. Nothing here licenses a claim about tabular data in general, and the
+difficulty gradient is a design compensation, not a substitute for breadth.
+
+\textbf{Perturbation baselines are off-manifold.} Replacing a feature with the
+training median creates rows the data-generating process would not
+produce~\cite{hooker2019benchmark}, which can inflate \aopc{}. We report a
+marginal-draw variant as a sensitivity check and it did not reverse the ordering, but
+both variants share the independence assumption, and a fully on-manifold evaluation
+would need a generative model of the data.
+
+\textbf{The plausibility reference sets are not ground truth.} They are compiled from
+cited literature and clinical guidelines, frozen before any result existed, and they
+remain incomplete, non-causal, and shaped by what their source literature chose to
+measure. A low overlap score is as consistent with an incomplete reference set as with
+a poor explanation. This is why \RQ{5} is reported as corroborating evidence only.
+
+\textbf{The additivity gate failed for one cell, and we report it rather than widen the
+gate.} In PIMA/LightGBM, \AdditivityWorstOutliers{} of 150 explained instances
+reconstruct \code{predict\_proba} to worse than the $5\times10^{-3}$ tolerance (worst
+\AdditivityWorstMax{}), against a cell median of $1.1\times10^{-9}$, so the
+pre-registered rule --- median below tolerance \emph{and} at most $\max(1, 2\%)$ of
+instances above it --- is not satisfied and protocol risk R1 fired. The discrepancy is
+insensitive to background size (identical at 20 and at all 614 training rows) and we did
+not attribute it; the obvious candidate, coincidence with a median-imputed value, was
+tested and rejected. It appears to be a library-level edge case at a split boundary in
+one fitted model.
+
+We had two pre-registered options: force that cell into log-odds space, which would make
+its \shap{} incomparable with \lime{} and so remove it from every cross-explainer
+comparison, or widen the gate. We did neither, because widening a gate after seeing the
+result it fails is precisely what pre-registration exists to prevent. Instead the cell is
+retained, the failure is stated here, and every hypothesis tally is additionally reported
+with the cell excluded (\file{results/stats_sensitivity_r1.csv}); no decision in
+Table~\ref{tab:hypotheses} changes. A reader who prefers the stricter reading can take
+the excluded column.
+
+\textbf{Retraining stability covers three of six models.} Running \RQ{2}c for all six
+would have exceeded the compute budget because of \lime{}'s cost, so it is restricted
+to the ensembles --- the paper's focus --- and the restriction was registered in
+advance rather than discovered afterwards.
+
+\textbf{Timing is single-machine and single-threaded.} The \SpeedFactor{}$\times$ gap
+reflects a structural difference in the algorithms and we expect its direction to
+hold, but the magnitude is hardware- and implementation-specific.
+
+\textbf{No human evaluation.} Every metric here is a property of the model--explanation
+pair. Whether either explanation actually helps a person make a better decision is a
+different question, requiring human subjects, and we do not address it.
+
+\textbf{Explanation is not justification.} Following
+Rudin~\cite{rudin2019stop}, a faithful post-hoc explanation of a black box is not the
+same thing as an interpretable model, and none of these results argue that
+post-hoc explanation is sufficient for a high-stakes deployment.
 
 \section{What we would do differently}
 Writing this up surfaced choices we would revisit.

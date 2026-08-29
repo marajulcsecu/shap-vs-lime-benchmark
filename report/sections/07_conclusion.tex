@@ -1,6 +1,23 @@
 \chapter{Conclusion}\label{ch:conclusion}
 
-\input{../paper/sections/07_conclusion}
+% --- inlined from paper/sections/07_conclusion.tex so the report no longer
+% --- depends on the paper's prose, which is cut to the 6-page limit.
+\section{Conclusion}\label{sec:conclusion}
+
+Across \NumCells{} model--dataset cells, \shap{} and \lime{} agree substantially on
+feature rankings (median $\rho = \MedianRho{}$, clearing a pre-registered bar of $0.50$
+in \HOneRejected{} of \HOneTotal{} cells) without being interchangeable: about a third of
+each top-five list still differs. Where a tree backend exists \shap{} is the more
+faithful, roughly \SpeedFactor{}$\times$ cheaper, and markedly more perturbation-robust.
+Explanation stability separates into three sources that are routinely conflated, and
+the one that survives a deterministic explainer --- variance from retraining the model
+--- is the one that a determinism guarantee cannot address. Rank-level fusion of the two did not clear the
+pre-registered bar of beating the better of them in any of the \HSixTotal{} cells, which
+follows from exactly that combination: substantial agreement leaves little complementary
+signal, and \shap{}'s consistent advantage means averaging can only dilute it.
+
+The protocol, code, data, and every figure and table in this paper regenerate from a
+single command, against hypotheses frozen in version control before any result existed.
 
 \section{Future work}
 Four extensions follow directly. First, replacing the literature-derived plausibility

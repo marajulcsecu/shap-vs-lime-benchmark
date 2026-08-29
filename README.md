@@ -26,12 +26,21 @@ contribution there is the evaluation, not the invention. No medical claims are m
 the three diseases are benchmarks. The paper is *prepared in IEEE conference format*; it
 is not submitted anywhere.
 
+## Two documents, two jobs
+
+The **paper** is a 6-page IEEE conference submission: the argument, the four
+methodological traps, and the evidence a reviewer needs, with 2 tables and 2 figures.
+The **report** is the full-length treatment: every cell of every metric, all 14 figures,
+all 15 tables, a literature review, and four appendices. They are independent LaTeX
+sources — the report does not `\input` the paper's prose — so trimming one cannot gut
+the other. The earlier 12-page paper is retained at tag `v1.0-extended-paper`.
+
 ## Deliverables
 
 | Deliverable | Path |
 |---|---|
-| IEEE conference paper (~10 pp, two-column) | `paper/main.pdf` |
-| Thesis report (~42 pp, with appendices) | `report/main.pdf` |
+| IEEE conference paper, **6 pages** (submission format) | `paper/main.pdf` |
+| Thesis report, 48 pp with appendices (the full-length treatment) | `report/main.pdf` |
 | Beamer slide deck (+ backup slides for Q&A) | `slides/main.pdf` |
 | Frozen analysis protocol, with amendment log | `docs/PROTOCOL.md` |
 | Presentation and defence guide | `docs/PRESENTATION_GUIDE.md` |

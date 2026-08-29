@@ -1,6 +1,64 @@
 \chapter{Discussion}\label{ch:discussion}
 
-\input{../paper/sections/05_discussion}
+% --- inlined from paper/sections/05_discussion.tex so the report no longer
+% --- depends on the paper's prose, which is cut to the 6-page limit.
+\section{Discussion}\label{sec:discussion}
+
+\subsection{What a practitioner should take from this}
+The agreement number cuts both ways, and it is worth being precise about it. At median
+$\rho = \MedianRho{}$ with top-5 overlap of \MedianJaccardFive{}, the two methods are
+not the wildly divergent pair that some of the disagreement literature implies: they
+clear a moderate-association bar in \HOneRejected{} of \HOneTotal{} cells. But a third
+of each top-five list still differs, so they are not interchangeable either. The
+practical consequence is that reading the intersection of the two is not a robustness
+check --- it silently drops about a third of each explanation --- and if a decision turns
+on which features appear in a top-five list, the choice of explainer is part of that
+decision and belongs in the record.
+
+On the evidence here the default should be \shap{} where a tree backend exists. It was
+the more faithful of the two on \aopc{} and insertion AUC, roughly \SpeedFactor{} times
+cheaper, deterministic given a fixed background, and the more robust to input
+perturbation. That is not a theoretical preference; on these eighteen cells it wins on
+every axis we measured except model-agnosticism. \lime{}'s case is precisely
+model-agnosticism --- and our stacking cells show what that is worth, since they admit
+no tree explainer at all.
+
+\subsection{Reproducible is not robust, and the difference has teeth}
+The stability decomposition is the result we would most want carried forward. Tree
+\shap{}'s re-run variance is exactly zero, and a study that measured stability only
+that way would report it as perfectly stable. Its cross-refit agreement was
+\RetrainShap{}, meaning the global ranking moves when the model is refitted on a
+bootstrap resample of the same training data. The instability is in the model, not the
+explainer, and no amount of determinism in the attribution method removes it. Anyone
+reporting explanation stability should say which of the three things they measured.
+
+\subsection{Why fusion did not help}
+The null result on \RQ{6} is intelligible rather than disappointing, and it follows
+from \RQ{1}. Fusion pays off when the inputs are individually noisy but their errors
+are uncorrelated --- the ensemble argument. Here neither condition holds. The two agree
+substantially ($\rho = \MedianRho{}$), so there is little independent signal for fusion
+to recover, and one of them is consistently better: with \shap{} ahead on fidelity in
+most cells, averaging its ranks with a weaker and largely redundant signal moves the
+result toward the weaker one. The effect is consistent rather than marginal --- fusion
+lost in every one of the \HSixTotal{} cells, with a median rank-biserial effect of
+$-0.80$. The fidelity-weighted rule was designed to counter exactly that
+by learning $w$ from a held-out calibration split, and it was usually the best of the
+three, but a weight fitted per cell on a small sample cannot recover the gap. We read
+the outcome as evidence that explanation aggregation needs \emph{complementary} base
+explainers, and that \shap{} and \lime{} on tree models are not complementary enough.
+
+\subsection{On pre-registration in a study of this size}
+Freezing the protocol before running cost little and repaid it three times. The
+additivity check we wrote to enforce probability-space comparability caught a
+background-construction error that violated \shap{}'s own additivity by one per cent
+on LightGBM cells while every other cell looked healthy. A test asserting that every
+reported interval contains its own point estimate caught a misapplication of BCa
+bootstrap to a non-smooth statistic. A test on the rank-biased-overlap floor caught
+that raw \rbo{} is not comparable across datasets of different width. None of these
+would have been visible in the results; all three are recorded in the protocol's
+amendment log with dates and reasons. We mention this because the alternative --- a
+comparison study whose analysis choices are made after seeing the numbers --- is the
+normal case in this literature, and it is cheap to avoid.
 
 \section{Practical guidance}
 Compressing the results into advice a practitioner can act on:

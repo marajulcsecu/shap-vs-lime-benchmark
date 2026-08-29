@@ -1,6 +1,67 @@
 \chapter{Literature Review}\label{ch:literature}
 
-\input{../paper/sections/02_related_work}
+% --- inlined from paper/sections/02_related_work.tex so the report no longer
+% --- depends on the paper's prose, which is cut to the 6-page limit.
+\section{Related Work}\label{sec:related}
+
+\subsection{The two methods}
+\shap{} assigns each feature the Shapley value of its marginal contribution to a
+prediction, giving local accuracy and consistency by
+construction~\cite{lundberg2017unified}. \textsc{TreeSHAP} makes this tractable for
+tree ensembles in polynomial time~\cite{lundberg2020local}. \lime{} instead perturbs
+the instance, weights the perturbations by proximity, and fits a sparse linear
+surrogate whose coefficients are the explanation~\cite{ribeiro2016why}. The
+difference is not cosmetic: \shap{} is an attribution of the model's output, while
+\lime{} is a local approximation of the model's function, and the two answer
+different questions about the same prediction.
+
+\subsection{Evaluating an explanation}
+Because there is no ground-truth attribution, evaluation is indirect. Perturbation
+tests remove features in explanation order and measure how fast the prediction
+degrades, summarised as area over the perturbation curve~\cite{samek2017evaluating};
+the \textsc{eraser} benchmark formalised the complementary notions of
+comprehensiveness and sufficiency~\cite{deyoung2020eraser}. Hooker et
+al.~\cite{hooker2019benchmark} showed that such tests are confounded by the
+off-manifold inputs that perturbation creates, a caveat we address directly in
+Section~\ref{sec:pitfalls}. Robustness --- similar inputs should receive similar
+explanations --- is usually estimated as a local Lipschitz
+constant~\cite{alvarezmelis2018robustness}. For comparing ranked lists, rank-biased
+overlap weights the head of the list without requiring a cut-off
+$k$~\cite{webber2010similarity}.
+
+\subsection{Known failure modes}
+\shap{}'s guarantees are weaker in practice than in theory: the choice of background
+distribution changes the attributions~\cite{sundararajan2020many}, and Shapley values
+answer a question that may not be the one asked~\cite{kumar2020problems}. Both methods
+can be deliberately fooled by an adversarial
+model~\cite{slack2020fooling}. Rudin~\cite{rudin2019stop} argues that post-hoc
+explanation of a black box is the wrong goal for high-stakes decisions. We take these
+as reasons for careful measurement rather than as settled verdicts.
+
+\subsection{Comparisons, and where this study sits}
+Several studies contrast \shap{} and \lime{} on tabular
+data~\cite{man2021best,salih2024perspective,elshawi2019interpretability,duell2021comparison,amparore2021trust}.
+Table~\ref{tab:positioning} sets this study's design against the axes that determine
+how far such a result generalises: how many model families and datasets are varied,
+whether a control is included, whether hypotheses are stated in advance and corrected
+for multiplicity, and whether the comparison verifies that the two explainers are
+reporting the same quantity. The table characterises prior practice in aggregate
+rather than tabulating each paper, because these details are not consistently
+recoverable from the sources and some of the cited work is commentary rather than
+empirical comparison; readers should consult the individual works for their exact
+scope. To our knowledge no prior comparison in this literature pre-registers its
+hypotheses.
+
+\input{../tables/T11}
+
+\subsection{Aggregating explanations}
+Combining several explainers has been proposed before, both as an ensemble of
+attributions~\cite{rieger2020simple} and as a framework for aggregating explanation
+outputs~\cite{bhatt2020aggregating}; rank fusion itself is standard in information
+retrieval, where reciprocal-rank fusion is a strong and very simple
+baseline~\cite{cormack2009reciprocal}. We therefore make no novelty claim for fusion.
+What is missing is an evaluation of such rules under controlled conditions against a
+bar that a practitioner would care about, which is what Section~\ref{sec:rq6} supplies.
 
 \section{Synthesis: what this literature leaves open}
 Three gaps recur across the work surveyed above, and each maps to a design decision in

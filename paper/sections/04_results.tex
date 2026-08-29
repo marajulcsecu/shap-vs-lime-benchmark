@@ -1,199 +1,94 @@
 \section{Results}\label{sec:results}
 
-\subsection{The models are competent, and span a difficulty gradient}
-\label{sec:results-performance}
-Before interpreting a model it is worth establishing that it works.
-Table~\ref{tab:performance} and Fig.~\ref{fig:performance} report nested
-cross-validation performance. The ensembles behave as expected on data of this size,
-and the three datasets separate cleanly by difficulty: mean ROC-AUC \AucPima{} on
-PIMA, \AucHeart{} on Heart Disease, and \AucCkd{} on Chronic Kidney Disease. That
-gradient is not incidental --- it is the axis Section~\ref{sec:rq1} exploits --- and
-CKD's near-separability is itself informative, since a task on which many single
-features suffice is a task on which explanations have latitude to disagree.
-
-\input{../tables/T3}
-
-\begin{figure}[t]\centering
-  \includegraphics[width=\columnwidth]{F3.pdf}
-  \caption{Predictive performance across the three datasets. Bars are nested
-  cross-validation means; error bars are standard deviations over the five outer
-  folds. The three datasets differ in difficulty by roughly $0.17$ ROC-AUC.}
-  \label{fig:performance}
-\end{figure}
-
-\subsection{RQ1: substantial agreement, but not interchangeable}\label{sec:rq1}
-Median per-instance rank agreement between \shap{} and \lime{} is \MedianRho{}
-(Spearman $\rho$), with top-5 Jaccard overlap of \MedianJaccardFive{}. The
-pre-registered bar of $\rho > 0.50$ is cleared in \HOneRejected{} of \HOneTotal{}
-cells, so the two methods agree more than a reader of the disagreement literature might
-expect --- and still differ on roughly a third of each top-five list, which is not a
-margin a practitioner can ignore. Table~\ref{tab:agreement} gives the per-cell picture with bootstrap
-intervals, Fig.~\ref{fig:agreement-heatmap} the global rankings, and
-Fig.~\ref{fig:agreement-violins} the full per-instance distributions.
-
-\input{../tables/T4}
-
-\begin{figure}[t]\centering
-  \includegraphics[width=\columnwidth]{F4.pdf}
-  \caption{Global rank agreement between \shap{} and \lime{} for every
-  dataset--model cell. Values are Spearman $\rho$ on rankings derived from mean
-  $|\phi|$ over the explained instances.}
-  \label{fig:agreement-heatmap}
-\end{figure}
-
-\begin{figure}[t]\centering
-  \includegraphics[width=\columnwidth]{F5.pdf}
-  \caption{Per-instance agreement distributions. The dashed line is \RQ{1}'s
-  pre-registered bar of $\rho = 0.50$, fixed before any value was computed. Spread
-  within a cell is wide: cell-level medians conceal instances on which the two methods
-  disagree almost completely.}
-  \label{fig:agreement-violins}
-\end{figure}
-
-Agreement is not uniform. Broken down by dataset it is \RhoPima{} on PIMA,
-\RhoHeart{} on Heart Disease, and \RhoCkd{} on Chronic Kidney Disease --- and the
-ordering does not follow task difficulty in the direction one might guess.
-Fig.~\ref{fig:agreement-difficulty} plots the relationship directly. The reading we
-favour is that agreement depends less on how hard a task is than on how
-\emph{redundant} its features are: when several features are individually sufficient,
-two explainers can both be locally faithful while nominating different ones.
-
-\begin{figure}[t]\centering
-  \includegraphics[width=\columnwidth]{F6.pdf}
-  \caption{Agreement against task difficulty across all \NumCells{} cells. Each point
-  is one dataset--model cell.}
-  \label{fig:agreement-difficulty}
-\end{figure}
-
-\subsection{RQ2: reproducible is not the same as robust}\label{sec:rq2}
-Table~\ref{tab:stability} separates the three sources of instability, and the
-separation is the point.
-
-\input{../tables/T5}
-
-On \emph{re-run variance}, \shap{} with a tree backend scores exactly zero: given a
-fixed background it returns bit-identical attributions. We state that as a property of
-the method, declared in the protocol before running, not as a discovery. \lime{}'s
-median re-run coefficient of variation is \RerunCvLime{}, and
-Fig.~\ref{fig:lime-variance} shows it shrinking as the sampling budget grows --- the
-practical consequence being that \lime{}'s reproducibility is a budget the user
-chooses, not a property they get.
-
-\begin{figure}[t]\centering
-  \includegraphics[width=\columnwidth]{F7.pdf}
-  \caption{\lime{}'s run-to-run variance against its neighbourhood sampling budget.
-  \shap{}'s tree backends sit on the zero line by construction.}
-  \label{fig:lime-variance}
-\end{figure}
-
-Determinism, however, buys less than it appears to. Under \emph{input perturbation},
-median local Lipschitz estimates are \LipschitzShap{} for \shap{} against
-\LipschitzLime{} for \lime{} (Fig.~\ref{fig:lipschitz}): \shap{} is the more robust of
-the two, but neither is insensitive to a small move in the input. And under
-\emph{retraining}, cross-refit rank agreement is \RetrainShap{} for \shap{} and
-\RetrainLime{} for \lime{} (Fig.~\ref{fig:retrain}) --- so an explanation that is
-perfectly reproducible against a fixed model still shifts when that model is refitted
-on a bootstrap resample of the same data. A study reporting a single stability number
-would have recorded \shap{} as perfectly stable and stopped there.
-
-\begin{figure}[t]\centering
-  \includegraphics[width=\columnwidth]{F8.pdf}
-  \caption{Local Lipschitz estimates paired within each cell. Lower is more robust.}
-  \label{fig:lipschitz}
-\end{figure}
-
-\begin{figure}[t]\centering
-  \includegraphics[width=\columnwidth]{F9.pdf}
-  \caption{Cross-refit rank agreement after retraining on bootstrap resamples, for the
-  three ensemble models (protocol scope restriction R3).}
-  \label{fig:retrain}
-\end{figure}
-
-\subsection{RQ3: both are faithful; SHAP more so}\label{sec:rq3}
-Median \aopc{} is \AopcShap{} for \shap{} and \AopcLime{} for \lime{}, against
-\AopcRandom{} for the random control (Table~\ref{tab:fidelity}). The control is what
-makes those first two numbers mean anything: both explainers beat it decisively, in
-\HThreeBRejected{} of \HThreeBTotal{} tested comparisons after Holm correction.
-Fig.~\ref{fig:deletion} shows the curves --- a faithful ranking pulls the prediction
-down fast, and the control does not.
-
-\input{../tables/T6}
-
-\begin{figure*}[t]\centering
-  \includegraphics[width=\textwidth]{F10.pdf}
-  \caption{Deletion curves for the three ensemble models. A faithful ranking removes
-  the features the model actually relies on first, so its curve falls fastest. The
-  random control barely moves until most features are gone, which is precisely why an
-  \aopc{} value cannot be interpreted without it.}
-  \label{fig:deletion}
-\end{figure*}
-
-The marginal-baseline sensitivity check does not reverse the ordering, which matters
-given that median replacement pushes instances off the data
-manifold~\cite{hooker2019benchmark}: the conclusion survives a baseline that keeps
-perturbed rows marginally plausible.
-
-\subsection{RQ4: SHAP is cheaper by an order of magnitude}\label{sec:rq4}
-Median cost is \SecondsShap{}\,s per explanation for \shap{} against
-\SecondsLime{}\,s for \lime{}, a factor of roughly \SpeedFactor{}
-(Table~\ref{tab:runtime}, Fig.~\ref{fig:runtime}). The gap is structural, not an
-implementation detail: \textsc{TreeSHAP} exploits tree structure, while \lime{} must
-evaluate the model on thousands of perturbed rows per explanation. The efficiency
-frontier in Fig.~\ref{fig:runtime} makes the practical point --- on these models
-\shap{} is simultaneously the more faithful and the cheaper option, so \lime{}'s case
-rests on model-agnosticism rather than on measured quality.
-
-\input{../tables/T7}
-
-\begin{figure}[t]\centering
-  \includegraphics[width=\columnwidth]{F11.pdf}
-  \caption{Cost per explanation and the fidelity it buys. Fusion rules consume both
-  base explanations, so their cost is the sum.}
-  \label{fig:runtime}
-\end{figure}
-
-\subsection{RQ5: plausibility barely discriminates}\label{sec:rq5}
-\input{../tables/T8}
-
-Overlap with the pre-registered reference feature sets is similar for both explainers
-(Table~\ref{tab:plausibility}, Fig.~\ref{fig:plausibility}); both clearly exceed the
-random control, but they do not separate from each other. We report this as a null
-finding about the \emph{metric}, not about the methods: literature-derived reference
-sets are not ground truth, they are incomplete, and top-5 overlap on an 8-feature
-dataset has little room to vary. \RQ{5} is the weakest measurement in this study, and
-we said so before running it.
-
-\begin{figure}[t]\centering
-  \includegraphics[width=\columnwidth]{F12.pdf}
-  \caption{Top-5 overlap with the pre-registered reference feature sets. Reference
-  sets are a plausibility check, not ground truth.}
-  \label{fig:plausibility}
-\end{figure}
-
-\subsection{RQ6: fusion does not clear the bar}\label{sec:rq6}
-Rank fusion improved on the better of \shap{} and \lime{} in \HSixRejected{} of
-\HSixTotal{} cells after Holm correction (Table~\ref{tab:consensus},
-Fig.~\ref{fig:consensus}). The best fusion rule reaches median \aopc{}
-\AopcBestFusion{} against \AopcShap{} for \shap{} alone.
-
-\input{../tables/T9}
-
-\begin{figure}[t]\centering
-  \includegraphics[width=\columnwidth]{F13.pdf}
-  \caption{Per-cell difference between the best fusion rule and the better of
-  \shap{} and \lime{}, on evaluation instances only. Right of zero means fusion wins.}
-  \label{fig:consensus}
-\end{figure}
-
-This outcome was pre-registered as valid, and Section~\ref{sec:discussion} argues it
-follows from \RQ{1}. Table~\ref{tab:hypotheses} collects the decisions for all eleven
-hypotheses, and Fig.~\ref{fig:summary} the overall standing of each method.
+Table~\ref{tab:hypotheses} collects the decision for all eleven pre-registered
+hypotheses; each subsection below states the finding, the effect size, and the interval.
 
 \input{../tables/T10}
 
+\subsection{RQ1: substantial agreement, but not interchangeable}\label{sec:rq1}
+Median per-instance rank agreement is \MedianRho{} (Spearman $\rho$) with top-5 Jaccard
+overlap \MedianJaccardFive{}, clearing the pre-registered bar of $\rho>0.50$ in
+\HOneRejected{} of \HOneTotal{} cells. The two methods therefore agree more than a reader
+of the disagreement literature might expect --- and still differ on roughly a third of
+each top-five list, which is not a margin a practitioner can ignore.
+Fig.~\ref{fig:agreement-heatmap} shows the per-cell picture.
+
+Agreement is not uniform, and it does not follow task difficulty in the direction one
+might guess: \RhoPima{} on PIMA, \RhoHeart{} on Heart, but only \RhoCkd{} on Chronic
+Kidney Disease --- the \emph{easiest} task, at ROC-AUC \AucCkd{}. The reading we favour is
+that agreement depends less on how hard a task is than on how \emph{redundant} its
+features are: when several features are individually sufficient, two explainers can both
+be locally faithful while nominating different ones.
+
 \begin{figure}[t]\centering
-  \includegraphics[width=\columnwidth]{F14.pdf}
-  \caption{Mean rank of each explainer across every metric and cell, where rank 1 is
-  best on that metric.}
-  \label{fig:summary}
+  \includegraphics[width=\columnwidth]{F4.pdf}
+  \caption{Global rank agreement between \shap{} and \lime{} for every dataset--model
+  cell, as Spearman $\rho$ on rankings derived from mean $|\phi|$ over the explained
+  instances.}
+  \label{fig:agreement-heatmap}
 \end{figure}
+
+\subsection{RQ2: reproducible is not the same as robust}\label{sec:rq2}
+The decomposition is the point. On \emph{re-run variance}, \shap{} with a tree backend
+scores exactly zero: given a fixed background it returns bit-identical attributions. We
+state that as a property of the method, declared in the protocol before running, not as a
+discovery; \lime{}'s median coefficient of variation is \RerunCvLime{}, and it shrinks as
+the sampling budget grows, so \lime{}'s reproducibility is a budget the user chooses
+rather than a property they get.
+
+Determinism buys less than it appears to. Under \emph{input perturbation}, median local
+Lipschitz estimates are \LipschitzShap{} for \shap{} against \LipschitzLime{} for \lime{}
+(differing in 15 of 18 cells): \shap{} is markedly the more robust, but neither is
+insensitive to a small move in the input. Under \emph{retraining}, cross-refit rank
+agreement is \RetrainShap{} for \shap{} and \RetrainLime{} for \lime{} --- so an
+explanation that is bit-identical against a fixed model still shifts when that model is
+refitted on a bootstrap resample of the same data. A study reporting a single stability
+number would have recorded \shap{} as perfectly stable and stopped there.
+
+\subsection{RQ3--RQ4: SHAP is both more faithful and cheaper}\label{sec:rq3}
+Median \aopc{} is \AopcShap{} for \shap{} and \AopcLime{} for \lime{}, against
+\AopcRandom{} for the random control. The control is what makes the first two numbers
+mean anything: both explainers exceed it in \HThreeBRejected{} of \HThreeBTotal{} tested
+comparisons after Holm correction, and Fig.~\ref{fig:deletion} shows why an \aopc{} value
+cannot be read without it. The marginal-baseline sensitivity check does not reverse the
+ordering, which matters given that median replacement pushes instances off the
+manifold~\cite{hooker2019benchmark}.
+
+Median cost is \SecondsShap{}\,s per explanation for \shap{} against \SecondsLime{}\,s for
+\lime{}, a factor of roughly \SpeedFactor{}. The gap is structural rather than an
+implementation detail: \textsc{TreeSHAP} exploits tree structure while \lime{} must
+evaluate the model on thousands of perturbed rows. On these models \shap{} is therefore
+simultaneously the more faithful and the cheaper option, so \lime{}'s case rests on
+model-agnosticism rather than on measured quality --- and our stacking cells, which admit
+no tree explainer, show what that is worth.
+
+\begin{figure*}[t]\centering
+  \includegraphics[width=0.86\textwidth]{F10.pdf}
+  \caption{Deletion curves for the three ensemble models. A faithful ranking removes the
+  features the model actually relies on first, so its curve falls fastest. The random
+  control barely moves until most features are gone, which is precisely why an \aopc{}
+  value cannot be interpreted without it.}
+  \label{fig:deletion}
+\end{figure*}
+
+\subsection{RQ5: the plausibility check does not discriminate}\label{sec:rq5}
+Overlap with the pre-registered reference sets is similar for both explainers; both
+clearly exceed the random control but do not separate from each other. We report this as a
+null finding about the \emph{metric}, not the methods: literature-derived reference sets
+are not ground truth, they are incomplete, and top-5 overlap on an 8-feature dataset has
+little room to vary. \RQ{5} is the weakest measurement here, and we said so before running
+it.
+
+\subsection{RQ6: fusion does not clear the bar}\label{sec:rq6}
+Rank fusion improved on the better of \shap{} and \lime{} in \HSixRejected{} of
+\HSixTotal{} cells, with a median rank-biserial effect of $-0.80$; the best fusion rule
+reaches median \aopc{} \AopcBestFusion{} against \AopcShap{} for \shap{} alone. The
+outcome was pre-registered as valid and it follows from \RQ{1}. Fusion pays off when its
+inputs are individually noisy but their errors are uncorrelated. Here neither holds: the
+two agree substantially, so there is little independent signal to recover, and one is
+consistently better, so averaging its ranks with a weaker and largely redundant signal can
+only dilute it. The fidelity-weighted rule was designed to counter exactly that and was
+usually the best of the three, but a weight fitted per cell on a small calibration sample
+cannot recover the gap. We read this as evidence that explanation aggregation needs
+\emph{complementary} base explainers, and that \shap{} and \lime{} on tree models are not
+complementary enough.
