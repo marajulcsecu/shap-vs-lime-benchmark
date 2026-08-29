@@ -13,7 +13,7 @@ CALIB_FRACTION = 0.30         # NORMATIVE
 TEST_SIZE = 0.20              # NORMATIVE
 LIPSCHITZ_SIGMA = 0.10        # NORMATIVE: neighbour sd, in units of train sd
 RANDOM_CONTROL_DRAWS = 20     # NORMATIVE
-BASELINE_MARGINAL_DRAWS = 10  # NORMATIVE
+BASELINE_MARGINAL_DRAWS = 5   # NORMATIVE (see amendment A4)
 JACCARD_KS = (3, 5)           # NORMATIVE
 RBO_P = 0.90                  # NORMATIVE
 COMP_SUFF_K = 5               # NORMATIVE: k for comprehensiveness / sufficiency
@@ -43,6 +43,7 @@ class Profile:
     bootstrap_instances: int
     ci_resamples: int
     shap_background: int
+    marginal_draws: int
 
     @property
     def is_reportable(self) -> bool:
@@ -52,13 +53,15 @@ class Profile:
 QUICK = Profile(
     name="QUICK", n_explain=12, lime_num_samples=(500,), rerun_repeats=3,
     robust_neighbours=2, robust_instances=4, rerun_instances=4,
-    bootstrap_refits=3, bootstrap_instances=4, ci_resamples=200, shap_background=20,
+    bootstrap_refits=3, bootstrap_instances=4, ci_resamples=200,
+    shap_background=20, marginal_draws=2,
 )
 
 FULL = Profile(                                     # all values NORMATIVE
     name="FULL", n_explain=150, lime_num_samples=(5000, 1000), rerun_repeats=10,
     robust_neighbours=5, robust_instances=25, rerun_instances=30,
-    bootstrap_refits=10, bootstrap_instances=25, ci_resamples=2000, shap_background=50,
+    bootstrap_refits=10, bootstrap_instances=25, ci_resamples=2000,
+    shap_background=50, marginal_draws=5,
 )
 
 _PROFILES = {"QUICK": QUICK, "FULL": FULL}

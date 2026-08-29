@@ -144,3 +144,42 @@ def test_grouped_curves_agree_with_ungrouped_when_every_group_is_one_column():
     np.testing.assert_allclose(
         insertion_curve_grouped(linear_proba, X_INSTANCE, groups, BASELINE, k_max=3),
         insertion_curve(linear_proba, X_INSTANCE, [0, 1, 2], BASELINE, k_max=3))
+
+
+def test_batched_metrics_equal_the_one_call_at_a_time_version():
+    # The batched path is a pure optimisation: one predict_proba call for every
+    # baseline and both curves instead of 2 per baseline. It must be bit-comparable.
+    from xaibench.metrics.fidelity import batched_curve_metrics
+
+    groups = [np.array([i]) for i in [0, 1, 2]]
+    baselines = [BASELINE, np.array([0.5, 0.5, 0.5]), np.array([-1.0, 0.0, 1.0])]
+    batched = batched_curve_metrics(linear_proba, X_INSTANCE, groups, baselines,
+                                   k_max=3, k=2)
+    from xaibench.metrics.fidelity import (
+        curve_metrics, deletion_curve_grouped, insertion_curve_grouped,
+    )
+    individually = [
+        curve_metrics(
+            deletion_curve_grouped(linear_proba, X_INSTANCE, groups, b, 3),
+            insertion_curve_grouped(linear_proba, X_INSTANCE, groups, b, 3), k=2)
+        for b in baselines]
+    expected = {key: float(np.mean([m[key] for m in individually]))
+                for key in individually[0]}
+    for key, value in expected.items():
+        assert batched[key] == pytest.approx(value), key
+
+
+def test_batched_metrics_make_exactly_one_model_call():
+    from xaibench.metrics.fidelity import batched_curve_metrics
+    calls = []
+
+    def counting_proba(X):
+        calls.append(np.atleast_2d(X).shape[0])
+        return linear_proba(X)
+
+    groups = [np.array([i]) for i in [0, 1, 2]]
+    baselines = [BASELINE, np.array([0.5, 0.5, 0.5])]
+    batched_curve_metrics(counting_proba, X_INSTANCE, groups, baselines, k_max=3, k=2)
+    # One call for the target class plus one batched call for every curve.
+    assert len(calls) <= 2, calls
+    assert max(calls) == 2 * len(baselines) * 4

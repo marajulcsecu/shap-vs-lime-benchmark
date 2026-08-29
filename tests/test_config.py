@@ -38,5 +38,6 @@ def test_protocol_constants_match_frozen_protocol():
     assert config.FULL.bootstrap_refits == 10
     assert config.FULL.n_explain == 150
     assert config.FULL.ci_resamples == 2000
+    assert config.FULL.marginal_draws == 5
     assert config.FULL.lime_num_samples == (5000, 1000)
     assert config.ENSEMBLE_MODELS == ("rf", "xgb", "lgbm")

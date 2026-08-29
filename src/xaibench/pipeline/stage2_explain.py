@@ -40,11 +40,7 @@ from xaibench.explain.shap_backend import (
     explain_shap,
     raw_shap_values,
 )
-from xaibench.metrics.fidelity import (
-    curve_metrics,
-    deletion_curve_grouped,
-    median_baseline,
-)
+from xaibench.metrics.fidelity import batched_curve_metrics, median_baseline
 from xaibench.metrics.stability import (
     local_lipschitz,
     repeat_pair_rho,
@@ -86,10 +82,9 @@ def _mean_aopc(cell, explanations, baseline) -> float:
     if not explanations:
         return 0.0
     return float(np.mean([
-        curve_metrics(
-            deletion_curve_grouped(cell.predict_proba, cell.X_test_t[exp.instance_id],
-                                   transformed_ranking(cell, exp), baseline, AOPC_MAX_K),
-            np.zeros(2))["aopc"]
+        batched_curve_metrics(cell.predict_proba, cell.X_test_t[exp.instance_id],
+                              transformed_ranking(cell, exp), [baseline],
+                              AOPC_MAX_K)["aopc"]
         for exp in explanations]))
 
 

@@ -140,3 +140,31 @@ def curve_metrics(deletion: np.ndarray, insertion: np.ndarray, k: int = 5) -> di
         "comprehensiveness": float(deletion[0] - deletion[k]),
         "sufficiency": float(deletion[0] - insertion[k]),
     }
+
+
+def batched_curve_metrics(predict_proba, x, groups, baselines, k_max: int,
+                          k: int = 5) -> dict:
+    """Fidelity metrics averaged over several baselines, in ONE model call.
+
+    The naive loop costs two `predict_proba` calls per baseline, which across the
+    study is ~28k calls and dominates Stage 3. Stacking every deletion and insertion
+    row for every baseline into a single matrix cuts that to one call per
+    (explainer, instance) - the same numbers, ~20x less traffic.
+    """
+    x = np.asarray(x, dtype=float).ravel()
+    k_max = int(min(k_max, len(groups)))
+    width = k_max + 1
+    blocks = []
+    for baseline in baselines:
+        blocks.append(_grouped_rows(x, baseline, groups, k_max, start_from_baseline=False))
+        blocks.append(_grouped_rows(x, baseline, groups, k_max, start_from_baseline=True))
+
+    cls = _target_class(predict_proba, x)
+    flat = _probabilities(predict_proba, np.vstack(blocks), cls)
+
+    scored = []
+    for i in range(len(baselines)):
+        deletion = flat[(2 * i) * width:(2 * i + 1) * width]
+        insertion = flat[(2 * i + 1) * width:(2 * i + 2) * width]
+        scored.append(curve_metrics(deletion, insertion, k=k))
+    return {key: float(np.mean([s[key] for s in scored])) for key in scored[0]}
