@@ -349,6 +349,6 @@ unexplained inconsistency.
 
 ## 10. Amendment log
 
-| Date | Section | Change | Reason |
-|------|---------|--------|--------|
-| — | — | none yet | — |
+| ID | Date | Section | Change | Reason |
+|----|------|---------|--------|--------|
+| A1 | 2026-08-29 | §5.1 | Added **floor-normalised RBO** as the reported agreement measure alongside raw RBO. | Found during implementation, before any result was computed. Because both compared rankings are permutations of the *same* feature set, RBO's extrapolation term `p^k · A_k` is always exactly `p^k`, which is a hard floor that depends on the number of features: a perfectly reversed ranking still scores 0.589 at d = 8 (PIMA), 0.416 at d = 13 (Heart), and 0.193 at d = 24 (CKD). Raw RBO is therefore not comparable across the three datasets — PIMA cannot score below 0.589 no matter how much the explainers disagree. `rbo_normalised = (RBO − floor) / (1 − floor)` restores a common 0–1 scale. Raw RBO and the per-dataset floor are both still reported so the correction is auditable. |
