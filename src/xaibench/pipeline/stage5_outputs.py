@@ -9,7 +9,7 @@ import subprocess
 import time
 
 from xaibench.config import get_profile, paths
-from xaibench.stats.report import TABLES, findings_macros
+from xaibench.stats.report import TABLES, findings_macros, splice_readme
 from xaibench.viz.figures import build_all
 
 
@@ -105,6 +105,9 @@ def main(force: bool = False) -> None:
     # "no number is typed by hand" covers running text and not only tables.
     (p.tables / "findings.tex").write_text(findings_macros(profile))
     print(f"[stage5] headline macros -> {p.tables / 'findings.tex'}")
+
+    if splice_readme(profile, p.root / "README.md"):
+        print("[stage5] refreshed the generated findings table in README.md")
 
     manifest = write_manifest(profile, time.perf_counter() - started)
     print(f"[stage5] manifest: {len(manifest['artifacts'])} artefacts, "

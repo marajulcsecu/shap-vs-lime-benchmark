@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Frozen analysis protocol
+    url: https://github.com/marajulcsecu/shap-vs-lime-benchmark/blob/main/docs/PROTOCOL.md
+    about: Every research question, hypothesis, metric, and test, with its amendment log.
+  - name: How to present this work
+    url: https://github.com/marajulcsecu/shap-vs-lime-benchmark/blob/main/docs/PRESENTATION_GUIDE.md
+    about: Per-slide talking track and 25 anticipated questions with answers.

@@ -1,0 +1,148 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Test suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pinned dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.lock.txt
+
+      - name: Verify vendored dataset checksums
+        # The datasets are committed, so this runs offline. A mismatch means the
+        # vendored copy was altered and every downstream number is suspect.
+        env:
+          PYTHONPATH: src
+        run: python -m xaibench.data.fetch
+
+      - name: Run tests
+        env:
+          PYTHONPATH: src
+          OMP_NUM_THREADS: '1'
+          XAIB_PROFILE: QUICK
+          MPLBACKEND: Agg
+        run: pytest -q -m "not slow" --durations=10
+
+  smoke:
+    name: Pipeline smoke run
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.lock.txt
+
+      - name: Run all five stages at the QUICK profile
+        env:
+          PYTHONPATH: src
+          OMP_NUM_THREADS: '1'
+          XAIB_PROFILE: QUICK
+          MPLBACKEND: Agg
+          PYTHONHASHSEED: '42'
+        run: |
+          for stage in stage1_performance stage2_explain stage3_metrics \
+                       stage4_stats stage5_outputs; do
+            echo "::group::$stage"
+            python -m xaibench.pipeline.$stage
+            echo "::endgroup::"
+          done
+
+      - name: Assert the run produced every artefact
+        env:
+          PYTHONPATH: src
+        run: |
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+          manifest = json.loads(Path("results/MANIFEST.json").read_text())
+          figures = sorted(Path("figures").glob("*.pdf"))
+          tables = sorted(Path("tables").glob("T*.tex"))
+          print(f"profile={manifest['profile']} artefacts={len(manifest['artifacts'])} "
+                f"figures={len(figures)} tables={len(tables)}")
+          problems = []
+          if len(figures) != 14: problems.append(f"{len(figures)} figures, expected 14")
+          if len(tables) != 15: problems.append(f"{len(tables)} tables, expected 15")
+          if manifest["reportable"]: problems.append("a QUICK run must not be reportable")
+          for p in problems: print("ISSUE:", p)
+          sys.exit(1 if problems else 0)
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-figures
+          path: figures/*.png
+          retention-days: 7
+
+  documents:
+    name: LaTeX documents
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install TeX Live
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            texlive-latex-recommended texlive-latex-extra \
+            texlive-fonts-recommended texlive-publishers \
+            texlive-science latexmk poppler-utils
+
+      - name: Build paper, report, and slides
+        run: |
+          for doc in paper report slides; do
+            echo "::group::$doc"
+            (cd "$doc" && latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex)
+            echo "::endgroup::"
+          done
+
+      - name: Enforce the 6-page conference limit and check for placeholders
+        run: |
+          pages=$(pdfinfo paper/main.pdf | awk '/^Pages:/ {print $2}')
+          echo "paper: $pages pages"
+          [ "$pages" -le 6 ] || { echo "::error::paper is $pages pages, limit is 6"; exit 1; }
+          for doc in paper report; do
+            if pdftotext "$doc/main.pdf" - | grep -qE 'Table \?\?|Fig\. \?\?|PROFILE=QUICK|STUB'; then
+              echo "::error::$doc contains a placeholder or broken cross-reference"; exit 1
+            fi
+            if grep -qE 'Reference .* undefined|Citation .* undefined' "$doc/main.log"; then
+              echo "::error::$doc has undefined references"; exit 1
+            fi
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: documents
+          path: |
+            paper/main.pdf
+            report/main.pdf
+            slides/main.pdf
+          retention-days: 30

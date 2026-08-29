@@ -177,3 +177,37 @@ def test_every_generated_table_compiles_standalone(name, tmp_path):
         cwd=tmp_path, capture_output=True, text=True, timeout=120)
     assert result.returncode == 0, (
         f"{name}.tex does not compile:\n" + result.stdout[-2500:])
+
+
+def test_the_readme_findings_table_matches_the_current_results():
+    """The README claims every number in it is generated; that has to be true.
+
+    The hand-written version of this table had CKD's rho as 0.64 when the results say
+    0.63 -- a small error, in the most-read file in the repository, of exactly the kind
+    that generation exists to prevent.
+    """
+    from xaibench.config import get_profile, paths
+    from xaibench.stats.report import README_BEGIN, README_END, readme_findings_table
+
+    readme = paths().root / "README.md"
+    if not readme.exists():
+        pytest.skip("README.md absent")
+    text = readme.read_text()
+    assert README_BEGIN in text and README_END in text, "generation markers are missing"
+    embedded = text.split(README_BEGIN, 1)[1].split(README_END, 1)[0]
+    expected = readme_findings_table(get_profile("FULL"))
+    expected_body = expected.split(README_BEGIN, 1)[1].split(README_END, 1)[0]
+    assert embedded.strip() == expected_body.strip(), (
+        "README findings table is stale; run `make stage5` (or `make all`) to refresh it")
+
+
+def test_the_readme_makes_no_claim_it_cannot_support():
+    from xaibench.config import paths
+    readme = paths().root / "README.md"
+    if not readme.exists():
+        pytest.skip("README.md absent")
+    text = readme.read_text()
+    # Claims we deliberately do not make anywhere in this project.
+    for phrase in ("state of the art", "novel method", "IEEE Access", "we prove",
+                   "outperforms all"):
+        assert phrase.lower() not in text.lower(), f"README overclaims: {phrase!r}"

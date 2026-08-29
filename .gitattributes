@@ -1,0 +1,17 @@
+# Keep GitHub's language bar honest: the substance is Python, not the generated
+# LaTeX fragments, CSVs, and PDFs that the pipeline emits.
+* text=auto eol=lf
+
+results/**      linguist-generated=true
+figures/**      linguist-generated=true
+tables/**       linguist-generated=true
+data/raw/**     linguist-vendored=true
+*.pdf           binary linguist-documentation=true
+docs/**         linguist-documentation=true
+paper/**        linguist-documentation=true
+report/**       linguist-documentation=true
+slides/**       linguist-documentation=true
+
+*.csv           text
+*.parquet       binary
+*.png           binary

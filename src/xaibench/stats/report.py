@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import pathlib
 
 import numpy as np
 import pandas as pd
@@ -662,3 +663,99 @@ def findings_macros(profile) -> str:
         _macro("RboFloorTwentyFour", fmt(rbo_floor(24, RBO_P), 3)),
     ]
     return "\n".join(lines) + "\n"
+
+
+# ---------------------------------------------------------------- README findings
+# The README claims every number in it is generated. That claim has to be true, so the
+# findings table is spliced between markers by stage 5 rather than hand-maintained --
+# otherwise the most-read file in the repository is the first one to go stale.
+
+README_BEGIN = "<!-- BEGIN GENERATED FINDINGS -->"
+README_END = "<!-- END GENERATED FINDINGS -->"
+
+
+def readme_findings_table(profile) -> str:
+    agreement = _results("metrics_agreement.csv").query("instance_id >= 0")
+    fidelity = _results("metrics_fidelity.csv").query("baseline == 'median'")
+    stability = _results("metrics_stability.csv")
+    runtime = _results("metrics_runtime.csv")
+    stats = _results("stats_hypotheses.csv")
+    perf = _results("performance.csv")
+
+    primary = runtime[(runtime.explainer != "lime")
+                      | (runtime.num_samples == profile.lime_num_samples[0])]
+
+    def med(frame, column, **filters):
+        subset = frame
+        for key, value in filters.items():
+            subset = subset[subset[key] == value]
+        series = subset[column].dropna()
+        return float(series.median()) if len(series) else float("nan")
+
+    def tally(hypothesis):
+        group = stats.query("hypothesis == @hypothesis")
+        return int((group.decision == "reject H0").sum()), len(group)
+
+    rho = med(agreement, "spearman")
+    jaccard = med(agreement, "jaccard5")
+    rho_ckd = med(agreement, "spearman", dataset="ckd")
+    auc_ckd = med(perf, "roc_auc", dataset="ckd")
+    shap_seconds = med(primary, "median_seconds", explainer="shap")
+    lime_seconds = med(primary, "median_seconds", explainer="lime")
+    h1_hit, h1_all = tally("H1")
+    h3b_hit, h3b_all = tally("H3b")
+    h6_hit, h6_all = tally("H6")
+    h6_effect = float(stats.query("hypothesis == 'H6'").effect_size.median())
+
+    rows = [
+        ("RQ1", "Do SHAP and LIME agree on feature rankings?",
+         f"**Substantially, but not interchangeably.** Median Spearman ρ = {rho:.2f}, "
+         f"top-5 Jaccard {jaccard:.2f}; clears a pre-registered 0.50 bar in "
+         f"{h1_hit}/{h1_all} cells, yet a third of each top-five list still differs. "
+         f"Agreement is *lowest* on the **easiest** task (CKD, ρ = {rho_ckd:.2f} at "
+         f"ROC-AUC {auc_ckd:.2f})."),
+        ("RQ2", "How stable are the explanations?",
+         f"**Reproducible ≠ robust.** Tree SHAP's re-run CV is *exactly* "
+         f"{med(stability, 'rerun_cv', explainer='shap'):.0f}, but its cross-refit "
+         f"agreement is {med(stability, 'retrain_agreement', explainer='shap'):.2f} — the "
+         f"ranking moves when the model is refit on a resample of the same data. "
+         f"Perturbation robustness: {med(stability, 'lipschitz', explainer='shap'):.2f} "
+         f"(SHAP) vs {med(stability, 'lipschitz', explainer='lime'):.2f} (LIME)."),
+        ("RQ3", "Are they faithful to the model?",
+         f"**Both, SHAP more so.** AOPC {med(fidelity, 'aopc', explainer='shap'):.3f} "
+         f"(SHAP) vs {med(fidelity, 'aopc', explainer='lime'):.3f} (LIME) vs "
+         f"**{med(fidelity, 'aopc', explainer='random'):.3f} (random control)**. Both beat "
+         f"the control in {h3b_hit}/{h3b_all} tests after Holm correction."),
+        ("RQ4", "What does an explanation cost?",
+         f"**SHAP is ~{lime_seconds / shap_seconds:.0f}× cheaper** — {shap_seconds:.4f} s "
+         f"vs {lime_seconds:.4f} s per explanation. Structural, not an implementation "
+         f"detail."),
+        ("RQ5", "Do top features look plausible?",
+         "**The metric does not discriminate.** Both beat random; neither separates from "
+         "the other. Pre-registered as the weakest measurement here."),
+        ("RQ6", "Does fusing the two help?",
+         f"**{'No' if h6_hit == 0 else 'Sometimes'}, in {h6_hit}/{h6_all} cells** "
+         f"(median effect {h6_effect:+.2f}). A pre-registered null result that follows "
+         f"from RQ1: substantial agreement leaves no complementary signal to exploit."),
+    ]
+    lines = [README_BEGIN,
+             "| # | Question | Finding |",
+             "|---|----------|---------|"]
+    lines += [f"| {rq} | {question} | {finding} |" for rq, question, finding in rows]
+    lines.append(README_END)
+    return "\n".join(lines) + "\n"
+
+
+def splice_readme(profile, readme_path) -> bool:
+    """Replace the marked block in README.md. Returns True if the file changed."""
+    path = pathlib.Path(readme_path)
+    text = path.read_text()
+    if README_BEGIN not in text or README_END not in text:
+        return False
+    head, rest = text.split(README_BEGIN, 1)
+    _, tail = rest.split(README_END, 1)
+    updated = head + readme_findings_table(profile).rstrip("\n") + tail
+    if updated != text:
+        path.write_text(updated)
+        return True
+    return False
