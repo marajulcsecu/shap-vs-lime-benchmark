@@ -40,7 +40,11 @@ from xaibench.explain.shap_backend import (
     explain_shap,
     raw_shap_values,
 )
-from xaibench.metrics.fidelity import aopc_deletion, median_baseline
+from xaibench.metrics.fidelity import (
+    curve_metrics,
+    deletion_curve_grouped,
+    median_baseline,
+)
 from xaibench.metrics.stability import (
     local_lipschitz,
     repeat_pair_rho,
@@ -63,27 +67,29 @@ class CellArtifacts:
     eval_ids: np.ndarray
 
 
-def transformed_ranking(cell, explanation) -> np.ndarray:
-    """Lift an original-feature ranking to transformed-column order.
+def transformed_ranking(cell, explanation) -> list[np.ndarray]:
+    """Lift an original-feature ranking to per-feature groups of transformed columns.
 
     Fidelity perturbs the model's actual inputs, which are transformed columns, but
-    rankings live in original-feature space. Deleting feature f means deleting every
-    one-hot column belonging to f, so a group's columns stay adjacent here.
+    rankings live in original-feature space. Deleting "the top-k features" must delete
+    every one-hot column belonging to those k features -- deleting k *columns* instead
+    would under-perturb Heart (13 features across 25 columns) while leaving PIMA
+    unaffected, so the datasets would not be measured on the same scale. Returning
+    groups rather than a flat order makes that impossible to get wrong downstream.
     """
     groups = np.asarray(cell.groups)
-    order: list[int] = []
-    for feature_index in explanation.ranking:
-        feature = cell.feature_order[int(feature_index)]
-        order.extend(np.flatnonzero(groups == feature).tolist())
-    return np.asarray(order, dtype=int)
+    return [np.flatnonzero(groups == cell.feature_order[int(i)])
+            for i in explanation.ranking]
 
 
 def _mean_aopc(cell, explanations, baseline) -> float:
     if not explanations:
         return 0.0
     return float(np.mean([
-        aopc_deletion(cell.predict_proba, cell.X_test_t[exp.instance_id],
-                      transformed_ranking(cell, exp), baseline, AOPC_MAX_K)
+        curve_metrics(
+            deletion_curve_grouped(cell.predict_proba, cell.X_test_t[exp.instance_id],
+                                   transformed_ranking(cell, exp), baseline, AOPC_MAX_K),
+            np.zeros(2))["aopc"]
         for exp in explanations]))
 
 
@@ -230,7 +236,8 @@ def explain_cell(dataset_id: str, model_id: str, params: dict,
         config_row={
             "dataset": dataset_id, "model": model_id,
             "shap_backend": shap_backend_kind(model_id), "space": "probability",
-            **additivity, "additivity_gate_ok": additivity_gate_ok(additivity),
+            **additivity,
+            "additivity_gate_ok": additivity_gate_ok(additivity, ids.size),
             "background": int(background.shape[0]),
             "fidelity_weight_shap": weight,
             "lime_num_samples_primary": int(profile.lime_num_samples[0]),

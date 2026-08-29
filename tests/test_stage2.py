@@ -72,13 +72,15 @@ def test_transformed_ranking_expands_a_feature_into_all_its_onehot_columns():
     from xaibench.models.cells import build_cell
     cell = build_cell("heart", "rf", params={}, profile=QUICK)
     exp = explain_shap(cell, cell.instance_ids[:1])[0]
-    order = transformed_ranking(cell, exp)
-    assert order.size == len(cell.groups)
-    assert sorted(order.tolist()) == list(range(len(cell.groups)))
-    # The first original feature's columns must all come before the second's.
-    first = cell.feature_order[int(exp.ranking[0])]
-    n_first = cell.groups.count(first)
-    assert {cell.groups[i] for i in order[:n_first]} == {first}
+    groups = transformed_ranking(cell, exp)
+    assert len(groups) == len(cell.feature_order)
+    flat = np.concatenate(groups)
+    assert sorted(flat.tolist()) == list(range(len(cell.groups)))
+    # Each group holds exactly the columns of one original feature, in ranked order.
+    for position, feature_index in enumerate(exp.ranking):
+        feature = cell.feature_order[int(feature_index)]
+        assert {cell.groups[i] for i in groups[position]} == {feature}
+        assert len(groups[position]) == cell.groups.count(feature)
 
 
 @pytest.mark.slow

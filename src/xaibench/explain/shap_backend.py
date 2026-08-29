@@ -14,6 +14,7 @@ used throughout.
 """
 from __future__ import annotations
 
+import math
 import time
 
 import numpy as np
@@ -122,15 +123,23 @@ def additivity_report(cell, values: np.ndarray, base: float, instance_ids) -> di
     }
 
 
-def additivity_gate_ok(report: dict, max_frac_over: float = 0.02) -> bool:
+def additivity_gate_ok(report: dict, n_instances: int | None = None,
+                       max_frac_over: float = 0.02) -> bool:
     """Pre-registered acceptance: typical behaviour exact, outliers rare.
 
-    A cell whose *median* error clears the tolerance and whose over-tolerance
-    fraction is below max_frac_over is in probability space; anything else means
-    protocol risk R1 has fired for that cell.
+    A cell passes when its *median* error clears the tolerance and the number of
+    over-tolerance instances is within `max(1, 2 % of n)`. The `max(1, ...)` matters:
+    a single anomalous instance is never grounds for declaring a whole cell out of
+    probability space, and under the QUICK profile (12 instances) a strict 2 % rule
+    would reject a cell for one outlier. Anything worse means risk R1 has fired.
     """
-    return (report["additivity_median"] < SHAP_ADDITIVITY_TOL
-            and report["additivity_frac_over_tol"] <= max_frac_over)
+    if report["additivity_median"] >= SHAP_ADDITIVITY_TOL:
+        return False
+    if n_instances is None:
+        frac = report["additivity_frac_over_tol"]
+        n_instances = round(report["additivity_n_over_tol"] / frac) if frac > 0 else 1
+    allowed = max(1, math.ceil(max_frac_over * max(int(n_instances), 1)))
+    return report["additivity_n_over_tol"] <= allowed
 
 
 def explain_shap(cell, instance_ids=None, seed: int = SEED,

@@ -92,3 +92,51 @@ def sufficiency(predict_proba, x, ranking, baseline, k: int = 5) -> float:
     cls = _target_class(predict_proba, x)
     full = _probabilities(predict_proba, np.atleast_2d(np.asarray(x, dtype=float)), cls)[0]
     return float(full - curve[-1])
+
+
+def _grouped_rows(x, baseline, groups, k_max, start_from_baseline):
+    x = np.asarray(x, dtype=float).ravel()
+    baseline = np.asarray(baseline, dtype=float).ravel()
+    k_max = int(min(k_max, len(groups)))
+    source, target = (baseline, x) if start_from_baseline else (x, baseline)
+    rows = np.tile(source, (k_max + 1, 1))
+    for k in range(1, k_max + 1):
+        columns = np.asarray(groups[k - 1], dtype=int)
+        rows[k:, columns] = target[columns]
+    return rows
+
+
+def deletion_curve_grouped(predict_proba, x, groups, baseline, k_max: int) -> np.ndarray:
+    """Deletion curve at ORIGINAL-feature granularity.
+
+    `groups[i]` holds every transformed column belonging to the i-th ranked original
+    feature. Deleting "the top-k features" must remove all of their columns: deleting
+    k *columns* instead would under-perturb Heart (13 features across 25 columns) while
+    leaving PIMA unaffected, so the two datasets would not be measured on the same scale.
+    """
+    rows = _grouped_rows(x, baseline, groups, k_max, start_from_baseline=False)
+    return _probabilities(predict_proba, rows, _target_class(predict_proba, x))
+
+
+def insertion_curve_grouped(predict_proba, x, groups, baseline, k_max: int) -> np.ndarray:
+    """Insertion curve at ORIGINAL-feature granularity."""
+    rows = _grouped_rows(x, baseline, groups, k_max, start_from_baseline=True)
+    return _probabilities(predict_proba, rows, _target_class(predict_proba, x))
+
+
+def curve_metrics(deletion: np.ndarray, insertion: np.ndarray, k: int = 5) -> dict:
+    """All four fidelity metrics read off two already-computed curves.
+
+    Exact, not approximate: deletion[0] is p(own class) on the unperturbed instance,
+    so comprehensiveness and sufficiency need no extra model calls. That halves the
+    predict_proba traffic across ~14k curve evaluations.
+    """
+    deletion = np.asarray(deletion, dtype=float)
+    insertion = np.asarray(insertion, dtype=float)
+    k = int(min(k, deletion.size - 1, insertion.size - 1))
+    return {
+        "aopc": float(np.mean(deletion[0] - deletion[1:])) if deletion.size > 1 else 0.0,
+        "auc_ins": float(_trapezoid(insertion, dx=1.0) / max(insertion.size - 1, 1)),
+        "comprehensiveness": float(deletion[0] - deletion[k]),
+        "sufficiency": float(deletion[0] - insertion[k]),
+    }

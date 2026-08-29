@@ -110,3 +110,37 @@ def test_random_ranking_scores_lower_aopc_than_the_true_one_on_average():
     random_scores = [aopc_deletion(linear_proba, X_INSTANCE, list(rng.permutation(3)),
                                    BASELINE, k_max=3) for _ in range(40)]
     assert true_score > np.mean(random_scores)
+
+
+def test_grouped_deletion_removes_whole_feature_groups_not_single_columns():
+    # With one-hot encoding, "delete the top-3 features" must delete every column
+    # belonging to those three features. Deleting 3 *columns* instead would silently
+    # under-perturb every categorical dataset, making explanations look less faithful
+    # than they are on Heart (13 features spanning 25 columns) but not on PIMA.
+    from xaibench.metrics.fidelity import deletion_curve_grouped
+
+    coef = np.array([5.0, 5.0, 1.0, 0.0])   # feature A spans columns 0 and 1
+
+    def proba(X):
+        X = np.atleast_2d(np.asarray(X, dtype=float))
+        p1 = 1.0 / (1.0 + np.exp(-(X @ coef)))
+        return np.column_stack([1.0 - p1, p1])
+
+    x = np.ones(4)
+    groups = [np.array([0, 1]), np.array([2]), np.array([3])]
+    curve = deletion_curve_grouped(proba, x, groups, np.zeros(4), k_max=3)
+    assert len(curve) == 4
+    # Deleting group 0 removes BOTH columns, so the logit drops 10, not 5.
+    assert curve[1] == pytest.approx(proba(np.array([0.0, 0.0, 1.0, 1.0]))[0, 1])
+    assert np.all(np.diff(curve) <= 1e-12)
+
+
+def test_grouped_curves_agree_with_ungrouped_when_every_group_is_one_column():
+    from xaibench.metrics.fidelity import deletion_curve_grouped, insertion_curve_grouped
+    groups = [np.array([i]) for i in [0, 1, 2]]
+    np.testing.assert_allclose(
+        deletion_curve_grouped(linear_proba, X_INSTANCE, groups, BASELINE, k_max=3),
+        deletion_curve(linear_proba, X_INSTANCE, [0, 1, 2], BASELINE, k_max=3))
+    np.testing.assert_allclose(
+        insertion_curve_grouped(linear_proba, X_INSTANCE, groups, BASELINE, k_max=3),
+        insertion_curve(linear_proba, X_INSTANCE, [0, 1, 2], BASELINE, k_max=3))
