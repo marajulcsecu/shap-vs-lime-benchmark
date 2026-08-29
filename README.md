@@ -129,8 +129,9 @@ Source CSVs are vendored under `data/raw/` with SHA-256 digests in
 `data/raw/checksums.json`, verified on every load. A mismatch is a hard failure, not a
 warning: a silently changed upstream source would invalidate every number in the paper.
 
-Code in this repository is MIT-licensed (`LICENSE`). The datasets retain their own
-licences above and are redistributed under those terms.
+Code in this repository is MIT-licensed ([`LICENSE`](LICENSE)). The datasets retain their
+own terms, set out in [`DATA_LICENSES.md`](DATA_LICENSES.md), and are redistributed under
+them.
 
 ## Environment notes
 
