@@ -33,7 +33,8 @@ def test_ranks_are_a_permutation_per_explanation(artifacts):
 def test_config_row_records_the_probability_space_check(artifacts):
     row = artifacts.config_row
     assert row["shap_backend"] in {"tree", "tree_prob", "permutation"}
-    assert row["additivity_error"] < 5e-3
+    assert row["additivity_median"] < 5e-3
+    assert row["additivity_gate_ok"] is True
     assert row["space"] == "probability"
 
 

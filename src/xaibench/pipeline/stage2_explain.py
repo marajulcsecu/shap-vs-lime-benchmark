@@ -34,7 +34,8 @@ from xaibench.explain.consensus import (
 )
 from xaibench.explain.lime_backend import explain_lime
 from xaibench.explain.shap_backend import (
-    additivity_error,
+    additivity_gate_ok,
+    additivity_report,
     build_background,
     explain_shap,
     raw_shap_values,
@@ -189,7 +190,7 @@ def explain_cell(dataset_id: str, model_id: str, params: dict,
     baseline = median_baseline(cell.X_train_t)
 
     values, base = raw_shap_values(cell, ids, background, SEED)
-    add_err = additivity_error(cell, values, base, ids)
+    additivity = additivity_report(cell, values, base, ids)
 
     shap_exps = explain_shap(cell, ids, seed=SEED, background=background)
     shap_frame = explanations_to_frame(shap_exps)
@@ -229,7 +230,8 @@ def explain_cell(dataset_id: str, model_id: str, params: dict,
         config_row={
             "dataset": dataset_id, "model": model_id,
             "shap_backend": shap_backend_kind(model_id), "space": "probability",
-            "additivity_error": add_err, "background": int(background.shape[0]),
+            **additivity, "additivity_gate_ok": additivity_gate_ok(additivity),
+            "background": int(background.shape[0]),
             "fidelity_weight_shap": weight,
             "lime_num_samples_primary": int(profile.lime_num_samples[0]),
             "profile": profile.name,

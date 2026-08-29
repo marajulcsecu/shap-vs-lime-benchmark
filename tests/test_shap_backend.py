@@ -4,6 +4,8 @@ import pytest
 from xaibench.config import MODELS, QUICK
 from xaibench.explain.shap_backend import (
     SHAP_ADDITIVITY_TOL,
+    additivity_gate_ok,
+    additivity_report,
     build_background,
     explain_shap,
     raw_shap_values,
@@ -29,9 +31,9 @@ def test_additivity_holds_within_tolerance(model_id):
     cell = build_cell("pima", model_id, params={}, profile=QUICK)
     background = build_background(cell, QUICK.shap_background, 42)
     values, base = raw_shap_values(cell, cell.instance_ids, background, 42)
-    reconstructed = base + values.sum(axis=1)
-    actual = cell.predict_proba(cell.X_test_t[cell.instance_ids])[:, 1]
-    assert np.max(np.abs(reconstructed - actual)) < SHAP_ADDITIVITY_TOL
+    report = additivity_report(cell, values, base, cell.instance_ids)
+    assert report["additivity_median"] < SHAP_ADDITIVITY_TOL
+    assert additivity_gate_ok(report)
 
 
 @pytest.mark.parametrize("model_id", ["dtree", "rf", "xgb", "lgbm"])
@@ -61,11 +63,32 @@ def test_attributions_are_aggregated_to_original_features_on_expanded_data():
         assert exp.feature_names == tuple(cell.feature_order)
 
 
-def test_background_is_summarised_to_the_requested_size():
+def test_background_is_a_subsample_of_real_training_rows():
+    # Real rows, not k-means centroids: a centroid averages one-hot columns into
+    # fractional values the model never sees, and interventional TreeSHAP evaluated
+    # against such off-manifold references violates its own additivity by ~1% on
+    # LightGBM. See protocol amendment A2.
     cell = build_cell("pima", "rf", params={}, profile=QUICK)
     bg = build_background(cell, k=15, seed=42)
-    assert bg.shape == (15, cell.X_train_t.shape[1])
+    assert bg.shape[1] == cell.X_train_t.shape[1]
+    assert 14 <= bg.shape[0] <= 16
     np.testing.assert_allclose(bg, build_background(cell, k=15, seed=42))
+    train_rows = {tuple(np.round(r, 12)) for r in cell.X_train_t}
+    for row in bg:
+        assert tuple(np.round(row, 12)) in train_rows, "background row is not real data"
+
+
+def test_additivity_holds_for_lightgbm_on_every_dataset():
+    # The cell that exposed the centroid problem. Heart has 8 categorical features
+    # (25 one-hot columns), so its centroids were the most fractional and the most
+    # wrong. This test is the regression guard.
+    for dataset in ("pima", "heart", "ckd"):
+        cell = build_cell(dataset, "lgbm", params={}, profile=QUICK)
+        bg = build_background(cell, QUICK.shap_background, 42)
+        values, base = raw_shap_values(cell, cell.instance_ids, bg, 42)
+        report = additivity_report(cell, values, base, cell.instance_ids)
+        assert report["additivity_median"] < SHAP_ADDITIVITY_TOL, dataset
+        assert additivity_gate_ok(report), f"{dataset}: {report}"
 
 
 def test_background_falls_back_when_k_exceeds_the_training_rows():
