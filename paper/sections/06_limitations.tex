@@ -20,14 +20,25 @@ remain incomplete, non-causal, and shaped by what their source literature chose 
 measure. A low overlap score is as consistent with an incomplete reference set as with
 a poor explanation. This is why \RQ{5} is reported as corroborating evidence only.
 
-\textbf{One additivity outlier is retained, not removed.} In
-\AdditivityOutlierCells{} of \NumCells{} cells, a single explained instance reproduces
-\texttt{predict\_proba} to worse than the $5\times10^{-3}$ tolerance while the cell's
-median error is \AdditivityMedianMax{}. The discrepancy is insensitive to background
-size and we did not attribute it; it appears to be a library-level edge case at a split
-boundary. Forcing that whole cell into log-odds space would have made its \shap{}
-incomparable with \lime{}, a larger distortion than the outlier, so it is disclosed and
-kept.
+\textbf{The additivity gate failed for one cell, and we report it rather than widen the
+gate.} In PIMA/LightGBM, \AdditivityWorstOutliers{} of 150 explained instances
+reconstruct \texttt{predict\_proba} to worse than the $5\times10^{-3}$ tolerance (worst
+\AdditivityWorstMax{}), against a cell median of $1.1\times10^{-9}$, so the
+pre-registered rule --- median below tolerance \emph{and} at most $\max(1, 2\%)$ of
+instances above it --- is not satisfied and protocol risk R1 fired. The discrepancy is
+insensitive to background size (identical at 20 and at all 614 training rows) and we did
+not attribute it; the obvious candidate, coincidence with a median-imputed value, was
+tested and rejected. It appears to be a library-level edge case at a split boundary in
+one fitted model.
+
+We had two pre-registered options: force that cell into log-odds space, which would make
+its \shap{} incomparable with \lime{} and so remove it from every cross-explainer
+comparison, or widen the gate. We did neither, because widening a gate after seeing the
+result it fails is precisely what pre-registration exists to prevent. Instead the cell is
+retained, the failure is stated here, and every hypothesis tally is additionally reported
+with the cell excluded (\texttt{results/stats\_sensitivity\_r1.csv}); no decision in
+Table~\ref{tab:hypotheses} changes. A reader who prefers the stricter reading can take
+the excluded column.
 
 \textbf{Retraining stability covers three of six models.} Running \RQ{2}c for all six
 would have exceeded the compute budget because of \lime{}'s cost, so it is restricted

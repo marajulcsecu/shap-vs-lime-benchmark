@@ -507,6 +507,9 @@ def _macro(name: str, value: str) -> str:
 
 
 def findings_macros(profile) -> str:
+    from xaibench.config import RBO_P
+    from xaibench.metrics.agreement import rbo_floor
+
     agreement = _results("metrics_agreement.csv").query("instance_id >= 0")
     fidelity = _results("metrics_fidelity.csv").query("baseline == 'median'")
     stability = _results("metrics_stability.csv")
@@ -573,5 +576,13 @@ def findings_macros(profile) -> str:
         _macro("HSixTotal", f"{h6_total}"),
         _macro("AdditivityMedianMax", fmt(config.additivity_median.max(), 3)),
         _macro("AdditivityOutlierCells", str(int((config.additivity_n_over_tol > 0).sum()))),
+        _macro("AdditivityGateFailCells", str(int((~config.additivity_gate_ok.astype(bool)).sum()))),
+        _macro("AdditivityWorstMax", fmt(config.additivity_max.max(), 3)),
+        _macro("AdditivityWorstOutliers", str(int(config.additivity_n_over_tol.max()))),
+        # Exact, deterministic properties of RBO, not experimental results -- but still
+        # generated, because a hand-typed constant is a hand-typed constant.
+        _macro("RboFloorEight", fmt(rbo_floor(8, RBO_P), 3)),
+        _macro("RboFloorThirteen", fmt(rbo_floor(13, RBO_P), 3)),
+        _macro("RboFloorTwentyFour", fmt(rbo_floor(24, RBO_P), 3)),
     ]
     return "\n".join(lines) + "\n"

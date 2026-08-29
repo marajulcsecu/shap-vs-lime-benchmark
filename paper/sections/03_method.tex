@@ -83,7 +83,7 @@ $\pi(x)$ the ranking of features by $|\phi(x)|$, ties broken by index.
 Spearman $\rho$, Kendall $\tau_b$, Jaccard overlap of the top $k \in \{3,5\}$, and
 rank-biased overlap. Because both rankings permute the \emph{same} feature set, the
 extrapolation term of \rbo{} is a hard floor that scales with $d$ --- a reversed
-ranking still scores $0.589$ at $d=8$ but $0.193$ at $d=24$ --- so we also report a
+ranking still scores \RboFloorEight{} at $d=8$ but \RboFloorTwentyFour{} at $d=24$ --- so we also report a
 floor-normalised \rbo{} that is comparable across datasets of different width.
 
 \emph{Stability} (\RQ{2}) is decomposed. Re-run variance repeats an explainer $R=10$
@@ -118,8 +118,12 @@ default. Comparing them directly contrasts different quantities on different sca
 We therefore require probability-space attributions throughout and \emph{verify} it
 rather than assume it, by checking that $\text{base} + \sum_j \phi_j$ reproduces
 \texttt{predict\_proba}. Median additivity error across all cells is
-\AdditivityMedianMax{}; \AdditivityOutlierCells{} cell contains a single instance
-above tolerance, reported in Section~\ref{sec:limitations} rather than removed.
+\AdditivityMedianMax{}, so for a typical instance the reconstruction is exact to eight
+decimal places. In \AdditivityGateFailCells{} of \NumCells{} cells the pre-registered
+acceptance gate nonetheless did not pass: PIMA/LightGBM has
+\AdditivityWorstOutliers{} instances of 150 above the $5\times10^{-3}$ tolerance
+(worst \AdditivityWorstMax{}) against a cell median of $1.1\times10^{-9}$. Protocol
+risk R1 therefore fired, and Section~\ref{sec:limitations} states how it is handled.
 
 \textbf{The reference distribution must be real data.} Summarising the \shap{}
 background by $k$-means yields synthetic points: averaging one-hot columns produces

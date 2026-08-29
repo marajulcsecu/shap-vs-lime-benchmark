@@ -277,6 +277,39 @@ def estimate_table(profile: Profile) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def gate_failed_cells() -> list[tuple[str, str]]:
+    """Cells where the pre-registered additivity gate did not pass (protocol risk R1)."""
+    config = pd.read_csv(paths().results / "explainer_config.csv")
+    failed = config[~config.additivity_gate_ok.astype(bool)]
+    return [(r.dataset, r.model) for r in failed.itertuples()]
+
+
+def sensitivity_excluding_gate_failures(profile: Profile) -> pd.DataFrame:
+    """Re-tally every hypothesis with R1-affected cells removed.
+
+    R1 fired for one cell, so the protocol requires it be handled rather than ignored.
+    Rather than widen the gate a second time -- which would be moving the goalposts
+    after seeing the result -- we report the headline tallies both with and without the
+    affected cell, so a reader can see for themselves that nothing turns on it.
+    """
+    excluded = set(gate_failed_cells())
+    stats = pd.read_csv(paths().results / "stats_hypotheses.csv")
+    kept = stats[~stats.apply(lambda r: (r.dataset, r.model) in excluded, axis=1)]
+    rows = []
+    for hypothesis in stats.hypothesis.unique():
+        full = stats.query("hypothesis == @hypothesis")
+        trimmed = kept.query("hypothesis == @hypothesis")
+        rows.append({
+            "hypothesis": hypothesis,
+            "cells_all": len(full),
+            "rejected_all": int((full.decision == "reject H0").sum()),
+            "cells_excl": len(trimmed),
+            "rejected_excl": int((trimmed.decision == "reject H0").sum()),
+            "excluded_cells": "; ".join(f"{d}/{m}" for d, m in sorted(excluded)) or "none",
+        })
+    return pd.DataFrame(rows)
+
+
 def main(force: bool = False) -> None:
     profile, p = get_profile(), paths()
     p.mkdirs()
@@ -289,6 +322,12 @@ def main(force: bool = False) -> None:
     run_all_hypotheses(profile).to_csv(hypotheses, index=False)
     print("[stage4] interval estimates", flush=True)
     estimate_table(profile).to_csv(estimates, index=False)
+    failed = gate_failed_cells()
+    if failed:
+        print(f"[stage4] protocol risk R1 fired for {len(failed)} cell(s): "
+              f"{failed}; writing sensitivity analysis", flush=True)
+    sensitivity_excluding_gate_failures(profile).to_csv(
+        p.results / "stats_sensitivity_r1.csv", index=False)
     print("[stage4] done")
 
 

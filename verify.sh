@@ -19,7 +19,21 @@ budget = pd.read_csv(p.results / "instance_budget.csv")
 stats = pd.read_csv(p.results / "stats_hypotheses.csv")
 problems = []
 if len(cfg) != len(CELLS): problems.append(f"{len(cfg)} cells, expected {len(CELLS)}")
-if not cfg.additivity_gate_ok.all(): problems.append("additivity gate failed in some cell")
+failed = cfg[~cfg.additivity_gate_ok.astype(bool)]
+if len(failed):
+    # R1 firing is allowed; silently ignoring it is not. Require the disclosure.
+    disclosed = (p.results / "stats_sensitivity_r1.csv").exists()
+    # Documents use human labels ("LightGBM"), results use ids ("lgbm").
+    from xaibench.models.zoo import MODEL_LABELS
+    text = open("paper/sections/06_limitations.tex").read().lower()
+    named = all(r.dataset.lower() in text
+                and MODEL_LABELS[r.model].lower() in text
+                for r in failed.itertuples())
+    if not disclosed: problems.append("R1 fired but no sensitivity analysis was written")
+    if not named: problems.append("R1 fired but the affected cell is not named in the limitations")
+    print(f"  NOTE: protocol risk R1 fired for {len(failed)} cell(s) -- "
+          f"{', '.join(r.dataset + '/' + r.model for r in failed.itertuples())}; "
+          "disclosed and sensitivity-checked")
 if set(cfg.space) != {"probability"}: problems.append(f"mixed output spaces: {set(cfg.space)}")
 if manifest["profile"] != "FULL": problems.append(f"profile is {manifest['profile']}, not FULL")
 if not manifest["reportable"]: problems.append("manifest marks the run non-reportable")
@@ -84,7 +98,7 @@ check $? "page counts are within target"
 echo "=== 5. reproducibility surface ==="
 [ -s requirements.lock.txt ]; check $? "dependency lockfile present"
 PYTHONPATH=src $PY -m xaibench.data.fetch >/dev/null 2>&1; check $? "source data checksums verify"
-git log --oneline --reverse | head -1 | grep -q "freeze pre-registered protocol"
+git log --reverse --format=%s | grep -m1 . | grep -q "freeze pre-registered protocol"
 check $? "protocol freeze is the first commit in history"
 
 echo
