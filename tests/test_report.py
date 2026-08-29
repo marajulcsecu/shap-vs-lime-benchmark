@@ -1,3 +1,5 @@
+import re
+
 import pandas as pd
 import pytest
 
@@ -35,8 +37,12 @@ def test_builders_escape_text_columns_explicitly():
     assert r"some\_feature" in to_booktabs(df, caption="c", label="l")
 
 
-def test_headers_are_always_escaped_even_when_cells_are_not():
-    assert r"a\_b" in to_booktabs(pd.DataFrame({"a_b": ["1"]}), caption="c", label="l")
+def test_headers_follow_the_same_ready_to_typeset_contract_as_cells():
+    # Headers legitimately carry maths, so the writer must not escape them. Builders
+    # call escape() on free text and leave intentional maths alone.
+    tex = to_booktabs(pd.DataFrame({r"Spearman $\rho$": ["1"]}), caption="c", label="l")
+    assert r"Spearman $\rho$" in tex
+    assert r"\$" not in tex
 
 
 def test_p_values_are_rendered_with_a_floor_not_as_zero():
@@ -68,23 +74,62 @@ def test_manifest_covers_every_planned_table():
     assert set(TABLES) == {f"T{i}" for i in range(1, 13)}
 
 
-def test_no_generated_table_contains_a_literal_nan():
-    # A "nan" in a submitted table is the most embarrassing possible defect.
+def _generated_tables():
     from xaibench.config import paths
-    folder = paths().tables
-    files = sorted(folder.glob("*.tex"))
+    # findings.tex holds \newcommand macros, not a table environment.
+    return [p for p in sorted(paths().tables.glob("T*.tex")) if p.stem != "findings"]
+
+
+def test_no_generated_table_contains_a_leaked_missing_value():
+    # A "nan" in a submitted table is the most embarrassing possible defect. The check
+    # is for a leaked *missing value*, so it matches how Python renders one -- word
+    # boundaries and exact case -- not the English word "none", which T11 uses
+    # legitimately in "none reported".
+    files = _generated_tables()
     assert files, "no tables generated yet; run stage5 first"
     for path in files:
-        lowered = path.read_text().lower()
-        assert "nan" not in lowered, f"{path.name} contains a literal nan"
-        assert "none" not in lowered, f"{path.name} contains a literal None"
+        text = path.read_text()
+        assert not re.search(r"\bnan\b", text, re.IGNORECASE), f"{path.name}: nan"
+        assert not re.search(r"\bNone\b", text), f"{path.name}: None"
+        assert "inf" not in text.lower().replace("information", ""), f"{path.name}: inf"
 
 
 def test_every_generated_table_is_balanced_latex():
-    from xaibench.config import paths
-    for path in sorted(paths().tables.glob("*.tex")):
+    for path in _generated_tables():
         text = path.read_text()
         assert text.count(r"\begin{table}") == text.count(r"\end{table}") == 1, path.name
         assert text.count(r"\begin{tabular}") == text.count(r"\end{tabular}") == 1, path.name
         assert r"\label{" in text, path.name
         assert path.stat().st_size > 60, path.name
+
+
+@pytest.mark.parametrize("name", [f"T{i}" for i in range(1, 13)])
+def test_every_generated_table_compiles_standalone(name, tmp_path):
+    """The only reliable check that a builder's escaping is right.
+
+    Headers legitimately contain maths ("Spearman $\\rho$", "$p_{\\text{adj}}$") while
+    cells legitimately contain escaped text (CKD feature names carry underscores).
+    No escaping rule distinguishes them, so the table is compiled instead of inspected.
+    """
+    import shutil
+    import subprocess
+
+    from xaibench.config import paths
+
+    if shutil.which("pdflatex") is None:
+        pytest.skip("pdflatex not available")
+    source = paths().tables / f"{name}.tex"
+    if not source.exists():
+        pytest.skip("tables not generated yet; run stage5 first")
+
+    document = tmp_path / "probe.tex"
+    document.write_text(
+        "\\documentclass{article}\n"
+        "\\usepackage[T1]{fontenc}\\usepackage{booktabs}\\usepackage{amsmath,amssymb}\n"
+        "\\usepackage{multirow}\\usepackage{array}\\usepackage{siunitx}\n"
+        "\\begin{document}\n" + source.read_text() + "\n\\end{document}\n")
+    result = subprocess.run(
+        ["pdflatex", "-interaction=nonstopmode", "-halt-on-error", document.name],
+        cwd=tmp_path, capture_output=True, text=True, timeout=120)
+    assert result.returncode == 0, (
+        f"{name}.tex does not compile:\n" + result.stdout[-2500:])

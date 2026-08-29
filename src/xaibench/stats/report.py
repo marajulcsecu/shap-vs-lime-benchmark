@@ -61,8 +61,10 @@ def to_booktabs(df: pd.DataFrame, caption: str, label: str,
                 escape_cells: bool = False) -> str:
     """A complete table environment.
 
-    Contract: **cells arrive LaTeX-ready.** Table builders call `escape()` on text
-    columns and `fmt`/`fmt_ci`/`fmt_p` on numbers, then pass them through untouched.
+    Contract: **cells and headers arrive LaTeX-ready.** Table builders call `escape()`
+    on free text and `fmt`/`fmt_ci`/`fmt_p` on numbers, then pass them through
+    untouched. `test_every_generated_table_compiles_standalone` is what enforces it:
+    guessing at escaping rules for headers that legitimately contain maths does not work.
     That is the only workable split, because a marker type cannot survive a round
     trip through a DataFrame -- pandas coerces a str subclass back to plain str -- so
     "$<$0.001" from fmt_p would be double-escaped by an escaping-by-default table
@@ -71,7 +73,10 @@ def to_booktabs(df: pd.DataFrame, caption: str, label: str,
     columns = list(df.columns)
     if column_format is None:
         column_format = "l" + "r" * (len(columns) - 1)
-    header = " & ".join(escape(c) for c in columns)
+    # Headers follow the same contract as cells: builders supply them LaTeX-ready.
+    # They deliberately contain maths -- "Spearman $\rho$", "$p_{\text{adj}}$" -- and
+    # escaping them unconditionally turned $ into \$ and broke the build.
+    header = " & ".join(str(c) for c in columns)
     body_rows = []
     for _, row in df.iterrows():
         cells = [escape(v) if escape_cells else str(v) for v in row.tolist()]
@@ -365,6 +370,7 @@ def T9(profile) -> str:
               "18 cells.")
 
 
+# Authored LaTeX, not free text: these carry deliberate maths and must NOT be escaped.
 _HYPOTHESIS_TEXT = {
     "H1": "SHAP/LIME concordance exceeds $\\rho = 0.50$",
     "H1b": "Concordance differs between simple models and ensembles",
@@ -389,7 +395,7 @@ def T10(profile) -> str:
         rejected = int((group.decision == "reject H0").sum())
         rows.append({
             "H": escape(hypothesis),
-            "Alternative hypothesis": escape(_HYPOTHESIS_TEXT.get(hypothesis, "")),
+            "Alternative hypothesis": _HYPOTHESIS_TEXT.get(hypothesis, ""),
             "Unit": escape(str(group.unit.iloc[0])),
             "Test": escape(str(group.test.iloc[0])),
             "Family": str(len(group)),
@@ -430,7 +436,7 @@ def T11(profile) -> str:
          "usually 1--4, often a single family"),
         ("Datasets varied", str(len(DATASETS)),
          "usually 1, occasionally several"),
-        ("Explainers compared", f"{len(ALL_EXPLAINERS)} (incl.\ random control)",
+        ("Explainers compared", rf"{len(ALL_EXPLAINERS)} (incl.\ random control)",
          "2, control rarely included"),
         ("Model--dataset cells", str(len(CELLS)), "typically 1--4"),
         ("Interpretability measures", "16 across 5 families",

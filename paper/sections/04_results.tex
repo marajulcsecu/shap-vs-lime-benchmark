@@ -21,11 +21,13 @@ features suffice is a task on which explanations have latitude to disagree.
   \label{fig:performance}
 \end{figure}
 
-\subsection{RQ1: the two explainers agree only moderately}\label{sec:rq1}
+\subsection{RQ1: substantial agreement, but not interchangeable}\label{sec:rq1}
 Median per-instance rank agreement between \shap{} and \lime{} is \MedianRho{}
-(Spearman $\rho$), with top-5 Jaccard overlap of \MedianJaccardFive{}: on a typical
-instance the two methods share roughly half of their top five features and order them
-differently. Table~\ref{tab:agreement} gives the per-cell picture with bootstrap
+(Spearman $\rho$), with top-5 Jaccard overlap of \MedianJaccardFive{}. The
+pre-registered bar of $\rho > 0.50$ is cleared in \HOneRejected{} of \HOneTotal{}
+cells, so the two methods agree more than a reader of the disagreement literature might
+expect --- and still differ on roughly a third of each top-five list, which is not a
+margin a practitioner can ignore. Table~\ref{tab:agreement} gives the per-cell picture with bootstrap
 intervals, Fig.~\ref{fig:agreement-heatmap} the global rankings, and
 Fig.~\ref{fig:agreement-violins} the full per-instance distributions.
 

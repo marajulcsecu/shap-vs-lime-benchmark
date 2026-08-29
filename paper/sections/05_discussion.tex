@@ -1,11 +1,15 @@
 \section{Discussion}\label{sec:discussion}
 
 \subsection{What a practitioner should take from this}
-The headline number is the agreement one. At median $\rho = \MedianRho{}$ and top-5
-overlap of \MedianJaccardFive{}, running both methods and reading the intersection is
-not a robustness check --- it is a way of discarding roughly half of each explanation.
-If a decision depends on which features appear in a top-five list, the choice of
-explainer is part of that decision and should be recorded as such.
+The agreement number cuts both ways, and it is worth being precise about it. At median
+$\rho = \MedianRho{}$ with top-5 overlap of \MedianJaccardFive{}, the two methods are
+not the wildly divergent pair that some of the disagreement literature implies: they
+clear a moderate-association bar in \HOneRejected{} of \HOneTotal{} cells. But a third
+of each top-five list still differs, so they are not interchangeable either. The
+practical consequence is that reading the intersection of the two is not a robustness
+check --- it silently drops about a third of each explanation --- and if a decision turns
+on which features appear in a top-five list, the choice of explainer is part of that
+decision and belongs in the record.
 
 On the evidence here the default should be \shap{} where a tree backend exists. It was
 the more faithful of the two on \aopc{} and insertion AUC, roughly \SpeedFactor{} times
@@ -27,10 +31,13 @@ reporting explanation stability should say which of the three things they measur
 \subsection{Why fusion did not help}
 The null result on \RQ{6} is intelligible rather than disappointing, and it follows
 from \RQ{1}. Fusion pays off when the inputs are individually noisy but their errors
-are uncorrelated --- the ensemble argument. Here the two explainers agree moderately
-and, more importantly, one of them is consistently better: with \shap{} ahead on
-fidelity in most cells, averaging its ranks with a weaker signal moves the result
-toward the weaker one. The fidelity-weighted rule was designed to counter exactly that
+are uncorrelated --- the ensemble argument. Here neither condition holds. The two agree
+substantially ($\rho = \MedianRho{}$), so there is little independent signal for fusion
+to recover, and one of them is consistently better: with \shap{} ahead on fidelity in
+most cells, averaging its ranks with a weaker and largely redundant signal moves the
+result toward the weaker one. The effect is consistent rather than marginal --- fusion
+lost in every one of the \HSixTotal{} cells, with a median rank-biserial effect of
+$-0.80$. The fidelity-weighted rule was designed to counter exactly that
 by learning $w$ from a held-out calibration split, and it was usually the best of the
 three, but a weight fitted per cell on a small sample cannot recover the gap. We read
 the outcome as evidence that explanation aggregation needs \emph{complementary} base

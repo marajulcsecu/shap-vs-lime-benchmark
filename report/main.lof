@@ -2,18 +2,18 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Predictive performance across the three datasets. Bars are nested cross-validation means; error bars are standard deviations over the five outer folds. The three datasets differ in difficulty by roughly $0.17$ ROC-AUC.}}{18}{figure.caption.10}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Global rank agreement between \textsc {shap}{} and \textsc {lime}{} for every dataset--model cell. Values are Spearman $\rho $ on rankings derived from mean $|\phi |$ over the explained instances.}}{19}{figure.caption.12}%
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Per-instance agreement distributions. The dashed line is RQ1's pre-registered bar of $\rho = 0.50$, fixed before any value was computed. Spread within a cell is wide: cell-level medians conceal instances on which the two methods disagree almost completely.}}{20}{figure.caption.13}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Agreement against task difficulty across all STUB{} cells. Each point is one dataset--model cell.}}{21}{figure.caption.14}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces \textsc {lime}{}'s run-to-run variance against its neighbourhood sampling budget. \textsc {shap}{}'s tree backends sit on the zero line by construction.}}{21}{figure.caption.16}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Local Lipschitz estimates paired within each cell. Lower is more robust.}}{22}{figure.caption.17}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Cross-refit rank agreement after retraining on bootstrap resamples, for the three ensemble models (protocol scope restriction R3).}}{22}{figure.caption.18}%
-\contentsline {figure}{\numberline {4.8}{\ignorespaces Deletion curves for the three ensemble models. A faithful ranking removes the features the model actually relies on first, so its curve falls fastest. The random control barely moves until most features are gone, which is precisely why an \textsc {aopc}{} value cannot be interpreted without it.}}{23}{figure.caption.20}%
-\contentsline {figure}{\numberline {4.9}{\ignorespaces Cost per explanation and the fidelity it buys. Fusion rules consume both base explanations, so their cost is the sum.}}{23}{figure.caption.22}%
-\contentsline {figure}{\numberline {4.10}{\ignorespaces Top-5 overlap with the pre-registered reference feature sets. Reference sets are a plausibility check, not ground truth.}}{24}{figure.caption.23}%
-\contentsline {figure}{\numberline {4.11}{\ignorespaces Per-cell difference between the best fusion rule and the better of \textsc {shap}{} and \textsc {lime}{}, on evaluation instances only. Right of zero means fusion wins.}}{24}{figure.caption.25}%
-\contentsline {figure}{\numberline {4.12}{\ignorespaces Mean rank of each explainer across every metric and cell, where rank 1 is best on that metric.}}{25}{figure.caption.27}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Predictive performance across the three datasets. Bars are nested cross-validation means; error bars are standard deviations over the five outer folds. The three datasets differ in difficulty by roughly $0.17$ ROC-AUC.}}{20}{figure.caption.10}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Global rank agreement between \textsc {shap}{} and \textsc {lime}{} for every dataset--model cell. Values are Spearman $\rho $ on rankings derived from mean $|\phi |$ over the explained instances.}}{22}{figure.caption.12}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Per-instance agreement distributions. The dashed line is RQ1's pre-registered bar of $\rho = 0.50$, fixed before any value was computed. Spread within a cell is wide: cell-level medians conceal instances on which the two methods disagree almost completely.}}{22}{figure.caption.13}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Agreement against task difficulty across all 18{} cells. Each point is one dataset--model cell.}}{23}{figure.caption.14}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces \textsc {lime}{}'s run-to-run variance against its neighbourhood sampling budget. \textsc {shap}{}'s tree backends sit on the zero line by construction.}}{24}{figure.caption.16}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Local Lipschitz estimates paired within each cell. Lower is more robust.}}{25}{figure.caption.17}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Cross-refit rank agreement after retraining on bootstrap resamples, for the three ensemble models (protocol scope restriction R3).}}{25}{figure.caption.18}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Deletion curves for the three ensemble models. A faithful ranking removes the features the model actually relies on first, so its curve falls fastest. The random control barely moves until most features are gone, which is precisely why an \textsc {aopc}{} value cannot be interpreted without it.}}{26}{figure.caption.20}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Cost per explanation and the fidelity it buys. Fusion rules consume both base explanations, so their cost is the sum.}}{27}{figure.caption.22}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Top-5 overlap with the pre-registered reference feature sets. Reference sets are a plausibility check, not ground truth.}}{27}{figure.caption.24}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Per-cell difference between the best fusion rule and the better of \textsc {shap}{} and \textsc {lime}{}, on evaluation instances only. Right of zero means fusion wins.}}{28}{figure.caption.26}%
+\contentsline {figure}{\numberline {4.12}{\ignorespaces Mean rank of each explainer across every metric and cell, where rank 1 is best on that metric.}}{29}{figure.caption.28}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }

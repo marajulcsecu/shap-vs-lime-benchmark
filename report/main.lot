@@ -1,30 +1,31 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {2.1}{\ignorespaces STUB}}{10}{table.caption.5}%
+\contentsline {table}{\numberline {2.1}{\ignorespaces Design axes of this benchmark against typical practice in prior SHAP-versus-LIME comparisons on tabular data \cite {man2021best,salih2024perspective,elshawi2019interpretability,duell2021comparison,amparore2021trust}.}}{11}{table.caption.5}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {3.1}{\ignorespaces STUB}}{13}{table.caption.6}%
-\contentsline {table}{\numberline {3.2}{\ignorespaces STUB}}{15}{table.caption.8}%
+\contentsline {table}{\numberline {3.1}{\ignorespaces Benchmark datasets. `Positive' is the prevalence of the positive class; `Missing' is the fraction of missing cells after the dataset-specific semantics fixes of Section~\ref {sec:method-data}.}}{14}{table.caption.6}%
+\contentsline {table}{\numberline {3.2}{\ignorespaces Hyperparameter search spaces and SHAP backend assignment. Grids are capped at 12 combinations to fit the compute budget.}}{17}{table.caption.8}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {4.1}{\ignorespaces STUB}}{18}{table.caption.9}%
-\contentsline {table}{\numberline {4.2}{\ignorespaces STUB}}{19}{table.caption.11}%
-\contentsline {table}{\numberline {4.3}{\ignorespaces STUB}}{20}{table.caption.15}%
-\contentsline {table}{\numberline {4.4}{\ignorespaces STUB}}{21}{table.caption.19}%
-\contentsline {table}{\numberline {4.5}{\ignorespaces STUB}}{22}{table.caption.21}%
-\contentsline {table}{\numberline {4.6}{\ignorespaces STUB}}{23}{table.caption.24}%
-\contentsline {table}{\numberline {4.7}{\ignorespaces STUB}}{24}{table.caption.26}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces Predictive performance, nested cross-validation (5 outer $\times $ 3 inner folds), mean $\pm $ standard deviation over the outer folds.}}{19}{table.caption.9}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces RQ1 --- agreement between SHAP and LIME feature rankings, per instance. Point estimates are medians with 95\% percentile bootstrap intervals.}}{21}{table.caption.11}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces RQ2 --- explanation stability decomposed into three sources: explainer randomness (re-run), input perturbation (Lipschitz), and model retraining. Medians over all cells.}}{21}{table.caption.15}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces RQ3 --- fidelity to the model's decision function, median baseline. Medians with 95\% bootstrap intervals across all 18 cells.}}{23}{table.caption.19}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces RQ4 --- cost per explanation and the fidelity it buys. Single-threaded, identical hardware for every measurement.}}{24}{table.caption.21}%
+\contentsline {table}{\numberline {4.6}{\ignorespaces RQ5 --- pre-registered plausibility reference sets and top-5 overlap.}}{24}{table.caption.23}%
+\contentsline {table}{\numberline {4.7}{\ignorespaces RQ6 --- does rank fusion beat the \emph {better} of SHAP and LIME? Tested on evaluation instances only; the fidelity weight was fitted on a disjoint calibration split.}}{28}{table.caption.25}%
+\contentsline {table}{\numberline {4.8}{\ignorespaces Decision table for all eleven pre-registered hypotheses. Every entry is auditable against the frozen protocol, which was committed before any result existed.}}{29}{table.caption.27}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {A.1}{\ignorespaces STUB}}{32}{table.caption.28}%
-\contentsline {table}{\numberline {A.2}{\ignorespaces STUB}}{32}{table.caption.29}%
-\contentsline {table}{\numberline {A.3}{\ignorespaces STUB}}{32}{table.caption.30}%
-\contentsline {table}{\numberline {A.4}{\ignorespaces STUB}}{32}{table.caption.31}%
-\contentsline {table}{\numberline {A.5}{\ignorespaces STUB}}{32}{table.caption.32}%
-\contentsline {table}{\numberline {A.6}{\ignorespaces STUB}}{32}{table.caption.33}%
-\contentsline {table}{\numberline {A.7}{\ignorespaces STUB}}{32}{table.caption.34}%
+\contentsline {table}{\numberline {A.1}{\ignorespaces Predictive performance, nested cross-validation (5 outer $\times $ 3 inner folds), mean $\pm $ standard deviation over the outer folds.}}{36}{table.caption.29}%
+\contentsline {table}{\numberline {A.2}{\ignorespaces RQ1 --- agreement between SHAP and LIME feature rankings, per instance. Point estimates are medians with 95\% percentile bootstrap intervals.}}{36}{table.caption.30}%
+\contentsline {table}{\numberline {A.3}{\ignorespaces RQ2 --- explanation stability decomposed into three sources: explainer randomness (re-run), input perturbation (Lipschitz), and model retraining. Medians over all cells.}}{37}{table.caption.31}%
+\contentsline {table}{\numberline {A.4}{\ignorespaces RQ3 --- fidelity to the model's decision function, median baseline. Medians with 95\% bootstrap intervals across all 18 cells.}}{37}{table.caption.32}%
+\contentsline {table}{\numberline {A.5}{\ignorespaces RQ4 --- cost per explanation and the fidelity it buys. Single-threaded, identical hardware for every measurement.}}{37}{table.caption.33}%
+\contentsline {table}{\numberline {A.6}{\ignorespaces RQ6 --- does rank fusion beat the \emph {better} of SHAP and LIME? Tested on evaluation instances only; the fidelity weight was fitted on a disjoint calibration split.}}{38}{table.caption.34}%
+\contentsline {table}{\numberline {A.7}{\ignorespaces Decision table for all eleven pre-registered hypotheses. Every entry is auditable against the frozen protocol, which was committed before any result existed.}}{38}{table.caption.35}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {B.1}{\ignorespaces STUB}}{34}{table.caption.35}%
+\contentsline {table}{\numberline {B.1}{\ignorespaces RQ5 --- pre-registered plausibility reference sets and top-5 overlap.}}{40}{table.caption.36}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {C.1}{\ignorespaces STUB}}{36}{table.caption.36}%
+\contentsline {table}{\numberline {C.1}{\ignorespaces Environment recorded with the results. Exact versions are pinned in \texttt {requirements.lock.txt}.}}{42}{table.caption.37}%
 \addvspace {10\p@ }
