@@ -83,6 +83,39 @@ def holm(p_values) -> np.ndarray:
     return np.asarray(multipletests(p, method="holm")[1], dtype=float)
 
 
+def percentile_ci(data, statistic, n_resamples: int, seed: int,
+                  confidence: float = 0.95) -> tuple[float, float]:
+    """Percentile bootstrap interval. Used for medians and other non-smooth statistics.
+
+    BCa estimates its acceleration term by jackknife, which assumes the statistic
+    responds smoothly to leaving one observation out. A median does not: it either
+    does not move or jumps. On small samples that makes BCa's corrected quantiles
+    unreliable, and they can land on the same side of the observed value -- producing
+    an interval that excludes the very estimate it describes, which is indefensible
+    in a results table. See protocol amendment A5.
+    """
+    x = np.asarray(data, dtype=float).ravel()
+    x = x[np.isfinite(x)]
+    n = x.size
+    if n == 0:
+        return (float("nan"), float("nan"))
+    theta_hat = float(statistic(x))
+    if n < 3 or np.ptp(x) == 0:
+        return (theta_hat, theta_hat)
+    rng = np.random.default_rng(seed)
+    boots = np.array([float(statistic(x[rng.integers(0, n, n)]))
+                      for _ in range(int(n_resamples))])
+    boots = boots[np.isfinite(boots)]
+    if boots.size == 0:
+        return (theta_hat, theta_hat)
+    alpha = 1.0 - confidence
+    low = float(np.quantile(boots, alpha / 2.0))
+    high = float(np.quantile(boots, 1.0 - alpha / 2.0))
+    # A bootstrap distribution can sit entirely to one side of the observed value on
+    # a lumpy small sample; widen rather than report an interval that omits its point.
+    return (min(low, theta_hat), max(high, theta_hat))
+
+
 def bca_ci(data, statistic, n_resamples: int, seed: int,
            confidence: float = 0.95) -> tuple[float, float]:
     """Bias-corrected and accelerated bootstrap interval (Efron, 1987).

@@ -97,3 +97,34 @@ def test_mannwhitney_reports_cliffs_delta_as_its_effect_size():
     result = mannwhitney_with_effect([4.0, 5.0, 6.0, 7.0], [1.0, 2.0, 3.0, 3.5])
     assert result.effect_name == "cliffs_delta"
     assert result.effect_size == pytest.approx(1.0)
+
+
+def test_percentile_ci_always_brackets_its_own_point_estimate():
+    # BCa's acceleration is estimated by jackknife, which assumes a smooth statistic.
+    # The median is not smooth -- leaving one point out either does not move it or
+    # jumps it -- so on small samples BCa can return an interval that excludes the
+    # very estimate it describes. A CI that does not contain its point estimate is
+    # indefensible in a results table, so medians use a percentile interval.
+    from xaibench.stats.tests import percentile_ci
+    rng = np.random.default_rng(0)
+    for n in (4, 5, 8, 12, 30):
+        for trial in range(25):
+            data = rng.normal(size=n)
+            point = float(np.median(data))
+            low, high = percentile_ci(data, np.median, 400, seed=trial)
+            assert low <= point + 1e-12 <= high + 1e-12, (n, trial, low, point, high)
+
+
+def test_percentile_ci_is_reproducible_and_degenerates_gracefully():
+    from xaibench.stats.tests import percentile_ci
+    data = np.random.default_rng(1).normal(size=40)
+    assert percentile_ci(data, np.median, 300, seed=2) == percentile_ci(data, np.median, 300, seed=2)
+    assert percentile_ci(np.full(20, 7.0), np.median, 200, seed=0) == (7.0, 7.0)
+
+
+def test_bca_still_brackets_for_a_smooth_statistic():
+    rng = np.random.default_rng(3)
+    for trial in range(25):
+        data = rng.normal(loc=2.0, size=40)
+        low, high = bca_ci(data, np.mean, 500, seed=trial)
+        assert low <= float(np.mean(data)) <= high
