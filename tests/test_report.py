@@ -61,3 +61,30 @@ def test_tiny_magnitudes_do_not_collapse_to_zero():
 
 def test_ci_format_is_compact_and_readable():
     assert fmt_ci(0.5, 0.4, 0.6) == "0.500 [0.400, 0.600]"
+
+
+def test_manifest_covers_every_planned_table():
+    from xaibench.stats.report import TABLES
+    assert set(TABLES) == {f"T{i}" for i in range(1, 13)}
+
+
+def test_no_generated_table_contains_a_literal_nan():
+    # A "nan" in a submitted table is the most embarrassing possible defect.
+    from xaibench.config import paths
+    folder = paths().tables
+    files = sorted(folder.glob("*.tex"))
+    assert files, "no tables generated yet; run stage5 first"
+    for path in files:
+        lowered = path.read_text().lower()
+        assert "nan" not in lowered, f"{path.name} contains a literal nan"
+        assert "none" not in lowered, f"{path.name} contains a literal None"
+
+
+def test_every_generated_table_is_balanced_latex():
+    from xaibench.config import paths
+    for path in sorted(paths().tables.glob("*.tex")):
+        text = path.read_text()
+        assert text.count(r"\begin{table}") == text.count(r"\end{table}") == 1, path.name
+        assert text.count(r"\begin{tabular}") == text.count(r"\end{tabular}") == 1, path.name
+        assert r"\label{" in text, path.name
+        assert path.stat().st_size > 60, path.name
