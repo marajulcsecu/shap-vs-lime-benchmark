@@ -23,6 +23,12 @@ def rerun_cv(repeats: np.ndarray) -> float:
     r = np.atleast_2d(np.asarray(repeats, dtype=float))
     if r.shape[0] < 2:
         return 0.0
+    # A deterministic explainer returns bit-identical repeats, but np.std on
+    # identical rows still leaves ~1e-17 of cancellation residue, which dividing by
+    # a small |mean| amplifies. The protocol claims tree SHAP gives *exactly* zero,
+    # so identity is checked directly rather than papered over with a tolerance.
+    if np.all(r == r[0]):
+        return 0.0
     sd = r.std(axis=0, ddof=1)
     mu = np.abs(r.mean(axis=0))
     return float(np.mean(sd / (mu + EPS)))

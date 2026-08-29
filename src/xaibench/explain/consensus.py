@@ -84,6 +84,8 @@ _RULES = {
     "fidwt": lambda a, b, w: fuse_weighted(a, b, w),
 }
 
+CONSENSUS_RULES = tuple(_RULES)
+
 
 def build_consensus(shap_exps: list[Explanation], lime_exps: list[Explanation],
                     weight: float, rule: str) -> list[Explanation]:

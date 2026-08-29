@@ -92,3 +92,17 @@ def test_retrain_agreement_is_one_for_identical_refits_and_lower_when_they_diffe
     differ = np.array([[0.5, 0.3, 0.1], [0.1, 0.3, 0.5],
                        [0.5, 0.3, 0.1], [0.1, 0.3, 0.5]])
     assert retrain_agreement(differ) < 1.0
+
+
+def test_bit_identical_repeats_give_exactly_zero_not_float_residue():
+    # np.std on identical rows leaves ~1e-17 of cancellation residue, and dividing
+    # by a small |mean| amplifies it. Reporting 8.3e-17 in a results table as though
+    # it were measured variance would be noise dressed as a finding.
+    repeats = np.tile(np.array([1e-9, -2e-9, 5e-10]), (10, 1))
+    assert rerun_cv(repeats) == 0.0
+
+
+def test_a_single_differing_repeat_still_registers_as_nonzero():
+    repeats = np.tile(np.array([0.5, 0.2, 0.1]), (10, 1))
+    repeats[3, 0] += 1e-6
+    assert rerun_cv(repeats) > 0.0
