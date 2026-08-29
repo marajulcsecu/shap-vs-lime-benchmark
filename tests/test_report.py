@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -71,13 +72,25 @@ def test_ci_format_is_compact_and_readable():
 
 def test_manifest_covers_every_planned_table():
     from xaibench.stats.report import TABLES
-    assert set(TABLES) == {f"T{i}" for i in range(1, 13)}
+    # T1-T12 are the planned tables; the *full variants exist because the two-column
+    # paper cannot carry an 8-metric or 5-measure table legibly, so it gets a condensed
+    # version and the report's appendix gets everything.
+    assert {f"T{i}" for i in range(1, 13)} <= set(TABLES)
+    assert {"T3full", "T4full", "T9full"} <= set(TABLES)
+    assert len(TABLES) == 15
 
 
 def _generated_tables():
     from xaibench.config import paths
     # findings.tex holds \newcommand macros, not a table environment.
     return [p for p in sorted(paths().tables.glob("T*.tex")) if p.stem != "findings"]
+
+
+def test_generated_table_files_match_the_manifest():
+    from xaibench.stats.report import TABLES
+    on_disk = {p.stem for p in _generated_tables()}
+    assert on_disk == set(TABLES), (
+        f"missing: {set(TABLES) - on_disk}; unexpected: {on_disk - set(TABLES)}")
 
 
 def test_no_generated_table_contains_a_leaked_missing_value():
@@ -95,15 +108,33 @@ def test_no_generated_table_contains_a_leaked_missing_value():
 
 
 def test_every_generated_table_is_balanced_latex():
+    # Wide tables use table* so they span both columns of the paper, so the environment
+    # name has to be read from the file rather than assumed.
     for path in _generated_tables():
         text = path.read_text()
-        assert text.count(r"\begin{table}") == text.count(r"\end{table}") == 1, path.name
+        environment = "table*" if r"\begin{table*}" in text else "table"
+        opens = text.count(rf"\begin{{{environment}}}")
+        closes = text.count(rf"\end{{{environment}}}")
+        assert opens == closes == 1, f"{path.name}: {environment} {opens}/{closes}"
         assert text.count(r"\begin{tabular}") == text.count(r"\end{tabular}") == 1, path.name
         assert r"\label{" in text, path.name
         assert path.stat().st_size > 60, path.name
 
 
-@pytest.mark.parametrize("name", [f"T{i}" for i in range(1, 13)])
+def test_wide_tables_span_both_columns_and_shrink_to_fit():
+    """The defect this guards: a table wider than an IEEE column overflowed the gutter
+    and printed on top of the neighbouring column's text."""
+    wide_expected = {"T1", "T2", "T3", "T3full", "T4", "T4full", "T6", "T8", "T9",
+                     "T9full", "T10"}
+    for path in _generated_tables():
+        text = path.read_text()
+        if path.stem in wide_expected:
+            assert r"\begin{table*}" in text, f"{path.stem} should span both columns"
+        assert r"\resizebox" in text, f"{path.stem} is not shrink-to-fit"
+
+
+@pytest.mark.parametrize("name", [f"T{i}" for i in range(1, 13)]
+                         + ["T3full", "T4full", "T9full"])
 def test_every_generated_table_compiles_standalone(name, tmp_path):
     """The only reliable check that a builder's escaping is right.
 
@@ -122,11 +153,24 @@ def test_every_generated_table_compiles_standalone(name, tmp_path):
     if not source.exists():
         pytest.skip("tables not generated yet; run stage5 first")
 
+    # The probe's preamble is derived from the paper's, not hand-listed: a hand-listed
+    # set silently diverged once already, and the table stopped compiling in the real
+    # document while this test still passed (the tables gained \resizebox, which needs
+    # graphicx). Only path-dependent lines are dropped.
+    preamble = []
+    for line in (Path(__file__).resolve().parents[1] / "paper" / "preamble.tex").read_text().splitlines():
+        stripped = line.strip()
+        if stripped.startswith("%") or not stripped:
+            continue
+        if any(token in stripped for token in
+               ("graphicspath", "\\input{", "hyperref", "IEEEtran")):
+            continue
+        preamble.append(stripped)
+
     document = tmp_path / "probe.tex"
     document.write_text(
-        "\\documentclass{article}\n"
-        "\\usepackage[T1]{fontenc}\\usepackage{booktabs}\\usepackage{amsmath,amssymb}\n"
-        "\\usepackage{multirow}\\usepackage{array}\\usepackage{siunitx}\n"
+        "\\documentclass[twocolumn]{article}\n"
+        + "\n".join(preamble) + "\n"
         "\\begin{document}\n" + source.read_text() + "\n\\end{document}\n")
     result = subprocess.run(
         ["pdflatex", "-interaction=nonstopmode", "-halt-on-error", document.name],

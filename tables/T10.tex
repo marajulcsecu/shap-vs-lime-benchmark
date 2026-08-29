@@ -1,24 +1,26 @@
-\begin{table}[t]
+\begin{table*}[t]
 \centering
 \caption{Decision table for all eleven pre-registered hypotheses. Every entry is auditable against the frozen protocol, which was committed before any result existed.}
 \label{tab:hypotheses}
 \small
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
 \begin{tabular}{llllrrrl}
 \toprule
-H & Alternative hypothesis & Unit & Test & Family & Median $r$ & Median $p_{\text{adj}}$ & Rejected \\
+H & Alternative hypothesis & Unit & Alt. & Family & Median $r$ & Median $p_{\text{adj}}$ & Rejected \\
 \midrule
-H1 & SHAP/LIME concordance exceeds $\rho = 0.50$ & instance & wilcoxon(rho - 0.50) & 18 & 0.805 & $<$0.001 & 15/18 \\
-H1b & Concordance differs between simple models and ensembles & cell & mannwhitneyu & 1 & 0.333 & 0.291 & 0/1 \\
-H1c & Concordance tracks task difficulty & cell & spearman + permutation(10000) & 1 & 0.296 & 0.243 & 0/1 \\
-H2a & LIME's re-run variance exceeds zero & instance & wilcoxon(cv > 0) & 18 & 1.000 & $<$0.001 & 18/18 \\
-H2b & SHAP and LIME differ in local robustness & instance & wilcoxon paired & 18 & -0.895 & $<$0.001 & 15/18 \\
-H2c & SHAP and LIME differ in retraining stability & cell & wilcoxon paired & 9 & 1.000 & $<$0.001 & 9/9 \\
-H3a & SHAP and LIME differ in fidelity & instance & wilcoxon paired & 18 & 0.598 & $<$0.001 & 13/18 \\
-H3b & Each explainer beats the random control & instance & wilcoxon paired & 36 & 0.818 & $<$0.001 & 36/36 \\
-H4 & SHAP costs less than LIME & instance & wilcoxon paired & 18 & -1.000 & $<$0.001 & 15/18 \\
-H5 & SHAP and LIME differ in plausibility overlap & cell (exploratory) & wilcoxon paired & 1 & 0.524 & 0.375 & 0/1 \\
-H6 & Fusion beats the better of SHAP and LIME & evaluation instance & wilcoxon paired & 18 & -0.797 & 1.000 & 0/18 \\
+H1 & SHAP/LIME concordance exceeds $\rho = 0.50$ & instance & greater & 18 & 0.805 & $<$0.001 & 15/18 \\
+H1b & Concordance differs between simple models and ensembles & cell & two-sided & 1 & 0.333 & 0.291 & 0/1 \\
+H1c & Concordance tracks task difficulty & cell & two-sided & 1 & 0.296 & 0.243 & 0/1 \\
+H2a & LIME's re-run variance exceeds zero & instance & greater & 18 & 1.000 & $<$0.001 & 18/18 \\
+H2b & SHAP and LIME differ in local robustness & instance & two-sided & 18 & -0.895 & $<$0.001 & 15/18 \\
+H2c & SHAP and LIME differ in retraining stability & cell & two-sided & 9 & 1.000 & $<$0.001 & 9/9 \\
+H3a & SHAP and LIME differ in fidelity & instance & two-sided & 18 & 0.598 & $<$0.001 & 13/18 \\
+H3b & Each explainer beats the random control & instance & greater & 36 & 0.818 & $<$0.001 & 36/36 \\
+H4 & SHAP costs less than LIME & instance & less & 18 & -1.000 & $<$0.001 & 15/18 \\
+H5 & SHAP and LIME differ in plausibility overlap & cell (exploratory) & two-sided & 1 & 0.524 & 0.375 & 0/1 \\
+H6 & Fusion beats the better of SHAP and LIME & evaluation instance & greater & 18 & -0.797 & 1.000 & 0/18 \\
 \bottomrule
 \end{tabular}
-\par\vspace{2pt}\footnotesize `Family' is the number of cells the hypothesis spans; $p_{\text{adj}}$ is Holm-corrected within that family. `Rejected' counts cells where $p_{\text{adj}} < 0.05$. Degenerate cells (no variation to test) are retained in the family and reported rather than dropped.
-\end{table}
+}
+\par\vspace{2pt}\footnotesize All tests are Wilcoxon signed-rank except H1b (Mann--Whitney U) and H1c (Spearman with a 10,000-draw permutation test). `Alt.' is the pre-registered alternative; `Family' is the number of cells the hypothesis spans, and $p_{\text{adj}}$ is Holm-corrected within it. `Rejected' counts cells where $p_{\text{adj}} < 0.05$. Degenerate cells (no variation to test) are retained in the family and reported rather than dropped.
+\end{table*}

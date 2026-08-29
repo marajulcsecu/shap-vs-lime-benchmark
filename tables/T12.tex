@@ -3,6 +3,7 @@
 \caption{Environment recorded with the results. Exact versions are pinned in \texttt{requirements.lock.txt}.}
 \label{tab:environment}
 \small
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
 \begin{tabular}{ll}
 \toprule
 Component & Version \\
@@ -23,9 +24,10 @@ python & 3.12.3 \\
 platform & Linux-7.0.0-30-generic-x86\_64-with-glibc2.39 \\
 cpu\_count & 12 \\
 memory & 7804208 kB \\
-git commit & d880817ceac8 \\
+git commit & e5fe322b667d \\
 profile & FULL \\
 \bottomrule
 \end{tabular}
+}
 \par\vspace{2pt}\footnotesize \texttt{results/MANIFEST.json} additionally records a SHA-256 digest for every generated artefact.
 \end{table}

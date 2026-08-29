@@ -1,8 +1,9 @@
-\begin{table}[t]
+\begin{table*}[t]
 \centering
 \caption{RQ5 --- pre-registered plausibility reference sets and top-5 overlap.}
 \label{tab:plausibility}
 \small
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
 \begin{tabular}{llrrrr}
 \toprule
 Dataset & Reference features & Sources & SHAP J@5 & LIME J@5 & Random J@5 \\
@@ -12,5 +13,6 @@ Heart & cp, thalach, oldpeak, ca, thal & 2 & 0.667 & 0.429 & 0.250 \\
 Chronic & hemo, sc, al, sg, pcv & 2 & 0.667 & 0.429 & 0.111 \\
 \bottomrule
 \end{tabular}
+}
 \par\vspace{2pt}\footnotesize These reference sets are \emph{not} ground truth. They are literature-derived, incomplete, and not causal; a low score is as consistent with an incomplete reference set as with a poor explanation. RQ5 is the weakest metric in this study and is reported as corroborating evidence only. The machine-readable sets, with full citation strings, are in \texttt{docs/reference\_features.yaml}.
-\end{table}
+\end{table*}

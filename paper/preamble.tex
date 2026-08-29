@@ -8,7 +8,17 @@
 \usepackage{array}
 \usepackage{subcaption}
 \usepackage[ruled,vlined]{algorithm2e}
+\usepackage[htt]{hyphenat}   % long \texttt{} file paths must be breakable
 \usepackage{url}
+\emergencystretch=3em
+% File paths in prose: \path breaks at / and . even for all-caps tokens,
+% which plain \texttt cannot do and which pushes lines past the measure.
+% \path expands \url and is illegal in a caption (a moving argument), so
+% \file is for running prose only; captions use plain \texttt.
+\newcommand{\file}[1]{\path{#1}}
+% Identifiers must not hyphenate: "LimeTab-ularExplainer" reads as part
+% of the name. Paths still break, which is what \file is for.
+\newcommand{\code}[1]{\texttt{\nohyphens{#1}}}
 \usepackage[hidelinks]{hyperref}
 \usepackage{cite}
 \graphicspath{{../figures/}}

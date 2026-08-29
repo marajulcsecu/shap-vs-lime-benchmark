@@ -3,7 +3,7 @@
 \input{../paper/sections/03_method}
 
 \section{Notation}
-\begin{tabular}{@{}ll@{}}
+\noindent\begin{tabular}{@{}p{0.22\textwidth}p{0.70\textwidth}@{}}
 \toprule
 Symbol & Meaning \\
 \midrule
@@ -28,11 +28,11 @@ $\hat{L}(x)$ & local Lipschitz estimate of explanation robustness \\
 Numeric columns are median-imputed then standardised; categorical columns are
 mode-imputed then one-hot encoded with binary features collapsed to a single column and
 unseen categories at transform time encoded as all-zero. Every step is fitted inside a
-\texttt{Pipeline}, so under Track A the statistics come from the inner-training rows of
+\code{Pipeline}, so under Track A the statistics come from the inner-training rows of
 each fold and under Track B from the 80\,\% training partition alone. The mapping from
 output columns back to original features is derived from the fitted encoder's own
 category lists rather than by parsing generated column names --- the Chronic Kidney
-Disease data contains both \texttt{pc} and \texttt{pcc}, and any name-prefix heuristic
+Disease data contains both \code{pc} and \code{pcc}, and any name-prefix heuristic
 assigns one's columns to the other.
 
 \section{Compute budget and profiles}

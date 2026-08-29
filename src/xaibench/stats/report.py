@@ -58,7 +58,8 @@ def fmt_p(p) -> str:
 def to_booktabs(df: pd.DataFrame, caption: str, label: str,
                 column_format: str | None = None, notes: str | None = None,
                 placement: str = "t", small: bool = True,
-                escape_cells: bool = False) -> str:
+                escape_cells: bool = False, wide: bool = False,
+                shrink: bool = True) -> str:
     """A complete table environment.
 
     Contract: **cells and headers arrive LaTeX-ready.** Table builders call `escape()`
@@ -81,12 +82,19 @@ def to_booktabs(df: pd.DataFrame, caption: str, label: str,
     for _, row in df.iterrows():
         cells = [escape(v) if escape_cells else str(v) for v in row.tolist()]
         body_rows.append(" & ".join(cells) + r" \\")
+    environment = "table*" if wide else "table"
+    # Shrink-to-fit only: \width is the natural width, so a table narrower than the
+    # column is left alone and a wider one is scaled down instead of overflowing.
+    open_box = (r"\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%"
+                if shrink else "")
+    close_box = "}" if shrink else ""
     parts = [
-        rf"\begin{{table}}[{placement}]",
+        rf"\begin{{{environment}}}[{placement}]",
         r"\centering",
         rf"\caption{{{caption}}}",
         rf"\label{{{label}}}",
         r"\small" if small else "",
+        open_box,
         rf"\begin{{tabular}}{{{column_format}}}",
         r"\toprule",
         header + r" \\",
@@ -94,10 +102,11 @@ def to_booktabs(df: pd.DataFrame, caption: str, label: str,
         *body_rows,
         r"\bottomrule",
         r"\end{tabular}",
+        close_box,
     ]
     if notes:
         parts.append(rf"\par\vspace{{2pt}}\footnotesize {notes}")
-    parts.append(r"\end{table}")
+    parts.append(rf"\end{{{environment}}}")
     return "\n".join(part for part in parts if part) + "\n"
 
 
@@ -139,7 +148,7 @@ def T1(profile) -> str:
         caption="Benchmark datasets. `Positive' is the prevalence of the positive "
                 "class; `Missing' is the fraction of missing cells after the "
                 "dataset-specific semantics fixes of Section~\\ref{sec:method-data}.",
-        label="tab:datasets", column_format="lrlrrl",
+        label="tab:datasets", column_format="lrlrrl", wide=True,
         notes=_quick_note(profile) + "All three datasets are public and de-identified. "
               "Diseases are used as benchmarks; no medical claims are made.")
 
@@ -170,33 +179,64 @@ def T2(profile) -> str:
     return to_booktabs(
         frame, caption="Hyperparameter search spaces and SHAP backend assignment. "
                        "Grids are capped at 12 combinations to fit the compute budget.",
-        label="tab:grids", column_format="llrl", notes=_quick_note(profile))
+        label="tab:grids", column_format="llrl", wide=True, notes=_quick_note(profile))
 
 
-def T3(profile) -> str:
+def _performance_frame(profile, metrics) -> pd.DataFrame:
     from xaibench.viz.theme import DATASET_LABELS, DATASET_ORDER, MODEL_LABELS, MODEL_ORDER
     perf = _results("performance.csv")
-    metrics = ["accuracy", "f1", "roc_auc", "pr_auc", "mcc", "brier"]
     rows = []
     for ds_id in DATASET_ORDER:
         for model_id in MODEL_ORDER:
             cell = perf.query("dataset == @ds_id and model == @model_id")
             row = {"Dataset": escape(DATASET_LABELS[ds_id].split()[0]),
                    "Model": escape(MODEL_LABELS[model_id])}
-            for metric in metrics:
-                row[metric.replace("_", "-").upper()] = (
-                    f"{fmt(cell[metric].mean(), 3)} $\\pm$ {fmt(cell[metric].std(), 3)}")
+            for metric, header in metrics:
+                row[header] = (f"{fmt(cell[metric].mean(), 3)} $\\pm$ "
+                               f"{fmt(cell[metric].std(), 3)}")
             rows.append(row)
+    return pd.DataFrame(rows)
+
+
+_PERF_CONDENSED = [("roc_auc", "ROC-AUC"), ("pr_auc", "PR-AUC"),
+                   ("f1", "F1"), ("mcc", "MCC")]
+_PERF_FULL = [("accuracy", "Accuracy"), ("precision", "Precision"),
+              ("recall", "Recall"), ("f1", "F1"), ("roc_auc", "ROC-AUC"),
+              ("pr_auc", "PR-AUC"), ("mcc", "MCC"), ("brier", "Brier")]
+
+
+def T3(profile) -> str:
+    """Condensed performance table for the paper. Full version is T3full."""
+    frame = _performance_frame(profile, _PERF_CONDENSED)
     return to_booktabs(
-        pd.DataFrame(rows),
+        frame,
         caption="Predictive performance, nested cross-validation (5 outer $\\times$ 3 "
-                "inner folds), mean $\\pm$ standard deviation over the outer folds.",
-        label="tab:performance", column_format="ll" + "r" * len(metrics),
-        notes=_quick_note(profile) + "Brier is a loss: lower is better. All others: "
-              "higher is better.")
+                "inner folds), mean $\\pm$ standard deviation over the outer folds. "
+                "Four representative metrics; all eight, for every cell, are in "
+                "\\texttt{results/performance.csv} and in the extended report.",
+        label="tab:performance", column_format="ll" + "r" * len(_PERF_CONDENSED),
+        wide=True, notes=_quick_note(profile) + "Higher is better for all four.")
 
 
-def T4(profile) -> str:
+def T3full(profile) -> str:
+    frame = _performance_frame(profile, _PERF_FULL)
+    return to_booktabs(
+        frame,
+        caption="Predictive performance, all eight metrics, nested cross-validation "
+                "(5 outer $\\times$ 3 inner folds), mean $\\pm$ standard deviation over "
+                "the outer folds.",
+        label="tab:performance-full", column_format="ll" + "r" * len(_PERF_FULL),
+        wide=True, notes=_quick_note(profile) + "Brier is a loss: lower is better. "
+              "All others: higher is better.")
+
+
+_AGREE_CONDENSED = [("spearman", "Spearman $\\rho$"), ("jaccard5", "Jaccard@5")]
+_AGREE_FULL = [("spearman", "Spearman $\\rho$"), ("kendall", "Kendall $\\tau_b$"),
+               ("jaccard3", "Jaccard@3"), ("jaccard5", "Jaccard@5"),
+               ("rbo_norm", "RBO$_{\\text{norm}}$")]
+
+
+def _agreement_frame(profile, metrics) -> pd.DataFrame:
     from xaibench.viz.theme import DATASET_LABELS, DATASET_ORDER, MODEL_LABELS, MODEL_ORDER
     agreement = _results("metrics_agreement.csv").query("instance_id >= 0")
     estimates = _results("stats_estimates.csv")
@@ -206,10 +246,7 @@ def T4(profile) -> str:
             cell = agreement.query("dataset == @ds_id and model == @model_id")
             row = {"Dataset": escape(DATASET_LABELS[ds_id].split()[0]),
                    "Model": escape(MODEL_LABELS[model_id]), "$n$": str(len(cell))}
-            for metric, header in (("spearman", "Spearman $\\rho$"),
-                                   ("kendall", "Kendall $\\tau_b$"),
-                                   ("jaccard5", "Jaccard@5"),
-                                   ("rbo_norm", "RBO$_{\\text{norm}}$")):
+            for metric, header in metrics:
                 interval = estimates.query(
                     "metric == @metric and dataset == @ds_id and model == @model_id")
                 if len(interval):
@@ -218,14 +255,30 @@ def T4(profile) -> str:
                 else:
                     row[header] = fmt(cell[metric].median() if metric in cell else None)
             rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def T4(profile) -> str:
+    """Condensed agreement table for the paper. Full version is T4full."""
     return to_booktabs(
-        pd.DataFrame(rows),
-        caption="RQ1 --- agreement between SHAP and LIME feature rankings, per "
-                "instance. Point estimates are medians with 95\\% percentile "
-                "bootstrap intervals.",
-        label="tab:agreement", column_format="llrrrrr",
-        notes=_quick_note(profile) + "RBO$_{\\text{norm}}$ is floor-normalised so it "
-              "is comparable across datasets of different width (protocol amendment A1).")
+        _agreement_frame(profile, _AGREE_CONDENSED),
+        caption="RQ1 --- agreement between SHAP and LIME feature rankings, per instance. "
+                "Medians with 95\\% percentile bootstrap intervals. Kendall $\\tau_b$, "
+                "Jaccard@3, and floor-normalised RBO are in "
+                "\\texttt{results/metrics\\_agreement.csv} and in the extended report.",
+        label="tab:agreement", column_format="llr" + "r" * len(_AGREE_CONDENSED),
+        wide=True, notes=_quick_note(profile))
+
+
+def T4full(profile) -> str:
+    return to_booktabs(
+        _agreement_frame(profile, _AGREE_FULL),
+        caption="RQ1 --- all agreement measures between SHAP and LIME feature rankings, "
+                "per instance. Medians with 95\\% percentile bootstrap intervals.",
+        label="tab:agreement-full", column_format="llr" + "r" * len(_AGREE_FULL),
+        wide=True,
+        notes=_quick_note(profile) + "RBO$_{\\text{norm}}$ is floor-normalised so it is "
+              "comparable across datasets of different width (protocol amendment A1).")
 
 
 def _explainer_rows(frame, columns, headers, estimates=None, metric_map=None):
@@ -282,7 +335,7 @@ def T6(profile) -> str:
         frame,
         caption="RQ3 --- fidelity to the model's decision function, median baseline. "
                 "Medians with 95\\% bootstrap intervals across all 18 cells.",
-        label="tab:fidelity", column_format="lrrrr",
+        label="tab:fidelity", column_format="lrrrr", wide=True,
         notes=_quick_note(profile) + "The random control is the scale: an AOPC value "
               "is uninterpretable without it, since deleting any few features moves a "
               "prediction.")
@@ -334,7 +387,7 @@ def T8(profile) -> str:
     return to_booktabs(
         pd.DataFrame(rows),
         caption="RQ5 --- pre-registered plausibility reference sets and top-5 overlap.",
-        label="tab:plausibility", column_format="llrrrr",
+        label="tab:plausibility", column_format="llrrrr", wide=True,
         notes=_quick_note(profile) + "These reference sets are \\emph{not} ground truth. "
               "They are literature-derived, incomplete, and not causal; a low score is "
               "as consistent with an incomplete reference set as with a poor "
@@ -343,31 +396,51 @@ def T8(profile) -> str:
               "citation strings, are in \\texttt{docs/reference\\_features.yaml}.")
 
 
-def T9(profile) -> str:
-    from xaibench.viz.theme import DATASET_LABELS, MODEL_LABELS
+def _consensus_frame(profile, full: bool) -> pd.DataFrame:
+    from xaibench.viz.theme import DATASET_LABELS, EXPLAINER_LABELS, MODEL_LABELS
     stats = _results("stats_hypotheses.csv").query("hypothesis == 'H6'")
     rows = []
     for row in stats.itertuples():
-        rows.append({
+        rule = str(getattr(row, "best_rule", "--"))
+        entry = {
             "Dataset": escape(DATASET_LABELS.get(row.dataset, row.dataset).split()[0]),
             "Model": escape(MODEL_LABELS.get(row.model, row.model)),
-            "Best rule": escape(str(getattr(row, "best_rule", "--"))),
+            "Best rule": escape(EXPLAINER_LABELS.get(rule, rule).replace("Fusion: ", "")),
             "$\\Delta$AOPC": fmt(getattr(row, "point_estimate", None), 4),
-            "$r$": fmt(row.effect_size, 3),
-            "$p$": fmt_p(row.p_value),
-            "$p_{\\text{adj}}$": fmt_p(row.p_adj),
-            "Decision": escape(row.decision),
-        })
+        }
+        if full:
+            entry["$r$"] = fmt(row.effect_size, 3)
+            entry["$p$"] = fmt_p(row.p_value)
+        entry["$p_{\\text{adj}}$"] = fmt_p(row.p_adj)
+        entry["Fusion wins?"] = "yes" if row.decision == "reject H0" else "no"
+        rows.append(entry)
+    return pd.DataFrame(rows)
+
+
+def T9(profile) -> str:
+    """Condensed consensus table for the paper. Full version is T9full."""
+    frame = _consensus_frame(profile, full=False)
     return to_booktabs(
-        pd.DataFrame(rows),
+        frame,
         caption="RQ6 --- does rank fusion beat the \\emph{better} of SHAP and LIME? "
-                "Tested on evaluation instances only; the fidelity weight was fitted "
-                "on a disjoint calibration split.",
-        label="tab:consensus", column_format="lllrrrrl",
+                "Tested on evaluation instances only; the fidelity weight was fitted on "
+                "a disjoint calibration split. Effect sizes and unadjusted $p$ are in "
+                "\\texttt{results/stats\\_hypotheses.csv} and in the extended report.",
+        label="tab:consensus", column_format="lllrrl", wide=True,
         notes=_quick_note(profile) + "$\\Delta$AOPC is the median per-instance "
-              "difference (fusion $-$ best single). $r$ is the rank-biserial "
-              "correlation. $p_{\\text{adj}}$ is Holm-corrected within the family of "
-              "18 cells.")
+              "difference (fusion $-$ best single); negative means fusion lost. "
+              "$p_{\\text{adj}}$ is Holm-corrected within the family of 18 cells.")
+
+
+def T9full(profile) -> str:
+    frame = _consensus_frame(profile, full=True)
+    return to_booktabs(
+        frame,
+        caption="RQ6 --- rank fusion against the better of SHAP and LIME, with effect "
+                "sizes and unadjusted $p$-values, on evaluation instances only.",
+        label="tab:consensus-full", column_format="lllrrrrl", wide=True,
+        notes=_quick_note(profile) + "$r$ is the rank-biserial correlation. A negative "
+              "$r$ with a one-sided `greater' alternative means fusion lost.")
 
 
 # Authored LaTeX, not free text: these carry deliberate maths and must NOT be escaped.
@@ -397,7 +470,7 @@ def T10(profile) -> str:
             "H": escape(hypothesis),
             "Alternative hypothesis": _HYPOTHESIS_TEXT.get(hypothesis, ""),
             "Unit": escape(str(group.unit.iloc[0])),
-            "Test": escape(str(group.test.iloc[0])),
+            "Alt.": escape(str(group.alternative.iloc[0])),
             "Family": str(len(group)),
             "Median $r$": fmt(live.effect_size.median() if len(live) else None, 3),
             "Median $p_{\\text{adj}}$": fmt_p(live.p_adj.median() if len(live) else None),
@@ -412,12 +485,14 @@ def T10(profile) -> str:
         caption="Decision table for all eleven pre-registered hypotheses. Every entry "
                 "is auditable against the frozen protocol, which was committed before "
                 "any result existed.",
-        label="tab:hypotheses", column_format="llllrrrl",
-        notes=_quick_note(profile) + "`Family' is the number of cells the hypothesis "
-              "spans; $p_{\\text{adj}}$ is Holm-corrected within that family. "
-              "`Rejected' counts cells where $p_{\\text{adj}} < 0.05$. Degenerate "
-              "cells (no variation to test) are retained in the family and reported "
-              "rather than dropped.")
+        label="tab:hypotheses", column_format="llllrrrl", wide=True,
+        notes=_quick_note(profile) + "All tests are Wilcoxon signed-rank except H1b "
+              "(Mann--Whitney U) and H1c (Spearman with a 10,000-draw permutation test). "
+              "`Alt.' is the pre-registered alternative; `Family' is the number of cells "
+              "the hypothesis spans, and $p_{\\text{adj}}$ is Holm-corrected within it. "
+              "`Rejected' counts cells where $p_{\\text{adj}} < 0.05$. Degenerate cells "
+              "(no variation to test) are retained in the family and reported rather "
+              "than dropped.")
 
 
 def T11(profile) -> str:
@@ -492,8 +567,9 @@ def T12(profile) -> str:
               "records a SHA-256 digest for every generated artefact.")
 
 
-TABLES = {"T1": T1, "T2": T2, "T3": T3, "T4": T4, "T5": T5, "T6": T6,
-          "T7": T7, "T8": T8, "T9": T9, "T10": T10, "T11": T11, "T12": T12}
+TABLES = {"T1": T1, "T2": T2, "T3": T3, "T3full": T3full, "T4": T4,
+          "T4full": T4full, "T5": T5, "T6": T6, "T7": T7, "T8": T8,
+          "T9": T9, "T9full": T9full, "T10": T10, "T11": T11, "T12": T12}
 
 
 # ------------------------------------------------------------- headline macros

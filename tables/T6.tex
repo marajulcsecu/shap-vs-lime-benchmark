@@ -1,8 +1,9 @@
-\begin{table}[t]
+\begin{table*}[t]
 \centering
 \caption{RQ3 --- fidelity to the model's decision function, median baseline. Medians with 95\% bootstrap intervals across all 18 cells.}
 \label{tab:fidelity}
 \small
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
 \begin{tabular}{lrrrr}
 \toprule
 Explainer & AOPC $\uparrow$ & AUC-ins $\uparrow$ & Compreh. $\uparrow$ & Suffic. $\downarrow$ \\
@@ -15,5 +16,6 @@ Fusion: fidelity-wt. & 0.237 [0.120, 0.336] & 0.846 [0.784, 0.885] & 0.253 [0.10
 Random control & 0.082 [0.033, 0.136] & 0.696 [0.642, 0.797] & 0.040 [0.003, 0.095] & 0.043 [0.022, 0.106] \\
 \bottomrule
 \end{tabular}
+}
 \par\vspace{2pt}\footnotesize The random control is the scale: an AOPC value is uninterpretable without it, since deleting any few features moves a prediction.
-\end{table}
+\end{table*}

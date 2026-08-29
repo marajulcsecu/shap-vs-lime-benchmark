@@ -93,7 +93,15 @@ for name, (low, high) in want.items():
 sys.exit(1 if bad else 0)
 PYEOF
 check $? "page counts are within target"
-! grep -q "undefined" paper/main.log report/main.log; check $? "no undefined references or citations"
+! grep -qE "Reference .* undefined|Citation .* undefined|There were undefined (references|citations)" \
+    paper/main.log report/main.log
+check $? "no undefined references or citations"
+# The rendered artefact is what a reader sees, so check for "??" there too. The log
+# grep alone was matching harmless "Font shape ... undefined" warnings and missing
+# nothing; this catches a broken cross-reference even if the log wording changes.
+broken=$(for d in paper report; do pdftotext $d/main.pdf - 2>/dev/null; done \
+         | grep -cE "Table \?\?|Fig\. \?\?|Section \?\?|Chapter \?\?|\[\?\]")
+[ "$broken" = "0" ]; check $? "no ?? or [?] placeholders in the rendered PDFs"
 
 echo "=== 5. reproducibility surface ==="
 [ -s requirements.lock.txt ]; check $? "dependency lockfile present"

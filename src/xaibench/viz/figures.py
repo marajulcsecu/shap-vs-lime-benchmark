@@ -120,7 +120,8 @@ def fig_datasets(profile: Profile):
                              for d, n in zip(frame.dataset, frame.n)], fontsize=7.5)
     axes[0].set_ylim(0, 1)
     _label(axes[0], y="Class proportion", title="Class balance")
-    axes[0].legend(ncol=2, loc="lower center", bbox_to_anchor=(0.5, 1.02))
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, ncol=2, loc="outside upper center")
     for xi, rate in zip(x, frame.positive):
         axes[0].text(xi, 1.0 - rate / 2, f"{rate:.1%}", ha="center", va="center",
                      fontsize=7.5, color="white")
@@ -142,7 +143,7 @@ def fig_datasets(profile: Profile):
 # --------------------------------------------------------------------------- F3
 def fig_performance(profile: Profile):
     perf = _read("performance.csv")
-    fig, axes = plt.subplots(1, 2, figsize=(17 * CM, 6.5 * CM), sharex=True)
+    fig, axes = plt.subplots(1, 2, figsize=(17 * CM, 7.5 * CM), sharex=True)
     for axis, metric, name in zip(axes, ("roc_auc", "mcc"), ("ROC-AUC", "MCC")):
         grouped = perf.groupby(["dataset", "model"])[metric].agg(["mean", "std"])
         width = 0.26
@@ -155,10 +156,10 @@ def fig_performance(profile: Profile):
         axis.set_xticks(np.arange(len(MODEL_ORDER)))
         axis.set_xticklabels([MODEL_LABELS[m] for m in MODEL_ORDER], rotation=30,
                              ha="right")
-        _label(axis, y=f"{name} (nested CV, mean $\\pm$ sd over 5 outer folds)")
+        _label(axis, y=name, title=f"{name} by dataset and model")
         axis.set_ylim(0, 1.04)
-    axes[0].legend(ncol=3, loc="lower center", bbox_to_anchor=(1.05, 1.02),
-                   fontsize=7.5)
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, ncol=3, loc="outside upper center", fontsize=7.5)
     return fig
 
 
@@ -191,7 +192,7 @@ def fig_agreement_heatmap(profile: Profile):
 # --------------------------------------------------------------------------- F5
 def fig_agreement_violins(profile: Profile):
     agreement = _read("metrics_agreement.csv").query("instance_id >= 0")
-    fig, axes = plt.subplots(1, 3, figsize=(17 * CM, 6 * CM), sharey=True)
+    fig, axes = plt.subplots(1, 3, figsize=(17 * CM, 7 * CM), sharey=True)
     for axis, ds_id in zip(axes, DATASET_ORDER):
         cell = agreement.query("dataset == @ds_id")
         data = [cell.query("model == @m").spearman.dropna().to_numpy()
@@ -212,7 +213,7 @@ def fig_agreement_violins(profile: Profile):
         n = int(cell.groupby("model").size().median()) if len(cell) else 0
         _label(axis, title=f"{DATASET_LABELS[ds_id]} (n = {n} instances)")
         axis.set_ylim(-1.05, 1.05)
-    _label(axes[0], y="Per-instance Spearman $\\rho$ (SHAP vs LIME)")
+    _label(axes[0], y="Spearman $\\rho$")
     axes[2].text(0.98, 0.03, "dashed line: H1's pre-registered bar $\\rho = 0.50$",
                  transform=axes[2].transAxes, ha="right", fontsize=7,
                  color=PALETTE["lime"])
@@ -228,7 +229,7 @@ def fig_agreement_vs_difficulty(profile: Profile):
     merged = cell_rho.merge(auc, on=["dataset", "model"])
     merged["difficulty"] = 1 - merged.roc_auc
 
-    fig, ax = plt.subplots(figsize=(9 * CM, 7 * CM))
+    fig, ax = plt.subplots(figsize=(9 * CM, 8 * CM))
     markers = {"pima": "o", "heart": "s", "ckd": "^"}
     for ds_id in DATASET_ORDER:
         subset = merged.query("dataset == @ds_id")
@@ -244,35 +245,64 @@ def fig_agreement_vs_difficulty(profile: Profile):
         ax.text(0.03, 0.04, f"Spearman $\\rho$ = {rho:.2f} over {len(merged)} cells",
                 transform=ax.transAxes, fontsize=7.5)
     _label(ax, x="Task difficulty  (1 $-$ nested-CV ROC-AUC)",
-           y="Median SHAP/LIME agreement (Spearman $\\rho$)",
-           title="Does explainer agreement track task difficulty?")
+           y="Median Spearman $\\rho$",
+           title="Does agreement track task difficulty?")
     ax.legend(fontsize=7.5, loc="upper right")
     return fig
 
 
 # --------------------------------------------------------------------------- F7
 def fig_lime_variance_vs_samples(profile: Profile):
+    """RQ2a: LIME's variance against its sampling budget, with SHAP's two backends.
+
+    The SHAP annotation is restricted to the FOUR TREE backends on purpose. Taking the
+    maximum over all six models mixes in the permutation backend, which is
+    sampling-based and reached a coefficient of variation of 139 -- so a label reading
+    "tree backends: exactly 0, max observed 1e+02" was self-contradictory and simply
+    wrong. Both numbers are now shown, each against the backend it belongs to.
+    """
+    from xaibench.config import SIMPLE_MODELS
     rerun = pd.read_parquet(paths().results / "stability_rerun.parquet")
+    tree_models = ["dtree", "rf", "xgb", "lgbm"]
+
+    fig, ax = plt.subplots(figsize=(11 * CM, 8.5 * CM))
     lime = rerun.query("explainer == 'lime'")
-    fig, ax = plt.subplots(figsize=(9 * CM, 6.5 * CM))
     grouped = lime.groupby(["dataset", "num_samples"]).rerun_cv.median().reset_index()
+    # LIME series share the LIME colour and differ by marker/style; the default colour
+    # cycle put a blue LIME line next to SHAP's blue reference line.
+    dataset_style = {"pima": ("-", "o"), "heart": ("--", "s"), "ckd": ("-.", "^")}
     for ds_id in DATASET_ORDER:
         subset = grouped.query("dataset == @ds_id").sort_values("num_samples")
-        if len(subset) < 1:
-            continue
-        ax.plot(subset.num_samples, subset.rerun_cv, marker="o", markersize=4,
-                label=DATASET_LABELS[ds_id])
-    shap_cv = rerun.query("explainer == 'shap'").rerun_cv.max()
-    ax.axhline(0.0, color=PALETTE["shap"], lw=1.2)
-    ax.text(0.02, 0.06, f"SHAP (tree backends): exactly 0, "
-                        f"max observed {shap_cv:.0e}",
-            transform=ax.transAxes, fontsize=7.2, color=PALETTE["shap"])
+        if len(subset):
+            style, marker = dataset_style[ds_id]
+            ax.plot(subset.num_samples, subset.rerun_cv, color=PALETTE["lime"],
+                    linestyle=style, marker=marker, markersize=4,
+                    label=f"LIME, {DATASET_LABELS[ds_id]}")
+
+    shap_rows = rerun.query("explainer == 'shap'")
+    tree_max = shap_rows[shap_rows.model.isin(tree_models)].rerun_cv.max()
+    agnostic = shap_rows[~shap_rows.model.isin(tree_models)].rerun_cv
+    ax.axhline(0.0, color=PALETTE["shap"], lw=1.6,
+               label="SHAP, tree backends (exactly 0)")
+    if len(agnostic):
+        ax.axhline(float(agnostic.median()), color=PALETTE["shap"], lw=1.2, ls=":",
+                   label="SHAP, model-agnostic backend (median)")
+
     ax.set_xscale("log")
     _label(ax, x="LIME neighbourhood samples per explanation (log scale)",
-           y="Median re-run coefficient of variation",
-           title="LIME's run-to-run variance versus sampling budget")
-    ax.legend(fontsize=7.5)
-    ax.set_ylim(bottom=-0.05)
+           y="Median re-run coefficient of variation")
+    ax.set_title("Run-to-run variance against sampling budget", pad=12)
+    ax.set_ylim(bottom=-0.15)
+    # fig.legend, not ax.legend: an axes-anchored legend landed on the x-axis label.
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, ncol=2, fontsize=6.8, loc="outside lower center")
+    ax.text(0.99, 0.96,
+            f"SHAP is deterministic only where a tree backend exists\n"
+            f"(tree max {tree_max:.1f}; model-agnostic max "
+            f"{agnostic.max():.0f})" if len(agnostic) else
+            f"tree-backend max {tree_max:.1f}",
+            transform=ax.transAxes, ha="right", va="top", fontsize=6.8,
+            style="italic", color="#555555")
     return fig
 
 
@@ -299,7 +329,8 @@ def fig_lipschitz(profile: Profile):
     _label(ax, x="Local Lipschitz estimate (lower = more robust to input perturbation)",
            title="Explanation robustness, paired within each cell")
     ax.grid(axis="x", alpha=0.25)
-    ax.legend(ncol=2, loc="lower center", bbox_to_anchor=(0.5, 1.02))
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, ncol=2, loc="outside upper center")
     return fig
 
 
@@ -308,7 +339,7 @@ def fig_retrain_stability(profile: Profile):
     stability = _read("metrics_stability.csv").dropna(subset=["retrain_agreement"])
     cell = (stability.groupby(["dataset", "model", "explainer"], as_index=False)
             .retrain_agreement.first())
-    fig, ax = plt.subplots(figsize=(11 * CM, 6.5 * CM))
+    fig, ax = plt.subplots(figsize=(11 * CM, 7.5 * CM))
     models = [m for m in MODEL_ORDER if m in set(cell.model)]
     labels, width = [], 0.38
     positions = np.arange(len(DATASET_ORDER) * len(models), dtype=float)
@@ -327,9 +358,10 @@ def fig_retrain_stability(profile: Profile):
     ax.set_xticks(positions)
     ax.set_xticklabels(labels, fontsize=7)
     ax.set_ylim(0, 1.05)
-    _label(ax, y="Cross-refit rank agreement (Spearman $\\rho$)",
-           title="Do the global rankings survive retraining on a bootstrap resample?")
-    ax.legend(ncol=2, loc="lower center", bbox_to_anchor=(0.5, 1.02))
+    _label(ax, y="Cross-refit $\\rho$",
+           title="Do global rankings survive retraining on a bootstrap resample?")
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, ncol=2, loc="outside upper center")
     return fig
 
 
@@ -357,8 +389,7 @@ def fig_deletion_curves(profile: Profile):
             if r == len(models) - 1:
                 axis.set_xlabel("Top-$k$ features deleted")
     handles, labels = axes[0, 0].get_legend_handles_labels()
-    fig.legend(handles, labels, ncol=4, loc="lower center",
-               bbox_to_anchor=(0.5, -0.075), fontsize=7.5)
+    fig.legend(handles, labels, ncol=4, loc="outside lower center", fontsize=7.5)
     fig.suptitle("Deletion curves: a faithful ranking drops the prediction fastest",
                  fontsize=9)
     return fig
@@ -369,7 +400,7 @@ def fig_runtime(profile: Profile):
     runtime = _read("metrics_runtime.csv")
     primary = runtime[(runtime.explainer != "lime")
                       | (runtime.num_samples == profile.lime_num_samples[0])]
-    fig, axes = plt.subplots(1, 2, figsize=(17 * CM, 6.5 * CM))
+    fig, axes = plt.subplots(1, 2, figsize=(17 * CM, 7.5 * CM))
 
     explainers = [e for e in ALL_EXPLAINERS if e != "random"]
     data = [primary.query("explainer == @e").median_seconds.dropna().to_numpy()
@@ -383,8 +414,8 @@ def fig_runtime(profile: Profile):
     axes[0].set_xticklabels([EXPLAINER_LABELS[e] for e in explainers], rotation=30,
                             ha="right", fontsize=7.2)
     axes[0].set_yscale("log")
-    _label(axes[0], y="Seconds per explanation (log scale, 18 cells)",
-           title="Cost")
+    _label(axes[0], y="Seconds / explanation",
+           title="Cost (log scale, 18 cells)")
 
     for explainer in explainers:
         subset = primary.query("explainer == @explainer").dropna(
@@ -396,7 +427,8 @@ def fig_runtime(profile: Profile):
     axes[1].set_xscale("log")
     _label(axes[1], x="Seconds per explanation (log scale)",
            y="Median AOPC (fidelity)", title="What the cost buys")
-    axes[1].legend(fontsize=6.8, loc="lower left", ncol=2)
+    handles, labels = axes[1].get_legend_handles_labels()
+    fig.legend(handles, labels, ncol=5, fontsize=7, loc="outside lower center")
     return fig
 
 
@@ -405,7 +437,7 @@ def fig_plausibility(profile: Profile):
     plaus = _read("metrics_plausibility.csv")
     cell = (plaus.groupby(["dataset", "explainer"], as_index=False).jaccard5.median())
     explainers = [e for e in ALL_EXPLAINERS]
-    fig, ax = plt.subplots(figsize=(11 * CM, 6.5 * CM))
+    fig, ax = plt.subplots(figsize=(11 * CM, 7.5 * CM))
     width = 0.8 / len(explainers)
     for i, explainer in enumerate(explainers):
         values = [float(cell.query("dataset == @d and explainer == @explainer")
@@ -420,8 +452,11 @@ def fig_plausibility(profile: Profile):
     ax.set_ylim(0, 1)
     _label(ax, y="Jaccard@5 vs reference set",
            title="Plausibility against pre-registered reference features")
-    ax.legend(ncol=3, fontsize=6.8, loc="lower center", bbox_to_anchor=(0.5, 1.02))
-    ax.text(0.99, 0.96, "corroborating evidence only:\nreference sets are not ground truth",
+    # Legend below the axes: three columns above the title wrapped onto two rows and
+    # overprinted it.
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, ncol=3, fontsize=6.8, loc="outside lower center")
+    ax.text(0.99, 0.97, "corroborating evidence only:\nreference sets are not ground truth",
             transform=ax.transAxes, ha="right", va="top", fontsize=6.8,
             style="italic", color="#666666")
     return fig

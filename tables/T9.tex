@@ -1,31 +1,33 @@
-\begin{table}[t]
+\begin{table*}[t]
 \centering
-\caption{RQ6 --- does rank fusion beat the \emph{better} of SHAP and LIME? Tested on evaluation instances only; the fidelity weight was fitted on a disjoint calibration split.}
+\caption{RQ6 --- does rank fusion beat the \emph{better} of SHAP and LIME? Tested on evaluation instances only; the fidelity weight was fitted on a disjoint calibration split. Effect sizes and unadjusted $p$ are in \texttt{results/stats\_hypotheses.csv} and in the extended report.}
 \label{tab:consensus}
 \small
-\begin{tabular}{lllrrrrl}
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{lllrrl}
 \toprule
-Dataset & Model & Best rule & $\Delta$AOPC & $r$ & $p$ & $p_{\text{adj}}$ & Decision \\
+Dataset & Model & Best rule & $\Delta$AOPC & $p_{\text{adj}}$ & Fusion wins? \\
 \midrule
-PIMA & LogReg & rankavg & -0.0017 & -0.785 & 1.000 & 1.000 & fail to reject H0 \\
-PIMA & DecTree & fidwt & 0.0000 & -0.772 & 1.000 & 1.000 & fail to reject H0 \\
-PIMA & RF & rrf & -0.0074 & -0.801 & 1.000 & 1.000 & fail to reject H0 \\
-PIMA & XGBoost & rankavg & -0.0115 & -0.755 & 1.000 & 1.000 & fail to reject H0 \\
-PIMA & LightGBM & fidwt & -0.0172 & -0.822 & 1.000 & 1.000 & fail to reject H0 \\
-PIMA & Stacking & rrf & -0.0132 & -0.843 & 1.000 & 1.000 & fail to reject H0 \\
-Heart & LogReg & rankavg & -0.0175 & -0.867 & 1.000 & 1.000 & fail to reject H0 \\
-Heart & DecTree & rankavg & 0.0000 & -0.870 & 1.000 & 1.000 & fail to reject H0 \\
-Heart & RF & rankavg & -0.0080 & -0.932 & 1.000 & 1.000 & fail to reject H0 \\
-Heart & XGBoost & rankavg & -0.0161 & -0.793 & 1.000 & 1.000 & fail to reject H0 \\
-Heart & LightGBM & fidwt & -0.0002 & -0.533 & 0.999 & 1.000 & fail to reject H0 \\
-Heart & Stacking & rrf & -0.0154 & -0.918 & 1.000 & 1.000 & fail to reject H0 \\
-Chronic & LogReg & fidwt & -0.0331 & -0.649 & 1.000 & 1.000 & fail to reject H0 \\
-Chronic & DecTree & rankavg & 0.0000 & -1.000 & 1.000 & 1.000 & fail to reject H0 \\
-Chronic & RF & rrf & -0.0312 & -0.910 & 1.000 & 1.000 & fail to reject H0 \\
-Chronic & XGBoost & rrf & -0.0122 & -0.727 & 1.000 & 1.000 & fail to reject H0 \\
-Chronic & LightGBM & fidwt & -0.0111 & -0.252 & 0.949 & 1.000 & fail to reject H0 \\
-Chronic & Stacking & fidwt & -0.0075 & -0.708 & 1.000 & 1.000 & fail to reject H0 \\
+PIMA & LogReg & mean-rank & -0.0017 & 1.000 & no \\
+PIMA & DecTree & fidelity-wt. & 0.0000 & 1.000 & no \\
+PIMA & RF & RRF & -0.0074 & 1.000 & no \\
+PIMA & XGBoost & mean-rank & -0.0115 & 1.000 & no \\
+PIMA & LightGBM & fidelity-wt. & -0.0172 & 1.000 & no \\
+PIMA & Stacking & RRF & -0.0132 & 1.000 & no \\
+Heart & LogReg & mean-rank & -0.0175 & 1.000 & no \\
+Heart & DecTree & mean-rank & 0.0000 & 1.000 & no \\
+Heart & RF & mean-rank & -0.0080 & 1.000 & no \\
+Heart & XGBoost & mean-rank & -0.0161 & 1.000 & no \\
+Heart & LightGBM & fidelity-wt. & -0.0002 & 1.000 & no \\
+Heart & Stacking & RRF & -0.0154 & 1.000 & no \\
+Chronic & LogReg & fidelity-wt. & -0.0331 & 1.000 & no \\
+Chronic & DecTree & mean-rank & 0.0000 & 1.000 & no \\
+Chronic & RF & RRF & -0.0312 & 1.000 & no \\
+Chronic & XGBoost & RRF & -0.0122 & 1.000 & no \\
+Chronic & LightGBM & fidelity-wt. & -0.0111 & 1.000 & no \\
+Chronic & Stacking & fidelity-wt. & -0.0075 & 1.000 & no \\
 \bottomrule
 \end{tabular}
-\par\vspace{2pt}\footnotesize $\Delta$AOPC is the median per-instance difference (fusion $-$ best single). $r$ is the rank-biserial correlation. $p_{\text{adj}}$ is Holm-corrected within the family of 18 cells.
-\end{table}
+}
+\par\vspace{2pt}\footnotesize $\Delta$AOPC is the median per-instance difference (fusion $-$ best single); negative means fusion lost. $p_{\text{adj}}$ is Holm-corrected within the family of 18 cells.
+\end{table*}

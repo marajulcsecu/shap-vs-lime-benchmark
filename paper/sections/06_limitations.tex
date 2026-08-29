@@ -22,7 +22,7 @@ a poor explanation. This is why \RQ{5} is reported as corroborating evidence onl
 
 \textbf{The additivity gate failed for one cell, and we report it rather than widen the
 gate.} In PIMA/LightGBM, \AdditivityWorstOutliers{} of 150 explained instances
-reconstruct \texttt{predict\_proba} to worse than the $5\times10^{-3}$ tolerance (worst
+reconstruct \code{predict\_proba} to worse than the $5\times10^{-3}$ tolerance (worst
 \AdditivityWorstMax{}), against a cell median of $1.1\times10^{-9}$, so the
 pre-registered rule --- median below tolerance \emph{and} at most $\max(1, 2\%)$ of
 instances above it --- is not satisfied and protocol risk R1 fired. The discrepancy is
@@ -36,7 +36,7 @@ its \shap{} incomparable with \lime{} and so remove it from every cross-explaine
 comparison, or widen the gate. We did neither, because widening a gate after seeing the
 result it fails is precisely what pre-registration exists to prevent. Instead the cell is
 retained, the failure is stated here, and every hypothesis tally is additionally reported
-with the cell excluded (\texttt{results/stats\_sensitivity\_r1.csv}); no decision in
+with the cell excluded (\file{results/stats_sensitivity_r1.csv}); no decision in
 Table~\ref{tab:hypotheses} changes. A reader who prefers the stricter reading can take
 the excluded column.
 

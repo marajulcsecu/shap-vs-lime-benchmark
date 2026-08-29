@@ -3,6 +3,7 @@
 \caption{RQ4 --- cost per explanation and the fidelity it buys. Single-threaded, identical hardware for every measurement.}
 \label{tab:runtime}
 \small
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
 \begin{tabular}{lrrrr}
 \toprule
 Explainer & Median s & IQR s & Slowest cell s & AOPC per s \\
@@ -15,5 +16,6 @@ Fusion: fidelity-wt. & 0.0487 & 0.0030 & 0.4515 & 4.95 \\
 Random control & 1.0e-6 & 0.0000 & 1.0e-6 & 81798.76 \\
 \bottomrule
 \end{tabular}
+}
 \par\vspace{2pt}\footnotesize Fusion rules consume both base explanations, so their cost is the sum. The random control is free by construction.
 \end{table}

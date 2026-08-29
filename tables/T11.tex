@@ -3,6 +3,7 @@
 \caption{Design axes of this benchmark against typical practice in prior SHAP-versus-LIME comparisons on tabular data \cite{man2021best,salih2024perspective,elshawi2019interpretability,duell2021comparison,amparore2021trust}.}
 \label{tab:positioning}
 \small
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
 \begin{tabular}{p{0.30\columnwidth}p{0.28\columnwidth}p{0.30\columnwidth}}
 \toprule
 Design axis & This study & Typical prior practice \\
@@ -19,5 +20,6 @@ Attribution space verified comparable & yes, by additivity check & not discussed
 Reproducibility package & pinned, checksummed, one command & partial or absent \\
 \bottomrule
 \end{tabular}
+}
 \par\vspace{2pt}\footnotesize The right-hand column characterises the cited literature in aggregate rather than tabulating each paper: metric and model counts are not consistently recoverable from these sources, and some are commentary rather than empirical comparison. Readers should consult the individual works for their exact scope.
 \end{table}

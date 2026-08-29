@@ -1,0 +1,33 @@
+\begin{table*}[t]
+\centering
+\caption{RQ6 --- rank fusion against the better of SHAP and LIME, with effect sizes and unadjusted $p$-values, on evaluation instances only.}
+\label{tab:consensus-full}
+\small
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{lllrrrrl}
+\toprule
+Dataset & Model & Best rule & $\Delta$AOPC & $r$ & $p$ & $p_{\text{adj}}$ & Fusion wins? \\
+\midrule
+PIMA & LogReg & mean-rank & -0.0017 & -0.785 & 1.000 & 1.000 & no \\
+PIMA & DecTree & fidelity-wt. & 0.0000 & -0.772 & 1.000 & 1.000 & no \\
+PIMA & RF & RRF & -0.0074 & -0.801 & 1.000 & 1.000 & no \\
+PIMA & XGBoost & mean-rank & -0.0115 & -0.755 & 1.000 & 1.000 & no \\
+PIMA & LightGBM & fidelity-wt. & -0.0172 & -0.822 & 1.000 & 1.000 & no \\
+PIMA & Stacking & RRF & -0.0132 & -0.843 & 1.000 & 1.000 & no \\
+Heart & LogReg & mean-rank & -0.0175 & -0.867 & 1.000 & 1.000 & no \\
+Heart & DecTree & mean-rank & 0.0000 & -0.870 & 1.000 & 1.000 & no \\
+Heart & RF & mean-rank & -0.0080 & -0.932 & 1.000 & 1.000 & no \\
+Heart & XGBoost & mean-rank & -0.0161 & -0.793 & 1.000 & 1.000 & no \\
+Heart & LightGBM & fidelity-wt. & -0.0002 & -0.533 & 0.999 & 1.000 & no \\
+Heart & Stacking & RRF & -0.0154 & -0.918 & 1.000 & 1.000 & no \\
+Chronic & LogReg & fidelity-wt. & -0.0331 & -0.649 & 1.000 & 1.000 & no \\
+Chronic & DecTree & mean-rank & 0.0000 & -1.000 & 1.000 & 1.000 & no \\
+Chronic & RF & RRF & -0.0312 & -0.910 & 1.000 & 1.000 & no \\
+Chronic & XGBoost & RRF & -0.0122 & -0.727 & 1.000 & 1.000 & no \\
+Chronic & LightGBM & fidelity-wt. & -0.0111 & -0.252 & 0.949 & 1.000 & no \\
+Chronic & Stacking & fidelity-wt. & -0.0075 & -0.708 & 1.000 & 1.000 & no \\
+\bottomrule
+\end{tabular}
+}
+\par\vspace{2pt}\footnotesize $r$ is the rank-biserial correlation. A negative $r$ with a one-sided `greater' alternative means fusion lost.
+\end{table*}

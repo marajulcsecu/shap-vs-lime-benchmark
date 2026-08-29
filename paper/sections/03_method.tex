@@ -47,8 +47,8 @@ estimator supports them and report MCC and PR-AUC alongside accuracy.
 
 \subsection{Explainers}\label{sec:method-explainers}
 \shap{} uses \textsc{TreeExplainer} for the four tree models and a model-agnostic
-permutation sampler over \texttt{predict\_proba} for logistic regression and stacking.
-\lime{} uses \texttt{LimeTabularExplainer} with its default discretisation, with the
+permutation sampler over \code{predict\_proba} for logistic regression and stacking.
+\lime{} uses \code{LimeTabularExplainer} with its default discretisation, with the
 one-hot columns declared categorical so the sampler cannot produce inputs the model
 has never seen. Three fusion rules combine the two rankings: mean-rank (Borda),
 reciprocal-rank fusion~\cite{cormack2009reciprocal}, and a fidelity-weighted variant
@@ -117,7 +117,7 @@ probability; \textsc{TreeExplainer} on boosted models returns log-odds margins b
 default. Comparing them directly contrasts different quantities on different scales.
 We therefore require probability-space attributions throughout and \emph{verify} it
 rather than assume it, by checking that $\text{base} + \sum_j \phi_j$ reproduces
-\texttt{predict\_proba}. Median additivity error across all cells is
+\code{predict\_proba}. Median additivity error across all cells is
 \AdditivityMedianMax{}, so for a typical instance the reconstruction is exact to eight
 decimal places. In \AdditivityGateFailCells{} of \NumCells{} cells the pre-registered
 acceptance gate nonetheless did not pass: PIMA/LightGBM has
