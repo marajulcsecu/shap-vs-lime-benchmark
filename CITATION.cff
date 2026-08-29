@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use this benchmark, please cite it as below."
+title: "SHAP versus LIME on Clinical Tabular Data: A Reproducible Benchmark of Explanation Agreement, Stability, Fidelity, and Rank-Level Consensus"
+abstract: >-
+  A reproducible benchmark comparing SHAP and LIME across six classifiers and three
+  public clinical tabular datasets on agreement, stability, fidelity, cost, and
+  plausibility, plus a controlled evaluation of three rank-fusion rules. Eleven
+  hypotheses were pre-registered in version control before any result was computed.
+type: software
+authors:
+  - family-names: Antika
+    given-names: Samira Oasela
+    affiliation: "Department of Computer Science and Engineering, University of Chittagong"
+  - family-names: Shuchona
+    given-names: Yeasmin Akter
+    affiliation: "Department of Computer Science and Engineering, University of Chittagong"
+  - family-names: Haque
+    given-names: MD. Marajul
+    affiliation: "Department of Computer Science and Engineering, University of Chittagong"
+  - family-names: Tripura
+    given-names: Gian Juti
+    affiliation: "Department of Computer Science and Engineering, University of Chittagong"
+version: 1.0.0
+date-released: "2026-08-29"
+license: MIT
+keywords:
+  - explainable artificial intelligence
+  - SHAP
+  - LIME
+  - model interpretability
+  - tabular data
+  - reproducibility
+  - pre-registration
