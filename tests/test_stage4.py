@@ -86,3 +86,27 @@ def test_h6_is_tested_on_evaluation_instances_only(stats_frame):
     h6 = stats_frame.query("hypothesis == 'H6'")
     merged = h6.merge(budget, on=["dataset", "model"])
     assert (merged.n <= merged.n_evaluation).all()
+
+
+def test_no_one_sided_rejection_contradicts_its_own_effect_size(stats_frame):
+    """A one-sided test that rejects must do so in the direction it claims.
+
+    Before the alternative was made part of the TestResult, H6 carried a `greater`
+    label while running two-sided, so 17 of 18 cells reported `reject H0` on an effect
+    size of about -0.8 -- fusion losing, reported as fusion winning.
+    """
+    for row in stats_frame.query("decision == 'reject H0' and not degenerate").itertuples():
+        if row.alternative == "greater":
+            assert row.effect_size > 0, f"{row.hypothesis} {row.dataset}/{row.model}"
+        elif row.alternative == "less":
+            assert row.effect_size < 0, f"{row.hypothesis} {row.dataset}/{row.model}"
+
+
+def test_reported_alternative_matches_the_protocol_for_every_hypothesis(stats_frame):
+    expected = {"H1": "greater", "H2a": "greater", "H3b": "greater", "H4": "less",
+                "H6": "greater", "H2b": "two-sided", "H2c": "two-sided",
+                "H3a": "two-sided", "H5": "two-sided", "H1b": "two-sided",
+                "H1c": "two-sided"}
+    for hypothesis, want in expected.items():
+        got = set(stats_frame.query("hypothesis == @hypothesis").alternative)
+        assert got == {want}, f"{hypothesis}: reported {got}, protocol says {want}"

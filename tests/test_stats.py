@@ -128,3 +128,29 @@ def test_bca_still_brackets_for_a_smooth_statistic():
         data = rng.normal(loc=2.0, size=40)
         low, high = bca_ci(data, np.mean, 500, seed=trial)
         assert low <= float(np.mean(data)) <= high
+
+
+def test_one_sided_rejection_must_agree_in_sign_with_its_effect_size():
+    """The invariant that catches a mislabelled alternative.
+
+    A `greater` test that rejects on negative-shifted data would mean the label and
+    the computation disagree. That exact mismatch inverted H6's headline conclusion
+    before this test existed.
+    """
+    negative = np.array([-0.05] * 17 + [0.01] * 3)
+    result = wilcoxon_with_effect(negative, alternative="greater")
+    assert result.alternative == "greater"
+    assert result.effect_size < 0
+    assert result.p_value > 0.5, "a 'greater' test must not reject negative-shifted data"
+
+    result = wilcoxon_with_effect(negative, alternative="less")
+    assert result.p_value < 0.05
+    assert result.effect_size < 0
+
+
+def test_the_alternative_is_recorded_on_the_result_not_supplied_separately():
+    for alternative in ("greater", "less", "two-sided"):
+        assert wilcoxon_with_effect(np.arange(1.0, 9.0),
+                                    alternative=alternative).alternative == alternative
+        assert mannwhitney_with_effect([3.0, 4.0], [1.0, 2.0],
+                                       alternative=alternative).alternative == alternative

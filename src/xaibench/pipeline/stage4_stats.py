@@ -34,10 +34,17 @@ from xaibench.stats.tests import (
 AGREEMENT_THRESHOLD = 0.50      # NORMATIVE: H1's pre-registered practical bar
 
 
-def _row(hypothesis, dataset, model, unit, test, alternative, result, extra=None):
+def _row(hypothesis, dataset, model, unit, test, result, extra=None):
+    """The reported alternative comes off the result, never from a separate argument.
+
+    Taking it as a display string let a one-sided label sit beside a two-sided call:
+    H6 was labelled `greater` while running two-sided, so a significant result in the
+    WRONG direction read as `reject H0` and inverted the headline conclusion. Deriving
+    the label from the test that actually ran makes that mismatch impossible.
+    """
     row = {
         "hypothesis": hypothesis, "dataset": dataset, "model": model, "unit": unit,
-        "test": test, "alternative": alternative, "n": result.n,
+        "test": test, "alternative": result.alternative, "n": result.n,
         "statistic": result.statistic, "p_value": result.p_value,
         "effect_size": result.effect_size, "effect_name": result.effect_name,
         "median_diff": result.median_diff, "degenerate": bool(result.degenerate),
@@ -74,7 +81,7 @@ def run_all_hypotheses(profile: Profile) -> pd.DataFrame:
         rho = data["agreement_local"].query(
             "dataset == @dataset_id and model == @model_id").spearman.to_numpy(float)
         rows.append(_row("H1", dataset_id, model_id, "instance",
-                         "wilcoxon(rho - 0.50)", "greater",
+                         "wilcoxon(rho - 0.50)",
                          wilcoxon_with_effect(rho, mu=AGREEMENT_THRESHOLD,
                                               alternative="greater"),
                          {"point_estimate": float(np.median(rho)) if rho.size else np.nan}))
@@ -85,8 +92,8 @@ def run_all_hypotheses(profile: Profile) -> pd.DataFrame:
     # H1b -- does concordance differ between simple models and ensembles?
     simple = cell_rho[cell_rho.model.isin(SIMPLE_MODELS)].spearman.to_numpy(float)
     ensemble = cell_rho[~cell_rho.model.isin(SIMPLE_MODELS)].spearman.to_numpy(float)
-    rows.append(_row("H1b", "all", "all", "cell", "mannwhitneyu", "two-sided",
-                     mannwhitney_with_effect(simple, ensemble),
+    rows.append(_row("H1b", "all", "all", "cell", "mannwhitneyu",
+                     mannwhitney_with_effect(simple, ensemble, alternative="two-sided"),
                      {"point_estimate": float(np.median(simple) - np.median(ensemble))}))
 
     # H1c -- does concordance track task difficulty (1 - ROC-AUC)?
@@ -116,7 +123,7 @@ def run_all_hypotheses(profile: Profile) -> pd.DataFrame:
             "dataset == @dataset_id and model == @model_id and explainer == 'lime'"
         ).rerun_cv.dropna().to_numpy(float)
         rows.append(_row("H2a", dataset_id, model_id, "instance",
-                         "wilcoxon(cv > 0)", "greater",
+                         "wilcoxon(cv > 0)",
                          wilcoxon_with_effect(cv, alternative="greater"),
                          {"point_estimate": float(np.median(cv)) if cv.size else np.nan}))
 
@@ -126,8 +133,8 @@ def run_all_hypotheses(profile: Profile) -> pd.DataFrame:
             "dataset == @dataset_id and model == @model_id").dropna(subset=["lipschitz"])
         a, b = _paired(cell, "lipschitz", "shap", "lime")
         rows.append(_row("H2b", dataset_id, model_id, "instance",
-                         "wilcoxon paired", "two-sided",
-                         wilcoxon_with_effect(a, b),
+                         "wilcoxon paired",
+                         wilcoxon_with_effect(a, b, alternative="two-sided"),
                          {"point_estimate": float(np.median(a) - np.median(b))
                           if a.size else np.nan}))
 
@@ -138,8 +145,8 @@ def run_all_hypotheses(profile: Profile) -> pd.DataFrame:
             cell = retrain.query("dataset == @dataset_id and model == @model_id")
             a, b = _paired(cell, "retrain_agreement", "shap", "lime")
             rows.append(_row("H2c", dataset_id, model_id, "cell",
-                             "wilcoxon paired", "two-sided",
-                             wilcoxon_with_effect(a, b),
+                             "wilcoxon paired",
+                             wilcoxon_with_effect(a, b, alternative="two-sided"),
                              {"point_estimate": float(np.mean(a) - np.mean(b))
                               if a.size else np.nan}))
 
@@ -149,8 +156,8 @@ def run_all_hypotheses(profile: Profile) -> pd.DataFrame:
             "dataset == @dataset_id and model == @model_id")
         a, b = _paired(cell, "aopc", "shap", "lime")
         rows.append(_row("H3a", dataset_id, model_id, "instance",
-                         "wilcoxon paired", "two-sided",
-                         wilcoxon_with_effect(a, b),
+                         "wilcoxon paired",
+                         wilcoxon_with_effect(a, b, alternative="two-sided"),
                          {"point_estimate": float(np.median(a) - np.median(b))
                           if a.size else np.nan}))
 
@@ -161,8 +168,8 @@ def run_all_hypotheses(profile: Profile) -> pd.DataFrame:
                 "dataset == @dataset_id and model == @model_id")
             a, b = _paired(cell, "aopc", explainer, "random")
             rows.append(_row("H3b", dataset_id, model_id, "instance",
-                             "wilcoxon paired", "greater",
-                             wilcoxon_with_effect(a, b),
+                             "wilcoxon paired",
+                             wilcoxon_with_effect(a, b, alternative="greater"),
                              {"explainer": explainer,
                               "point_estimate": float(np.median(a) - np.median(b))
                               if a.size else np.nan}))
@@ -174,8 +181,8 @@ def run_all_hypotheses(profile: Profile) -> pd.DataFrame:
             "dataset == @dataset_id and model == @model_id")
         a, b = _paired(cell, "runtime_s", "shap", "lime")
         rows.append(_row("H4", dataset_id, model_id, "instance",
-                         "wilcoxon paired", "less",
-                         wilcoxon_with_effect(a, b),
+                         "wilcoxon paired",
+                         wilcoxon_with_effect(a, b, alternative="less"),
                          {"point_estimate": float(np.median(a) - np.median(b))
                           if a.size else np.nan}))
 
@@ -185,8 +192,8 @@ def run_all_hypotheses(profile: Profile) -> pd.DataFrame:
     a, b = _paired(cell_plaus, "jaccard5", "shap", "lime",
                    index=["dataset", "model"])
     rows.append(_row("H5", "all", "all", "cell (exploratory)",
-                     "wilcoxon paired", "two-sided",
-                     wilcoxon_with_effect(a, b),
+                     "wilcoxon paired",
+                     wilcoxon_with_effect(a, b, alternative="two-sided"),
                      {"point_estimate": float(np.median(a) - np.median(b))
                       if a.size else np.nan}))
 
@@ -200,15 +207,16 @@ def run_all_hypotheses(profile: Profile) -> pd.DataFrame:
         available = [c for c in CONSENSUS_EXPLAINERS if c in wide]
         if not available or "shap" not in wide or "lime" not in wide:
             rows.append(_row("H6", dataset_id, model_id, "evaluation instance",
-                             "wilcoxon paired", "greater",
-                             wilcoxon_with_effect(np.zeros(1)), {"best_rule": "none"}))
+                             "wilcoxon paired",
+                             wilcoxon_with_effect(np.zeros(1), alternative="greater"),
+                             {"best_rule": "none"}))
             continue
         best_rule = wide[available].median().idxmax()
         fused = wide[best_rule].to_numpy(float)
         single = wide[["shap", "lime"]].max(axis=1).to_numpy(float)
         rows.append(_row("H6", dataset_id, model_id, "evaluation instance",
-                         "wilcoxon paired", "greater",
-                         wilcoxon_with_effect(fused, single),
+                         "wilcoxon paired",
+                         wilcoxon_with_effect(fused, single, alternative="greater"),
                          {"best_rule": best_rule,
                           "point_estimate": float(np.median(fused - single))}))
 

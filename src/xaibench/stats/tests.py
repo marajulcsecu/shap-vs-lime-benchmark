@@ -16,6 +16,7 @@ class TestResult:
     effect_size: float
     effect_name: str
     median_diff: float
+    alternative: str = "two-sided"
     degenerate: bool = False
 
 
@@ -38,7 +39,8 @@ def wilcoxon_with_effect(a, b=None, alternative: str = "two-sided",
 
     if nonzero.size == 0:
         return TestResult(n=int(diff.size), statistic=0.0, p_value=1.0, effect_size=0.0,
-                          effect_name="rank_biserial", median_diff=0.0, degenerate=True)
+                          effect_name="rank_biserial", median_diff=0.0,
+                          alternative=alternative, degenerate=True)
 
     result = stats.wilcoxon(nonzero, alternative=alternative, zero_method="wilcox")
     ranks = stats.rankdata(np.abs(nonzero))
@@ -48,7 +50,8 @@ def wilcoxon_with_effect(a, b=None, alternative: str = "two-sided",
     effect = (w_pos - w_neg) / total if total > 0 else 0.0
     return TestResult(n=int(diff.size), statistic=float(result.statistic),
                       p_value=float(result.pvalue), effect_size=float(effect),
-                      effect_name="rank_biserial", median_diff=float(np.median(diff)))
+                      effect_name="rank_biserial", median_diff=float(np.median(diff)),
+                      alternative=alternative)
 
 
 def cliffs_delta(a, b) -> float:
@@ -67,11 +70,11 @@ def mannwhitney_with_effect(a, b, alternative: str = "two-sided") -> TestResult:
     if a.size == 0 or b.size == 0 or np.ptp(np.concatenate([a, b])) == 0:
         return TestResult(n=int(a.size + b.size), statistic=0.0, p_value=1.0,
                           effect_size=0.0, effect_name="cliffs_delta",
-                          median_diff=0.0, degenerate=True)
+                          median_diff=0.0, alternative=alternative, degenerate=True)
     result = stats.mannwhitneyu(a, b, alternative=alternative)
     return TestResult(n=int(a.size + b.size), statistic=float(result.statistic),
                       p_value=float(result.pvalue), effect_size=cliffs_delta(a, b),
-                      effect_name="cliffs_delta",
+                      effect_name="cliffs_delta", alternative=alternative,
                       median_diff=float(np.median(a) - np.median(b)))
 
 
