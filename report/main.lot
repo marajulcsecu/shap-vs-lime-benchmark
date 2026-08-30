@@ -19,13 +19,8 @@
 \addvspace {10\p@ }
 \contentsline {table}{\numberline {A.1}{\ignorespaces Predictive performance, all eight metrics, nested cross-validation (5 outer $\times $ 3 inner folds), mean $\pm $ standard deviation over the outer folds.}}{37}{table.caption.29}%
 \contentsline {table}{\numberline {A.2}{\ignorespaces RQ1 --- all agreement measures between SHAP and LIME feature rankings, per instance. Medians with 95\% percentile bootstrap intervals.}}{37}{table.caption.30}%
-\contentsline {table}{\numberline {A.3}{\ignorespaces RQ2 --- explanation stability decomposed into three sources: explainer randomness (re-run), input perturbation (Lipschitz), and model retraining. Medians over all cells.}}{37}{table.caption.31}%
-\contentsline {table}{\numberline {A.4}{\ignorespaces RQ3 --- fidelity to the model's decision function, median baseline. Medians with 95\% bootstrap intervals across all 18 cells.}}{38}{table.caption.32}%
-\contentsline {table}{\numberline {A.5}{\ignorespaces RQ4 --- cost per explanation and the fidelity it buys. Single-threaded, identical hardware for every measurement.}}{38}{table.caption.33}%
-\contentsline {table}{\numberline {A.6}{\ignorespaces RQ6 --- rank fusion against the better of SHAP and LIME, with effect sizes and unadjusted $p$-values, on evaluation instances only.}}{38}{table.caption.34}%
-\contentsline {table}{\numberline {A.7}{\ignorespaces Decision table for all eleven pre-registered hypotheses. Every entry is auditable against the frozen protocol, which was committed before any result existed.}}{39}{table.caption.35}%
+\contentsline {table}{\numberline {A.3}{\ignorespaces RQ6 --- rank fusion against the better of SHAP and LIME, with effect sizes and unadjusted $p$-values, on evaluation instances only.}}{38}{table.caption.31}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {B.1}{\ignorespaces RQ5 --- pre-registered plausibility reference sets and top-5 overlap.}}{41}{table.caption.36}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {C.1}{\ignorespaces Environment recorded with the results. Exact versions are pinned in \texttt {requirements.lock.txt}.}}{43}{table.caption.37}%
+\contentsline {table}{\numberline {C.1}{\ignorespaces Environment recorded with the results. Exact versions are pinned in \texttt {requirements.lock.txt}.}}{41}{table.caption.32}%
 \addvspace {10\p@ }

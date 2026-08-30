@@ -23,7 +23,7 @@ Computer Science and Engineering, University of Chittagong.
 <!-- BEGIN GENERATED FINDINGS -->
 | # | Question | Finding |
 |---|----------|---------|
-| RQ1 | Do SHAP and LIME agree on feature rankings? | **Substantially, but not interchangeably.** Median Spearman ρ = 0.74, top-5 Jaccard 0.67; clears a pre-registered 0.50 bar in 15/18 cells, yet a third of each top-five list still differs. Agreement is *lowest* on the **easiest** task (CKD, ρ = 0.63 at ROC-AUC 1.00). |
+| RQ1 | Do SHAP and LIME agree on feature rankings? | **Substantially, but not interchangeably.** Median Spearman ρ = 0.74, top-5 Jaccard 0.67; clears a pre-registered 0.50 bar in 15/18 cells, yet one of the five top features still differs. Agreement is *lowest* on the **easiest** task (CKD, ρ = 0.63 at ROC-AUC 1.00). |
 | RQ2 | How stable are the explanations? | **Reproducible ≠ robust.** Tree SHAP's re-run CV is *exactly* 0, but its cross-refit agreement is 0.83 — the ranking moves when the model is refit on a resample of the same data. Perturbation robustness: 0.18 (SHAP) vs 0.65 (LIME). |
 | RQ3 | Are they faithful to the model? | **Both, SHAP more so.** AOPC 0.260 (SHAP) vs 0.224 (LIME) vs **0.075 (random control)**. Both beat the control in 36/36 tests after Holm correction. |
 | RQ4 | What does an explanation cost? | **SHAP is ~25× cheaper** — 0.0019 s vs 0.0462 s per explanation. Structural, not an implementation detail. |

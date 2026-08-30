@@ -711,7 +711,7 @@ def readme_findings_table(profile) -> str:
         ("RQ1", "Do SHAP and LIME agree on feature rankings?",
          f"**Substantially, but not interchangeably.** Median Spearman ρ = {rho:.2f}, "
          f"top-5 Jaccard {jaccard:.2f}; clears a pre-registered 0.50 bar in "
-         f"{h1_hit}/{h1_all} cells, yet a third of each top-five list still differs. "
+         f"{h1_hit}/{h1_all} cells, yet one of the five top features still differs. "
          f"Agreement is *lowest* on the **easiest** task (CKD, ρ = {rho_ckd:.2f} at "
          f"ROC-AUC {auc_ckd:.2f})."),
         ("RQ2", "How stable are the explanations?",

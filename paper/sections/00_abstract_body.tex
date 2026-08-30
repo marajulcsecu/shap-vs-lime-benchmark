@@ -10,9 +10,9 @@ model family, dataset, and explainer at once: six classifiers across three publi
 datasets, eighteen model--dataset cells, under one leakage-safe protocol with eleven
 hypotheses pre-registered in version control before any result existed. We additionally
 decompose explanation stability into three sources that single-notion studies conflate.
-The two explainers agree substantially but are not interchangeable, differing on roughly a
-third of each top-five feature list, and agreement is lowest on the \emph{easiest} task
-rather than the hardest. SHAP is the more faithful, markedly more robust to input
+The two explainers agree substantially but are not interchangeable: at the median they
+share four of their five top-ranked features and disagree on the fifth, and agreement is
+lowest on the \emph{easiest} task rather than the hardest. SHAP is the more faithful, markedly more robust to input
 perturbation, and roughly \SpeedFactor{}$\times$ cheaper wherever a tree backend exists,
 while a bit-identical explainer proves not to be a stable one: its global ranking still
 shifts when the model is refitted on a resample of the same data. Rank fusion, including

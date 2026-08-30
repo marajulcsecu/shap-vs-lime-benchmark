@@ -18,9 +18,9 @@ pre-registered hypotheses, non-parametric tests, Holm correction, effect sizes, 
 bootstrap intervals. We additionally decompose explanation stability into three
 separable sources that single-notion studies conflate: explainer randomness, input
 perturbation, and model retraining variance. Across \NumCells{} cells and \NumExplained{} explained instances the two explainers
-agree substantially but are not interchangeable, differing on roughly a third of each
-top-five feature list --- and agreement is lowest on the \emph{easiest} task rather
-than the hardest. SHAP is the more faithful, markedly more robust to input
+agree substantially but are not interchangeable: at the median they share four of their
+five top-ranked features and disagree on the fifth --- and agreement is lowest on the
+\emph{easiest} task rather than the hardest. SHAP is the more faithful, markedly more robust to input
 perturbation, and roughly \SpeedFactor{}$\times$ cheaper wherever a tree backend
 exists, while a bit-identical explainer proves not to be a stable one: its global
 ranking still shifts when the model is refitted on a resample of the same data. Rank
