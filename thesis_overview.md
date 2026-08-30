@@ -1,4 +1,4 @@
-# Thesis Overview — SHAP vs. LIME Explanation Benchmark
+# Thesis Overview — Hybrid SHAP–LIME Consensus and Its Limits
 
 **Course:** ENG 672 Technical Communication and Writing · **Revised:** 2026-08-29 · **v2**
 

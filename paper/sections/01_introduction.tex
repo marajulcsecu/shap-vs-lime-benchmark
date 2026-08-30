@@ -31,12 +31,18 @@ This paper contributes:
     (Section~\ref{sec:rq2}). Reporting one stability number conflates these, and the
     distinction matters: an explanation can be bit-identical across runs and still
     fragile, because the model beneath it moves when the training sample does.
-  \item \textbf{A controlled evaluation of rank-level fusion} against a deliberately
-    strict bar --- beat the \emph{better} of the two, not their average
-    (Section~\ref{sec:rq6}). Aggregating explanations is not a new
-    idea~\cite{bhatt2020aggregating,cormack2009reciprocal} and we claim no priority for
-    it; the contribution is the controlled evaluation, including the null outcome, which
-    was pre-registered as a valid result.
+  \item \textbf{A hybrid consensus method, and an honest account of its limits.} We
+    propose \emph{fidelity-weighted rank fusion}: the two explainers are combined in
+    proportion to the faithfulness each demonstrates, with the weight fitted on a
+    calibration split disjoint from the instances the method is later tested on, so it
+    cannot win by construction. It is evaluated against two published fusion baselines ---
+    mean-rank (Borda) and reciprocal-rank fusion~\cite{cormack2009reciprocal} --- and
+    against a deliberately strict bar: beat the \emph{better} of \shap{} and \lime{} on
+    the same cell, not their average, which anything would beat. Explanation aggregation
+    itself is prior work~\cite{bhatt2020aggregating} and we claim no priority for the
+    idea; what is new is the fidelity weighting, the leakage-safe calibration, and the
+    controlled test. The outcome is negative, it was pre-registered as a valid result
+    before running, and Section~\ref{sec:rq6} explains the mechanism.
 \end{enumerate}
 
 Section~\ref{sec:method} states the protocol, including four methodological traps that

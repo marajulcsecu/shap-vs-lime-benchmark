@@ -59,9 +59,13 @@ Combining several explainers has been proposed before, both as an ensemble of
 attributions~\cite{rieger2020simple} and as a framework for aggregating explanation
 outputs~\cite{bhatt2020aggregating}; rank fusion itself is standard in information
 retrieval, where reciprocal-rank fusion is a strong and very simple
-baseline~\cite{cormack2009reciprocal}. We therefore make no novelty claim for fusion.
-What is missing is an evaluation of such rules under controlled conditions against a
-bar that a practitioner would care about, which is what Section~\ref{sec:rq6} supplies.
+baseline~\cite{cormack2009reciprocal}. We therefore claim no priority for the idea of
+aggregation, and use both of those rules as baselines. What is new here is weighting the
+two explainers by their \emph{measured} fidelity rather than equally, fitting that
+weight on a disjoint calibration split so the rule cannot be tuned on its own test set,
+and testing the result against the better of the two rather than their mean --- an
+evaluation under controlled conditions against a bar a practitioner would care about,
+which Section~\ref{sec:rq6} supplies.
 
 \section{Synthesis: what this literature leaves open}
 Three gaps recur across the work surveyed above, and each maps to a design decision in

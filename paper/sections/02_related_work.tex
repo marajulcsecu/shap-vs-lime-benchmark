@@ -21,7 +21,17 @@ attributions~\cite{sundararajan2020many} --- and both methods can be deliberatel
 fooled~\cite{slack2020fooling}. We take these as reasons for careful measurement rather
 than settled verdicts.
 
-Several studies contrast the two on tabular
+Combining several explainers has been proposed before, both as an ensemble of
+attributions and as a framework for aggregating explanation
+outputs~\cite{bhatt2020aggregating}; rank fusion itself is standard in information
+retrieval, where reciprocal-rank fusion is a strong and very simple
+baseline~\cite{cormack2009reciprocal}. We therefore claim no priority for the idea of
+aggregation, and use both of those rules as baselines. What is new here is weighting the
+two explainers by their \emph{measured} fidelity rather than equally, fitting that weight
+on a disjoint calibration split so the rule cannot be tuned on its own test set, and
+testing the result against the better of the two rather than their mean.
+
+Several studies contrast \shap{} and \lime{} on tabular
 data~\cite{man2021best,salih2024perspective,elshawi2019interpretability,duell2021comparison,amparore2021trust}.
 Most vary a single axis, none we surveyed reports a random-ranking control or states its
 attribution space, and none pre-registers its hypotheses.

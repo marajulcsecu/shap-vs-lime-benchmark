@@ -1,47 +1,80 @@
 \section{Method}\label{sec:method}
 
 \subsection{Datasets, models, and protocol}\label{sec:method-data}
-Three public, de-identified tabular datasets (Table~\ref{tab:datasets}): PIMA Indian
-Diabetes~\cite{smith1988using}, the Cleveland subset of UCI Heart
-Disease~\cite{detrano1989international}, and UCI Chronic Kidney
-Disease~\cite{rubini2015ckd}. They were chosen to span a \emph{difficulty gradient} ---
+Three public, de-identified tabular datasets: PIMA Indian Diabetes
+(768 rows, 8 features, 34.9\,\% positive)~\cite{smith1988using}, the Cleveland subset of
+UCI Heart Disease (303, 13, 45.9\,\%)~\cite{detrano1989international}, and UCI Chronic
+Kidney Disease (400, 24, 62.5\,\%)~\cite{rubini2015ckd}; all are redistributable under CC0
+or CC BY 4.0 and are vendored with verified checksums. They span a \emph{difficulty gradient} ---
 nested-CV ROC-AUC of \AucPima{}, \AucHeart{}, and \AucCkd{} --- because a single-dataset
-study cannot ask whether explainer agreement depends on how hard the boundary is. The
-diseases are benchmarks; this paper makes no medical claim. In PIMA, biologically
-impossible zeros in glucose, blood pressure, skin thickness, insulin, and BMI are recoded
-as missing, while zeros in \emph{pregnancies} are legitimate and retained; the Heart
-five-level target is binarised at $>0$ and its nominal codes carried as categories so the
-linear model cannot read an ordering into them.
+study cannot ask whether agreement depends on how hard the boundary is. The diseases are
+benchmarks; no medical claim is made. In PIMA, biologically impossible zeros in glucose,
+blood pressure, skin thickness, insulin, and BMI are recoded as missing while legitimate
+zeros in \emph{pregnancies} are retained; the Heart target is binarised at $>0$ with its
+nominal codes carried as categories, so the linear model cannot read an ordering into
+them.
 
-\input{../tables/T1}
 
 Six classifiers span linear, single-tree, bagged, boosted, and stacked families: logistic
 regression, a decision tree, a random forest, XGBoost~\cite{chen2016xgboost},
 LightGBM~\cite{ke2017lightgbm}, and a stacking ensemble~\cite{wolpert1992stacked}.
-Stacking is included because it admits no tree-specific explainer, which makes it the one
-family where \shap{}'s own re-run variance is a non-trivial measurement.
+Stacking is included because it admits no tree-specific explainer, making it the one family
+where \shap{}'s own re-run variance is a non-trivial measurement.
 
 Performance and explanation analysis run on separated tracks. \textbf{Track A} estimates
-performance by nested cross-validation, five outer folds for estimation and three inner
-for hyperparameter selection, with every transformer inside the pipeline so imputation
-and scaling are fitted on inner-training rows only. \textbf{Track B} takes those
-hyperparameters, refits once on a single stratified 80/20 split, and runs every explainer
-against that one model per cell. The separation prevents a specific leak: explanation
-analysis needs one model per cell, not five fold-models, and the partition the explainers
-see must never have participated in tuning. We apply \emph{no} synthetic resampling ---
-imbalance is mild (34.9--62.5\,\% positive), and oversampling would alter the data
-manifold that \lime{}'s sampler and \shap{}'s background both draw from, confounding the
-comparison under study.
+performance by nested cross-validation, five outer folds for estimation and three inner for
+tuning, with every transformer inside the pipeline so imputation and scaling are fitted on
+inner-training rows only. \textbf{Track B} takes those hyperparameters, refits once on a
+stratified 80/20 split, and runs every explainer against that one model per cell. The
+separation prevents a specific leak: the partition the explainers see must never have
+participated in tuning. We apply \emph{no} synthetic resampling --- imbalance is mild, and
+oversampling would alter the data manifold that \lime{}'s sampler and \shap{}'s background
+both draw from, confounding the comparison under study.
 
 \subsection{Explainers and metrics}\label{sec:method-metrics}
 \shap{} uses \textsc{TreeExplainer} for the four tree models and a model-agnostic
 permutation sampler for logistic regression and stacking; \lime{} uses
-\code{LimeTabularExplainer} with one-hot columns declared categorical. Three fusion rules
-combine the two rankings: mean-rank, reciprocal-rank
-fusion~\cite{cormack2009reciprocal}, and a fidelity-weighted variant whose weight is the
-share of \aopc{} \shap{} earns on a \emph{disjoint} 30\,\% calibration split. Without that
-split the weight would be fitted on the very instances the hypothesis is tested on. A
-uniformly random ranking is the control.
+\code{LimeTabularExplainer} with one-hot columns declared categorical. A uniformly random ranking is the control.
+
+\subsection{The hybrid consensus method}\label{sec:method-hybrid}
+Both explainers produce a ranking over the same $d$ original features, so they can be
+combined at the level of ranks without either having to be rescaled. We evaluate three
+fusion rules (Algorithm~\ref{alg:fusion}).
+
+\begin{algorithm}[t]
+\caption{Rank-level fusion of two explanations}\label{alg:fusion}
+\KwIn{attributions $\phi^{A}, \phi^{B} \in \mathbb{R}^{d}$; rule; weight $w$}
+\KwOut{fused ranking over the $d$ original features}
+$r^{A} \gets$ normalised ranks of $|\phi^{A}|$\;
+$r^{B} \gets$ normalised ranks of $|\phi^{B}|$\;
+\Switch{rule}{
+  \Case{mean-rank (baseline)}{$r \gets \tfrac{1}{2}(r^{A} + r^{B})$\;}
+  \Case{RRF (baseline)}{$s_j \gets \tfrac{1}{60+r^{A}_j} + \tfrac{1}{60+r^{B}_j}$;
+        $r \gets$ ranks of $-s$\;}
+  \Case{fidelity-weighted (ours)}{$r \gets w\,r^{A} + (1-w)\,r^{B}$\;}
+}
+\Return{$\operatorname{argsort}(r)$}\;
+\end{algorithm}
+
+Two are published baselines: \emph{mean-rank}
+fusion, which averages the normalised ranks, and \emph{reciprocal-rank fusion}, standard in
+information retrieval, where each list contributes $1/(60+r_j)$ so one badly wrong ranking
+degrades the result less than an arithmetic mean would~\cite{cormack2009reciprocal}.
+
+The third rule is ours. \emph{Fidelity-weighted fusion} does not treat the two explainers
+as equally trustworthy. It weights them by the faithfulness each actually demonstrates:
+$w = \aopc{}^{\text{cal}}_{\shap} / (\aopc{}^{\text{cal}}_{\shap} +
+\aopc{}^{\text{cal}}_{\lime})$, so the explainer whose rankings move the model's
+prediction more on held-out instances carries more of the fused rank. The weight is
+estimated \emph{once per cell} on a calibration split of 30\,\% of the explained
+instances, and \RQ{6} is then tested on the remaining 70\,\% only. That disjointness is
+the point: a weight fitted on the same instances the hypothesis is tested on would make the
+rule win by construction, and the split is recorded per cell so the separation is auditable
+rather than asserted.
+
+The bar for all three rules is deliberately strict. A fused ranking must beat the
+\emph{better} of \shap{} and \lime{} on the same cell --- not their average, which any
+sensible combination would beat, and not the weaker of the two.
 
 Let $\phi(x) \in \mathbb{R}^{d}$ be an attribution vector over original features and
 $\pi(x)$ the ranking by $|\phi(x)|$. \emph{Agreement} (\RQ{1}) is Spearman $\rho$, Kendall

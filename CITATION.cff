@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this benchmark, please cite it as below."
-title: "SHAP versus LIME on Clinical Tabular Data: A Reproducible Benchmark of Explanation Agreement, Stability, Fidelity, and Rank-Level Consensus"
+title: "A Hybrid SHAP-LIME Consensus Method and Its Limits: A Reproducible Multi-Model Benchmark on Clinical Tabular Data"
 abstract: >-
   A reproducible benchmark comparing SHAP and LIME across six classifiers and three
   public clinical tabular datasets on agreement, stability, fidelity, cost, and

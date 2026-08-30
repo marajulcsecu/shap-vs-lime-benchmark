@@ -49,8 +49,9 @@ number would have recorded \shap{} as perfectly stable and stopped there.
 Median \aopc{} is \AopcShap{} for \shap{} and \AopcLime{} for \lime{}, against
 \AopcRandom{} for the random control. The control is what makes the first two numbers
 mean anything: both explainers exceed it in \HThreeBRejected{} of \HThreeBTotal{} tested
-comparisons after Holm correction, and Fig.~\ref{fig:deletion} shows why an \aopc{} value
-cannot be read without it. The marginal-baseline sensitivity check does not reverse the
+comparisons after Holm correction --- deleting the features an explainer ranks first
+collapses the prediction while deleting a random few barely moves it, which is why an
+\aopc{} value cannot be read without the control. The marginal-baseline sensitivity check does not reverse the
 ordering, which matters given that median replacement pushes instances off the
 manifold~\cite{hooker2019benchmark}.
 
@@ -62,14 +63,13 @@ simultaneously the more faithful and the cheaper option, so \lime{}'s case rests
 model-agnosticism rather than on measured quality --- and our stacking cells, which admit
 no tree explainer, show what that is worth.
 
-\begin{figure*}[t]\centering
-  \includegraphics[width=0.86\textwidth]{F10.pdf}
-  \caption{Deletion curves for the three ensemble models. A faithful ranking removes the
-  features the model actually relies on first, so its curve falls fastest. The random
-  control barely moves until most features are gone, which is precisely why an \aopc{}
-  value cannot be interpreted without it.}
-  \label{fig:deletion}
-\end{figure*}
+\begin{figure}[t]\centering
+  \includegraphics[width=\columnwidth]{F13.pdf}
+  \caption{Per-cell difference between the best fusion rule and the better of \shap{} and
+  \lime{}, on evaluation instances only. Every cell falls left of zero: the hybrid never
+  clears the bar. Labels give the rule that scored best in that cell.}
+  \label{fig:consensus}
+\end{figure}
 
 \subsection{RQ5: the plausibility check does not discriminate}\label{sec:rq5}
 Overlap with the pre-registered reference sets is similar for both explainers; both
@@ -80,10 +80,11 @@ little room to vary. \RQ{5} is the weakest measurement here, and we said so befo
 it.
 
 \subsection{RQ6: fusion does not clear the bar}\label{sec:rq6}
-Rank fusion improved on the better of \shap{} and \lime{} in \HSixRejected{} of
-\HSixTotal{} cells, with a median rank-biserial effect of $-0.80$; the best fusion rule
-reaches median \aopc{} \AopcBestFusion{} against \AopcShap{} for \shap{} alone. The
-outcome was pre-registered as valid and it follows from \RQ{1}. Fusion pays off when its
+Rank fusion --- including our fidelity-weighted rule --- improved on the better of
+\shap{} and \lime{} in \HSixRejected{} of \HSixTotal{} cells, with a median rank-biserial
+effect of $-0.80$ (Fig.~\ref{fig:consensus}); the best rule reaches median \aopc{}
+\AopcBestFusion{} against \AopcShap{} for \shap{} alone. The outcome was pre-registered as
+valid and it follows from \RQ{1}. Fusion pays off when its
 inputs are individually noisy but their errors are uncorrelated. Here neither holds: the
 two agree substantially, so there is little independent signal to recover, and one is
 consistently better, so averaging its ranks with a weaker and largely redundant signal can

@@ -1,14 +1,17 @@
-# SHAP versus LIME on Clinical Tabular Data
+# A Hybrid SHAP–LIME Consensus Method and Its Limits
 
 [![CI](https://github.com/marajulcsecu/shap-vs-lime-benchmark/actions/workflows/ci.yml/badge.svg)](https://github.com/marajulcsecu/shap-vs-lime-benchmark/actions/workflows/ci.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/code-MIT-green.svg)](LICENSE)
 [![Pre-registered](https://img.shields.io/badge/protocol-pre--registered-8A6A33.svg)](docs/PROTOCOL.md)
 
-A reproducible benchmark of post-hoc explanation **agreement, stability, fidelity, cost,
-plausibility**, and **rank-level consensus** — across 6 classifiers × 3 public clinical
-datasets = **18 model–dataset cells**, **1,746 explained instances**, and **11 hypotheses
-pre-registered in version control before any result existed**.
+A **hybrid consensus method** for combining SHAP and LIME — *fidelity-weighted rank
+fusion*, which weights each explainer by the faithfulness it demonstrates on a disjoint
+calibration split — evaluated against two published fusion baselines inside a reproducible
+benchmark of post-hoc explanation **agreement, stability, fidelity, cost, and
+plausibility**: 6 classifiers × 3 public clinical datasets = **18 model–dataset cells**,
+**1,746 explained instances**, **11 hypotheses pre-registered in version control before any
+result existed**. The hybrid did not clear its pre-registered bar, and RQ6 explains why.
 
 Undergraduate thesis for **ENG 672 — Technical Communication and Writing**, Department of
 Computer Science and Engineering, University of Chittagong.
@@ -48,7 +51,7 @@ the other. The earlier 12-page paper is retained at tag `v1.0-extended-paper`.
 | Deliverable | Path |
 |---|---|
 | IEEE conference paper, **6 pages** (submission format) | `paper/main.pdf` |
-| Thesis report, 48 pp with appendices (the full-length treatment) | `report/main.pdf` |
+| Thesis report, with appendices (the full-length treatment) | `report/main.pdf` |
 | Beamer slide deck (+ backup slides for Q&A) | `slides/main.pdf` |
 | Frozen analysis protocol, with amendment log | `docs/PROTOCOL.md` |
 | Presentation and defence guide | `docs/PRESENTATION_GUIDE.md` |

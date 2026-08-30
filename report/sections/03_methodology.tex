@@ -54,9 +54,18 @@ estimator supports them and report MCC and PR-AUC alongside accuracy.
 permutation sampler over \code{predict\_proba} for logistic regression and stacking.
 \lime{} uses \code{LimeTabularExplainer} with its default discretisation, with the
 one-hot columns declared categorical so the sampler cannot produce inputs the model
-has never seen. Three fusion rules combine the two rankings: mean-rank (Borda),
-reciprocal-rank fusion~\cite{cormack2009reciprocal}, and a fidelity-weighted variant
-(Algorithm~\ref{alg:fusion}). A uniformly random ranking serves as the control.
+has never seen. A uniformly random ranking serves as the control.
+
+Three fusion rules combine the two rankings (Algorithm~\ref{alg:fusion}). Two are
+published baselines: \emph{mean-rank} fusion (Borda), which averages the normalised
+ranks, and \emph{reciprocal-rank fusion}, standard in information retrieval, where each
+list contributes $1/(60+r_j)$ so one badly wrong ranking degrades the result less than
+an arithmetic mean would~\cite{cormack2009reciprocal}. The third,
+\emph{fidelity-weighted} fusion, is ours: it does not treat the two explainers as
+equally trustworthy, but weights them by the faithfulness each actually demonstrates,
+$w = \aopc{}^{\text{cal}}_{\shap} / (\aopc{}^{\text{cal}}_{\shap} +
+\aopc{}^{\text{cal}}_{\lime})$, so the explainer whose rankings move the model's
+prediction more on held-out instances carries more of the fused rank.
 
 \begin{algorithm}[t]
 \caption{Rank-level fusion of two explanations}\label{alg:fusion}
@@ -65,9 +74,9 @@ reciprocal-rank fusion~\cite{cormack2009reciprocal}, and a fidelity-weighted var
 $r^{A} \gets \textnormal{normalised ranks of } |\phi^{A}|$\;
 $r^{B} \gets \textnormal{normalised ranks of } |\phi^{B}|$\;
 \Switch{rule}{
-  \Case{mean-rank}{$r \gets \tfrac{1}{2}(r^{A} + r^{B})$\;}
-  \Case{fidelity-weighted}{$r \gets w\,r^{A} + (1-w)\,r^{B}$\;}
-  \Case{RRF}{$s_j \gets \tfrac{1}{60 + r^{A}_j} + \tfrac{1}{60 + r^{B}_j}$;
+  \Case{mean-rank (baseline)}{$r \gets \tfrac{1}{2}(r^{A} + r^{B})$\;}
+  \Case{fidelity-weighted (ours)}{$r \gets w\,r^{A} + (1-w)\,r^{B}$\;}
+  \Case{RRF (baseline)}{$s_j \gets \tfrac{1}{60 + r^{A}_j} + \tfrac{1}{60 + r^{B}_j}$;
              $r \gets$ ranks of $-s$\;}
 }
 \Return{$\operatorname{argsort}(r)$}\;

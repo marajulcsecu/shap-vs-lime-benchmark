@@ -22,9 +22,8 @@ gate.} In PIMA/LightGBM, \AdditivityWorstOutliers{} of 150 explained instances r
 \AdditivityWorstMax{}) against a cell median of $1.1\times10^{-9}$, so the pre-registered
 rule is not satisfied. The discrepancy is insensitive to background size and we did not
 attribute it; the obvious candidate, coincidence with a median-imputed value, was tested and
-rejected. Our two pre-registered options were to force that cell into log-odds space, which
-would remove it from every cross-explainer comparison, or to widen the gate. We did
-neither, because widening a gate after seeing the result it fails is what pre-registration
-exists to prevent. The cell is retained, the failure stated here, and every hypothesis
-tally additionally reported with the cell excluded; no decision in
-Table~\ref{tab:hypotheses} changes.
+rejected. Our two pre-registered options were to force that cell into log-odds space, which would
+remove it from every cross-explainer comparison, or to widen the gate. We did neither:
+widening a gate after seeing the result it fails is what pre-registration exists to
+prevent. The cell is retained, the failure stated, and every tally additionally reported
+with the cell excluded; no decision in Table~\ref{tab:hypotheses} changes.
