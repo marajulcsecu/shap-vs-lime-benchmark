@@ -54,6 +54,8 @@ the other. The earlier 12-page paper is retained at tag `v1.0-extended-paper`.
 | Thesis report, with appendices (the full-length treatment) | `report/main.pdf` |
 | Beamer slide deck (+ backup slides for Q&A) | `slides/main.pdf` |
 | Frozen analysis protocol, with amendment log | `docs/PROTOCOL.md` |
+| Plain-language explanation guide (English) | `docs/EXPLANATION_GUIDE.md` |
+| Plain-language explanation guide (Bengali) | `docs/EXPLANATION_GUIDE_BN.md` |
 | Presentation and defence guide | `docs/PRESENTATION_GUIDE.md` |
 | Author contribution statement | `docs/CONTRIBUTIONS.md` |
 
