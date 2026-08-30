@@ -94,12 +94,16 @@ jobs:
           sys.exit(1 if problems else 0)
           PY
 
+      # A convenience upload, not a check: the smoke run's own assertions above are
+      # what gate this job. Account-wide artifact storage can fill up, and that must
+      # not turn a passing build red.
       - uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true
         with:
           name: smoke-figures
           path: figures/*.png
-          retention-days: 7
+          retention-days: 3
 
   documents:
     name: LaTeX documents
@@ -142,11 +146,14 @@ jobs:
           MPLBACKEND: Agg
         run: pytest tests/test_paper_build.py -v -m "not slow"
 
+      # The three PDFs are committed to the repository, so this artefact is a
+      # convenience copy. Same reasoning as the smoke-figures upload above.
       - uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: documents
           path: |
             paper/main.pdf
             report/main.pdf
             slides/main.pdf
-          retention-days: 30
+          retention-days: 7
