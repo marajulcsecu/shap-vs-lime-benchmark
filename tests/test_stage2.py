@@ -1,3 +1,6 @@
+import shutil
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -84,7 +87,17 @@ def test_transformed_ranking_expands_a_feature_into_all_its_onehot_columns():
 
 
 @pytest.mark.slow
-def test_main_writes_one_parquet_per_cell_and_resumes():
+def test_main_writes_one_parquet_per_cell_and_resumes(tmp_path, monkeypatch):
+    # Own output tree, seeded with the reported results the way the session fixture seeds
+    # its scratch. Left in the shared scratch, this regenerates every cell under QUICK and
+    # its instance_budget.csv replaces the FULL copy -- after which stage 4's H6 test
+    # compares FULL sample sizes against a budget that never produced them and fails.
+    root = Path(__file__).resolve().parents[1]
+    shutil.copytree(root / "results", tmp_path / "results", dirs_exist_ok=True)
+    (tmp_path / "data").mkdir(parents=True, exist_ok=True)
+    monkeypatch.setenv("XAIB_OUTPUT_ROOT", str(tmp_path))
+    assert paths().results.parent == tmp_path, "output redirection did not take effect"
+
     main(force=True)
     p = paths()
     files = sorted(p.attributions.glob("*_attr.parquet"))
