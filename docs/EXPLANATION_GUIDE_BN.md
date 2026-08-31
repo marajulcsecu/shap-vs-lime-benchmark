@@ -9,6 +9,11 @@
 
 > **ইংরেজি ভার্সন:** `docs/EXPLANATION_GUIDE.md` — দুটোতে একই কথা আছে।
 
+> **পেপারের কোনো নির্দিষ্ট অংশ খুঁজছো?** এই guide সাজানো হয়েছে *ধারণা* অনুযায়ী।
+> [`docs/PAPER_GUIDE.md`](PAPER_GUIDE.md) সাজানো হয়েছে *পেপার* অনুযায়ী — title, abstract,
+> keyword, প্রতিটা section, প্রতিটা figure, আর ১৭টা reference-এর প্রতিটা কেন আছে। PDF পাশে
+> খুলে ওটা পড়ো। (ফাইলটা ইংরেজিতে।)
+
 **সূচিপত্র**
 
 | | | | |
@@ -53,16 +58,18 @@ prediction** ব্যাখ্যা করে। **দ্বিতীয়ত
 
 ### ১.৩ টাইটেলের মানে
 
-> **A Hybrid SHAP–LIME Consensus Method and Its Limits: A Reproducible Multi-Model
-> Benchmark on Clinical Tabular Data**
+> **SHAP or LIME? Agreement, Stability, Faithfulness and Speed Across Six Models and
+> Three Clinical Datasets**
 
 | অংশ | কী বোঝাচ্ছে |
 |---|---|
-| Hybrid … Consensus Method | আমাদের fidelity-weighted rank fusion rule |
-| and Its Limits | ১৮টা cell-এর একটাতেও এটা SHAP/LIME-এর ভালোটাকে হারাতে পারেনি |
-| Reproducible | প্রতিটা সংখ্যা, figure, table কোড দিয়ে তৈরি; `make all` দিলে পুরো study আবার তৈরি হয় |
-| Multi-Model | ছয় ধরনের classifier — আগের প্রায় সব তুলনামূলক কাজ এই axis-টাই fixed রাখে |
-| Clinical Tabular Data | তিনটা public, de-identified মেডিকেল table (কোনো মেডিকেল দাবি আমরা করছি না) |
+| SHAP or LIME? | practitioner-এর আসল প্রশ্ন, যেটার উত্তর পেপারটা দেয় — দুটোই চালিয়েছ, দুটো আলাদা বলছে, কোনটা নেবে? |
+| Agreement | RQ১ — দুটো কি একইভাবে feature সাজায়? Median ρ = 0.74, top-5-এর চারটা মেলে |
+| Stability | RQ২ — stability নামে মানুষ তিনটা আলাদা জিনিস বোঝায়; আমরা তিনটাকে আলাদা করে মেপেছি |
+| Faithfulness | RQ৩ — উপরের feature গুলো মুছে দিলে prediction সত্যিই নড়ে কি? |
+| Speed | RQ৪ — tree backend থাকলে SHAP প্রতি explanation-এ প্রায় 24.8 গুণ সস্তা |
+| Across Six Models | ছয় ধরনের classifier — আগের প্রায় সব তুলনামূলক কাজ এই axis-টাই fixed রাখে |
+| Three Clinical Datasets | তিনটা public, de-identified মেডিকেল table, প্রতি row-তে একজন রোগী (কোনো মেডিকেল দাবি আমরা করছি না) |
 
 ---
 
@@ -676,7 +683,7 @@ environment-এর রেকর্ড, আর repository-র গাইড)।
 
 ### Hybrid আর টাইটেল নিয়ে
 
-**"তোমাদের method টাইটেলে আছে কিন্তু কাজ করেনি। এটা contribution কীভাবে?"**
+**"তোমাদের নিজের method তো কাজ করেনি। এটা contribution কীভাবে?"**
 > কারণ আমরা মানদণ্ডটা সৎভাবে ঠিক করেছি আর যা পেয়েছি তাই বলেছি। মানদণ্ড ছিল একই cell-এ SHAP আর
 > LIME-এর **ভালোটাকে** হারানো — তাদের গড়কে না, যেটা যেকোনো কিছুই হারাতে পারত। Null ফলাফলটা
 > কিছু চালানোর আগেই বৈধ ফলাফল হিসেবে লেখা ছিল, তাই আমরা চুপচাপ সফলতার সংজ্ঞা বদলাতে পারতাম না।
@@ -684,10 +691,13 @@ environment-এর রেকর্ড, আর repository-র গাইড)।
 > এদের মিল যথেষ্ট বেশি এবং একজন ধারাবাহিকভাবে ভালো, তাই গড় করলে শক্তিশালী signal-টাই পাতলা হয়।
 > ভাগ্যক্রমে একটা positive ফলাফল পেয়ে কারণ ব্যাখ্যা করতে না পারা পেপার এর চেয়ে কম মূল্যবান হতো।
 
-**"তাহলে টাইটেলে রাখলে কেন?"**
-> কারণ এটা তিনটা contribution-এর একটা, আর পাঠকের জানার অধিকার আছে যে পেপারটা শুধু তুলনা করছে না,
-> একটা method-ও প্রস্তাব করছে। "And Its Limits" ওই দাবির সৎ অর্ধেক — আমরা সীমা নির্ধারণ করেছি
-> কখন explanation fusion চেষ্টা করার মতো, আর সেটা একটা ফলাফল।
+**"তাহলে টাইটেলে রাখলে না কেন?"**
+> কারণ টাইটেলের কাজ হলো পেপারটা আসলে কী নিয়ে, সেটা সঠিক অনুপাতে বলা। Hybrid হলো ছয়টা research
+> question-এর একটা; বাকি পাঁচটাই তুলনা, আর ওই তুলনাই গবেষণার মূল কথা। এটা এখনও Introduction-এর
+> তৃতীয় contribution, pre-registered টেবিলের RQ6, Results-এর নিজের একটা subsection, আর
+> abstract-এর একটা সরল বাক্য — কিছুই লুকানো হয়নি। আগের টাইটেল method-কে সামনে রেখেছিল আর সৎ
+> থাকার জন্য "And Its Limits" যোগ করেছিল; আমাদের সুপারভাইজারের রায় ছিল যে আমাদের একমাত্র
+> ব্যর্থ পরীক্ষাটাকে সামনে রাখলে thesis-এর ভুল ছবি তৈরি হয় — আর কথাটা ঠিক।
 
 **"Fusion কাজ করাতে কী লাগত?"**
 > সত্যিকারের পরিপূরক base explainer — যেমন একটা gradient-ভিত্তিক আর একটা perturbation-ভিত্তিক

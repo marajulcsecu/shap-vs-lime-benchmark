@@ -15,10 +15,10 @@ al.~\cite{hooker2019benchmark} showed such tests are confounded by the off-manif
 inputs perturbation creates, which we address directly in Section~\ref{sec:pitfalls}.
 Robustness is usually estimated as a local Lipschitz
 constant~\cite{alvarezmelis2018robustness}, and rank-biased overlap compares ranked lists
-without requiring a cut-off~\cite{webber2010similarity}. \shap{}'s guarantees are weaker in
-practice than in theory --- the background distribution changes the
-attributions~\cite{sundararajan2020many} --- and both methods can be deliberately
-fooled~\cite{slack2020fooling}. We take these as reasons for careful measurement rather
+without requiring a cut-off~\cite{webber2010similarity}. Neither method is as strong in
+practice as in theory --- the background distribution changes \shap{}'s attributions,
+which Section~\ref{sec:pitfalls} treats as a design decision --- and both can be
+deliberately fooled~\cite{slack2020fooling}. We take these as reasons for careful measurement rather
 than settled verdicts.
 
 Combining several explainers has been proposed before, both as an ensemble of
@@ -31,7 +31,7 @@ two explainers by their \emph{measured} fidelity rather than equally, fitting th
 on a disjoint calibration split so the rule cannot be tuned on its own test set, and
 testing the result against the better of the two rather than their mean.
 
-Several studies contrast \shap{} and \lime{} on tabular
-data~\cite{man2021best,salih2024perspective,elshawi2019interpretability,duell2021comparison,amparore2021trust}.
-Most vary a single axis, none we surveyed reports a random-ranking control or states its
-attribution space, and none pre-registers its hypotheses.
+Several studies contrast \shap{} and \lime{} on tabular and clinical
+data~\cite{salih2024perspective,duell2021comparison}. Most vary a single axis, none we
+surveyed reports a random-ranking control or states its attribution space, and none
+pre-registers its hypotheses.

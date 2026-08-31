@@ -1,17 +1,18 @@
-# A Hybrid SHAP–LIME Consensus Method and Its Limits
+# SHAP or LIME? Agreement, Stability, Faithfulness and Speed Across Six Models and Three Clinical Datasets
 
 [![CI](https://github.com/marajulcsecu/shap-vs-lime-benchmark/actions/workflows/ci.yml/badge.svg)](https://github.com/marajulcsecu/shap-vs-lime-benchmark/actions/workflows/ci.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/code-MIT-green.svg)](LICENSE)
 [![Pre-registered](https://img.shields.io/badge/protocol-pre--registered-8A6A33.svg)](docs/PROTOCOL.md)
 
-A **hybrid consensus method** for combining SHAP and LIME — *fidelity-weighted rank
-fusion*, which weights each explainer by the faithfulness it demonstrates on a disjoint
-calibration split — evaluated against two published fusion baselines inside a reproducible
-benchmark of post-hoc explanation **agreement, stability, fidelity, cost, and
-plausibility**: 6 classifiers × 3 public clinical datasets = **18 model–dataset cells**,
-**1,746 explained instances**, **11 hypotheses pre-registered in version control before any
-result existed**. The hybrid did not clear its pre-registered bar, and RQ6 explains why.
+A controlled comparison of the two dominant post-hoc explainers on clinical tabular data,
+measuring **agreement, stability, fidelity, cost, and plausibility** across 6 classifiers ×
+3 public clinical datasets = **18 model–dataset cells**, **1,746 explained instances**, and
+**11 hypotheses pre-registered in version control before any result existed**. It also
+proposes and tests a **hybrid consensus method** — *fidelity-weighted rank fusion*, which
+weights each explainer by the faithfulness it demonstrates on a disjoint calibration split —
+against two published fusion baselines. The hybrid did not clear its pre-registered bar, and
+RQ6 explains why.
 
 Undergraduate thesis for **ENG 672 — Technical Communication and Writing**, Department of
 Computer Science and Engineering, University of Chittagong.
@@ -56,6 +57,7 @@ the other. The earlier 12-page paper is retained at tag `v1.0-extended-paper`.
 | Frozen analysis protocol, with amendment log | `docs/PROTOCOL.md` |
 | Plain-language explanation guide (English) | `docs/EXPLANATION_GUIDE.md` |
 | Plain-language explanation guide (Bengali) | `docs/EXPLANATION_GUIDE_BN.md` |
+| The paper walked through part by part, including why each reference is cited | `docs/PAPER_GUIDE.md` |
 | Presentation and defence guide | `docs/PRESENTATION_GUIDE.md` |
 | Author contribution statement | `docs/CONTRIBUTIONS.md` |
 

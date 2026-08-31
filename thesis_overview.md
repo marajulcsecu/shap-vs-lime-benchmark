@@ -1,4 +1,4 @@
-# Thesis Overview — Hybrid SHAP–LIME Consensus and Its Limits
+# Thesis Overview — SHAP or LIME? A Controlled Comparison
 
 **Course:** ENG 672 Technical Communication and Writing · **Revised:** 2026-08-29 · **v2**
 

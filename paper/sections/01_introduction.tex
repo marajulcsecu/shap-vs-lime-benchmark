@@ -1,16 +1,16 @@
 \section{Introduction}\label{sec:intro}
 
-The models that perform best on tabular data are tree ensembles whose reasoning is not
-readable from their parameters~\cite{grinsztajn2022why}, and they are increasingly
-deployed where decisions affect people. Regulation has followed: the EU AI Act obliges
-providers of high-risk systems to make operation interpretable~\cite{euaiact2024}.
+Tree ensembles are the default choice for tabular prediction, their reasoning is not
+readable from their parameters, and they are increasingly deployed where decisions affect
+people. Regulation has followed: the EU AI Act obliges providers of high-risk systems to
+make operation interpretable~\cite{euaiact2024}.
 Two post-hoc methods dominate practice. \shap{} attributes a prediction to features
 through cooperative-game theory~\cite{lundberg2017unified,lundberg2020local}; \lime{}
 fits an interpretable surrogate in the neighbourhood of a single
 prediction~\cite{ribeiro2016why}. Their foundations differ, one is deterministic on
 trees while the other samples, and their failure modes are
-unrelated~\cite{slack2020fooling,kumar2020problems}. A practitioner who runs both and
-obtains two different top-five lists has no principled basis for choosing.
+unrelated~\cite{slack2020fooling}. A practitioner who runs both and obtains two different
+top-five lists has no principled basis for choosing.
 
 Prior comparisons do not settle this because they hold too much fixed: typically one
 model family or one dataset, a locally defined fidelity metric, no hypothesis test, no

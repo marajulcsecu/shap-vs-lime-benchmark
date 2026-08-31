@@ -4,6 +4,8 @@ For a 12–15 minute talk from `slides/main.pdf`, plus 25 anticipated questions 
 answers, divided so each author owns the block matching their row in
 `docs/CONTRIBUTIONS.md`.
 
+**For a walk through the paper part by part, see `docs/PAPER_GUIDE.md`.**
+
 **If you have not read the paper yet, start with `docs/EXPLANATION_GUIDE.md`** (or
 `docs/EXPLANATION_GUIDE_BN.md` in Bengali): it explains every part of the study in plain
 language. This file assumes you already know the content and only covers how to deliver it.
