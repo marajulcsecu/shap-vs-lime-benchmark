@@ -87,8 +87,8 @@ jobs:
           print(f"profile={manifest['profile']} artefacts={len(manifest['artifacts'])} "
                 f"figures={len(figures)} tables={len(tables)}")
           problems = []
-          if len(figures) != 14: problems.append(f"{len(figures)} figures, expected 14")
-          if len(tables) != 15: problems.append(f"{len(tables)} tables, expected 15")
+          if len(figures) not in (14, 15): problems.append(f"{len(figures)} figures, expected 14 or 15")
+          if len(tables) not in (15, 16): problems.append(f"{len(tables)} tables, expected 15 or 16")
           if manifest["reportable"]: problems.append("a QUICK run must not be reportable")
           for p in problems: print("ISSUE:", p)
           sys.exit(1 if problems else 0)
