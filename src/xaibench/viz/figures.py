@@ -169,7 +169,12 @@ def fig_agreement_heatmap(profile: Profile):
     matrix = (agreement.pivot_table(index="model", columns="dataset",
                                     values="spearman")
               .reindex(index=MODEL_ORDER, columns=list(DATASET_ORDER)))
-    fig, ax = plt.subplots(figsize=(9 * CM, 7.5 * CM))
+    sig_cells: set[tuple[str, str]] = set()
+    stats_path = paths().results / "stats_hypotheses.csv"
+    if stats_path.exists():
+        h1 = pd.read_csv(stats_path).query("hypothesis == 'H1' and decision == 'reject H0'")
+        sig_cells = {(r.model, r.dataset) for r in h1.itertuples()}
+    fig, ax = plt.subplots(figsize=(9 * CM, 7.2 * CM))
     image = ax.imshow(matrix.to_numpy(dtype=float), cmap="RdYlBu", vmin=-1, vmax=1,
                       aspect="auto")
     ax.set_xticks(range(matrix.shape[1]))
@@ -177,15 +182,16 @@ def fig_agreement_heatmap(profile: Profile):
                        ha="right", fontsize=7.5)
     ax.set_yticks(range(matrix.shape[0]))
     ax.set_yticklabels([MODEL_LABELS[m] for m in matrix.index])
-    for i in range(matrix.shape[0]):
-        for j in range(matrix.shape[1]):
+    for i, model_id in enumerate(matrix.index):
+        for j, ds_id in enumerate(matrix.columns):
             value = matrix.to_numpy(dtype=float)[i, j]
             if np.isfinite(value):
-                ax.text(j, i, f"{value:.2f}", ha="center", va="center", fontsize=8,
+                star = "*" if (model_id, ds_id) in sig_cells else ""
+                ax.text(j, i, f"{value:.2f}{star}", ha="center", va="center", fontsize=8,
                         color="black" if abs(value) < 0.6 else "white")
     ax.grid(False)
     fig.colorbar(image, ax=ax, label="Spearman $\\rho$ (global ranking)")
-    _label(ax, title="SHAP vs LIME global rank agreement")
+    _label(ax, title="SHAP vs LIME agreement (* = H1 $p_{\\mathrm{adj}}<0.05$)")
     return fig
 
 

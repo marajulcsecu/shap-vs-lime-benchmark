@@ -118,14 +118,10 @@ def test_the_paper_inputs_generated_tables_rather_than_inlining_them():
 
 
 def test_bibliography_is_sized_for_a_six_page_paper():
-    """The supervisor asked for a 16-17 item list, dropping older and redundant work.
-
-    The floor is not cosmetic: below it, one of the metric definitions (AOPC, RBO, local
-    Lipschitz, comprehensiveness/sufficiency), a dataset source, the reciprocal-rank
-    fusion baseline, or the aggregation prior-art disclaimer has lost its citation.
-    """
+    """Post-review revision (ICCIT 2026, R1.5) expanded the literature review to
+    incorporate recent disagreement, LIME stability, and conditional/ROAR fidelity works."""
     bbl = ROOT / "paper" / "main.bbl"
     if not bbl.exists():
         pytest.skip("main.bbl absent; run `make paper`")
     cited = bbl.read_text().count("\\bibitem")
-    assert 16 <= cited <= 18, f"{cited} references cited; the supervisor asked for 16-17"
+    assert 24 <= cited <= 36, f"{cited} references cited; expected 24-36 post-revision"

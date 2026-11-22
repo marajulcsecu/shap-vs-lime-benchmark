@@ -11,6 +11,12 @@
 \usepackage[htt]{hyphenat}   % long \texttt{} file paths must be breakable
 \usepackage{url}
 \emergencystretch=3em
+\setlength{\textfloatsep}{7pt plus 2pt minus 2pt}
+\setlength{\dbltextfloatsep}{7pt plus 2pt minus 2pt}
+\setlength{\floatsep}{6pt plus 2pt minus 2pt}
+\setlength{\dblfloatsep}{6pt plus 2pt minus 2pt}
+\setlength{\abovecaptionskip}{3pt}
+\setlength{\belowcaptionskip}{2pt}
 % File paths in prose: \path breaks at / and . even for all-caps tokens,
 % which plain \texttt cannot do and which pushes lines past the measure.
 % \path expands \url and is illegal in a caption (a moving argument), so
@@ -21,8 +27,13 @@
 \newcommand{\code}[1]{\texttt{\nohyphens{#1}}}
 \usepackage[hidelinks]{hyperref}
 \usepackage{cite}
+\usepackage{xcolor}
+\newif\ifhighlight
+\highlightfalse
+\newcommand{\rev}[1]{\ifhighlight{\color{blue!80!black}#1}\else#1\fi}
 \graphicspath{{../figures/}}
 \input{../tables/findings}
+\input{../tables/revision_findings}
 \newcommand{\shap}{\textsc{shap}}
 \newcommand{\lime}{\textsc{lime}}
 \newcommand{\aopc}{\textsc{aopc}}

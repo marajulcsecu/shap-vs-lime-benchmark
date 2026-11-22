@@ -1,28 +1,22 @@
 \section{Discussion}\label{sec:discussion}
 
-At median $\rho = \MedianRho{}$ the two methods are not the wildly divergent pair some of
-the disagreement literature implies, but one feature in each top-five list still differs.
-The practical consequence is that reading the intersection of the two is not a robustness
-check --- it silently drops a feature from each explanation --- and if a decision turns
-on which features appear in a top-five list, the choice of explainer is part of that
-decision and belongs in the record.
+\textbf{Explainer choice belongs in the audit trail.} Even at median $\rho=\MedianRho{}$
+(\rev{$\BcwdRhoMed{}$--$\CdcRhoMed{}$ externally}), one top-five feature differs between
+\shap{} and \lime{}. On tree ensembles, \textsc{TreeSHAP} dominates local faithfulness
+(median, marginal, \rev{conditional $k$-NN}), local robustness, and speed \rev{across all
+tested \lime{} budgets ($500$--$10{,}000$). On model-agnostic stacking, however, \lime{} is
+\StackRatioFiveK{}$\times$ faster at $N=5{,}000$ (\StackRatioFiveH{}$\times$ at $500$) and
+matches \shap{} on global retrained (\textsc{roar}) importance.}
 
-On this evidence the default should be \shap{} wherever a tree backend exists: on these
-\NumCells{} cells it wins on every axis we measured except model-agnosticism. That
-remaining axis is precisely \lime{}'s case, and it is not a small one.
+\rev{\textbf{Fixed-model vs.\ data-distribution faithfulness.} Local perturbation tests
+(including conditional $k$-NN) consistently favour \shap{}, whereas global \textsc{roar}
+retraining equalises \shap{} and \lime{} ($p=\RoarAucP{}$), reflecting the
+\emph{true-to-the-model} vs.\ \emph{true-to-the-data} split~\cite{chen2020truemodel}:
+auditing a deployed model requires fixed-model fidelity, while feature selection under
+retraining tolerates correlated substitutes.}
 
-The stability result is the one we would most want carried forward. Tree \shap{}'s re-run
-variance is exactly zero, so a study measuring stability that way alone would report it as
-perfectly stable; its cross-refit agreement was \RetrainShap{}, meaning the global ranking
-moves when the model is refitted on a resample of the same training data. The instability
-lives in the model, not the explainer, and no amount of determinism in the attribution
-method removes it. Anyone reporting explanation stability should say which of the three
-things they measured.
-
-Freezing the protocol repaid itself three times. The additivity check caught a
-background-construction error that violated \shap{}'s own additivity by one per cent on
-LightGBM cells while every other cell looked healthy; a test requiring each interval to
-contain its own point estimate caught a misapplication of BCa bootstrap to a non-smooth
-statistic; and a test on the \rbo{} floor caught that raw \rbo{} is not comparable across
-datasets of different width. None would have been visible in the results, and all three
-are recorded in the protocol's amendment log.
+\textbf{Determinism is not stability, and fusion needs complementarity.} Re-run variance
+alone labels \textsc{TreeSHAP} perfectly stable while hiding retraining drift
+($\rho=\RetrainShap{}$). Likewise, fusing concordant explainers where one dominates
+(\rev{\ShapWinPct{}\,\% win rate) fails even with tuned or $R^2$-adaptive weights} because
+little complementary signal exists.

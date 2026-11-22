@@ -1,36 +1,13 @@
 \documentclass[conference]{IEEEtran}
 \input{preamble}
 
+% Double-blind toggle (\blindtrue for TPC re-evaluation; \blindfalse for camera-ready).
+\newif\ifblind
+\blindtrue
+\highlightfalse
+% Anonymous review mirror URL (replace after creating anonymous.4open.science link).
+\newcommand{\AnonRepoUrl}{}
+
 \begin{document}
-\title{SHAP or LIME? Agreement, Stability, Faithfulness and Speed
-Across Six Models and Three Clinical Datasets}
-
-\author{%
-\IEEEauthorblockN{Samira Oasela Antika, Yeasmin Akter Shuchona,
-MD.\ Marajul Haque, and Gian Juti Tripura}
-\IEEEauthorblockA{Department of Computer Science and Engineering\\
-University of Chittagong, Chittagong-4331, Bangladesh\\
-\{22701043, 22701052, 23701070, 22701073\}@std.cu.ac.bd}%
-}
-
-\maketitle
-
-\input{sections/00_abstract}
-
-\begin{IEEEkeywords}
-explainable artificial intelligence, SHAP, LIME, ensemble learning, model
-interpretability, tabular data, reproducibility, pre-registration
-\end{IEEEkeywords}
-
-\input{sections/01_introduction}
-\input{sections/02_related_work}
-\input{sections/03_method}
-\input{sections/04_results}
-\input{sections/05_discussion}
-\input{sections/06_limitations}
-\input{sections/07_conclusion}
-\input{sections/08_backmatter}
-
-\bibliographystyle{IEEEtran}
-\bibliography{refs}
+\input{main_body}
 \end{document}

@@ -1,29 +1,18 @@
 \section{Limitations and Threats to Validity}\label{sec:limitations}
 
-We state these before a reader has to raise them. \textbf{Three datasets, all small and
-all clinical:} the per-cell tests have real power, but generalisation across \emph{datasets}
-rests on three points, and the difficulty gradient is a design compensation rather than a
-substitute for breadth. \textbf{Perturbation baselines are off-manifold:} median
-replacement creates rows the data-generating process would not
-produce~\cite{hooker2019benchmark}; a marginal-draw variant did not reverse the ordering,
-but both share an independence assumption. \textbf{The plausibility reference sets are not
-ground truth:} compiled from cited literature and frozen before any result existed, they
-remain incomplete, non-causal, and shaped by what their sources chose to measure, which is
-why \RQ{5} is corroborating evidence only. \textbf{Retraining stability covers three of six
-models}, restricted in advance on compute grounds. \textbf{Timing is single-machine:} the
-\SpeedFactor{}$\times$ gap reflects a structural difference, but its magnitude is
-hardware-specific. \textbf{No human evaluation:} every metric here is a property of the
-model--explanation pair. Finally, a faithful post-hoc explanation of a black box is still
-not an interpretable model.
+\textbf{Dataset scope:} our primary pre-registered benchmark rests on three small clinical
+datasets; \rev{while the $12$-cell external validation on BCWD ($d=30$) and CDC Diabetes
+($n=5{,}000$) substantially strengthens generality, extending to non-clinical and very high
+dimensionality ($d>100$) regimes remains future work. \textbf{Dependence assumptions:}
+conditional $k$-NN preserves empirical joint structure locally but relies on Euclidean
+neighbourhoods in standardised space; \textsc{roar} avoids off-manifold bias completely
+but evaluates global rather than per-instance attributions.} \textbf{Scope bounds:}
+retraining stability covers the three tree ensembles (protocol R3), timing is
+single-machine, and no human-subject evaluation is performed.
 
-\textbf{The additivity gate failed for one cell, and we report it rather than widen the
-gate.} In PIMA/LightGBM, \AdditivityWorstOutliers{} of 150 explained instances reconstruct
-\code{predict\_proba} to worse than the $5\times10^{-3}$ tolerance (worst
-\AdditivityWorstMax{}) against a cell median of $1.1\times10^{-9}$, so the pre-registered
-rule is not satisfied. The discrepancy is insensitive to background size and we did not
-attribute it; the obvious candidate, coincidence with a median-imputed value, was tested and
-rejected. Our two pre-registered options were to force that cell into log-odds space, which would
-remove it from every cross-explainer comparison, or to widen the gate. We did neither:
-widening a gate after seeing the result it fails is what pre-registration exists to
-prevent. The cell is retained, the failure stated, and every tally additionally reported
-with the cell excluded; no decision in Table~\ref{tab:hypotheses} changes.
+\textbf{Disclosed additivity gate failure (protocol risk R1):} in PIMA/LightGBM,
+\AdditivityWorstOutliers{}/150 instances exceed the $5\times 10^{-3}$ probability-space
+additivity gate (worst \AdditivityWorstMax{}, cell median $1.1\times 10^{-9}$). Rather than
+widen the gate post-hoc or drop the cell into log-odds space, we retain and disclose it and
+verify in \file{results/stats_sensitivity_r1.csv} that excluding PIMA/LightGBM alters zero
+hypothesis decisions in Table~\ref{tab:hypotheses}.

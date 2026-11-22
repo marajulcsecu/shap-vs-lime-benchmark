@@ -1,50 +1,37 @@
 \section{Introduction}\label{sec:intro}
 
-Tree ensembles are the default choice for tabular prediction, their reasoning is not
-readable from their parameters, and they are increasingly deployed where decisions affect
-people. Regulation has followed: the EU AI Act obliges providers of high-risk systems to
-make operation interpretable~\cite{euaiact2024}.
-Two post-hoc methods dominate practice. \shap{} attributes a prediction to features
-through cooperative-game theory~\cite{lundberg2017unified,lundberg2020local}; \lime{}
-fits an interpretable surrogate in the neighbourhood of a single
-prediction~\cite{ribeiro2016why}. Their foundations differ, one is deterministic on
-trees while the other samples, and their failure modes are
-unrelated~\cite{slack2020fooling}. A practitioner who runs both and obtains two different
-top-five lists has no principled basis for choosing.
+Tree ensembles dominate tabular prediction~\rev{\cite{grinsztajn2022why}}, yet their logic
+is opaque even as regulations such as the EU AI Act mandate interpretability for high-risk
+systems~\cite{euaiact2024}. Two post-hoc methods lead practice: \shap{} attributes
+predictions via cooperative game theory~\cite{lundberg2017unified,lundberg2020local}, while
+\lime{} fits a sparse local linear surrogate~\cite{ribeiro2016why}. \rev{Because they
+optimise different objectives over different neighbourhoods~\cite{han2022which},
+practitioners often face the \emph{disagreement problem}~\cite{krishna2024disagreement}}
+without a principled basis to choose.
 
-Prior comparisons do not settle this because they hold too much fixed: typically one
-model family or one dataset, a locally defined fidelity metric, no hypothesis test, no
-random-ranking baseline, and no statement of which output space the attributions occupy.
-The gap is not a missing algorithm but a missing controlled comparison --- and that is
-something an experiment can close.
-
-This paper contributes:
+Prior tabular comparisons fix a single model family or dataset, omit random-ranking
+controls and multiple-testing correction, silently compare log-odds \shap{} against
+probability-space \lime{}, \rev{report one conflated stability scalar, or evaluate \lime{}
+at a single unreported budget without dependence-aware faithfulness checks.} We address
+these gaps via a pre-registered, code-generated benchmark \rev{and post-review validations}:
 
 \begin{enumerate}
-  \item \textbf{A reproducible multi-axis benchmark.} Two explainers, three rank-fusion
-    rules, and a random control across six classifiers and three public clinical
-    datasets (\NumCells{} cells, \NumExplained{} instances), with eleven pre-registered
-    hypotheses, non-parametric tests, Holm correction within family, effect sizes, and
-    bootstrap intervals (Table~\ref{tab:hypotheses}).
-  \item \textbf{A three-way decomposition of explanation stability} --- explainer
-    randomness, input perturbation, and variance from retraining the model itself
-    (Section~\ref{sec:rq2}). Reporting one stability number conflates these, and the
-    distinction matters: an explanation can be bit-identical across runs and still
-    fragile, because the model beneath it moves when the training sample does.
-  \item \textbf{A hybrid consensus method, and an honest account of its limits.} We
-    propose \emph{fidelity-weighted rank fusion}: the two explainers are combined in
-    proportion to the faithfulness each demonstrates, with the weight fitted on a
-    calibration split disjoint from the instances the method is later tested on, so it
-    cannot win by construction. It is evaluated against two published fusion baselines ---
-    mean-rank (Borda) and reciprocal-rank fusion~\cite{cormack2009reciprocal} --- and
-    against a deliberately strict bar: beat the \emph{better} of \shap{} and \lime{} on
-    the same cell, not their average, which anything would beat. Explanation aggregation
-    itself is prior work~\cite{bhatt2020aggregating} and we claim no priority for the
-    idea; what is new is the fidelity weighting, the leakage-safe calibration, and the
-    controlled test. The outcome is negative, it was pre-registered as a valid result
-    before running, and Section~\ref{sec:rq6} explains the mechanism.
+  \item \textbf{Controlled benchmark, \rev{redundancy diagnosis, and external scalability.}}
+    Across six classifiers and three clinical datasets (\NumCells{} cells, \NumExplained{}
+    instances), we test eleven pre-registered hypotheses (\rev{Holm-adjusted
+    $p_{\text{adj}}<0.05$}) while avoiding four silent traps (Section~\ref{sec:pitfalls}).
+    \rev{We quantify inter-feature redundancy to explain why concordance drops on the
+    easiest task, and replicate our findings on $12$ external cells ($d=30$ and
+    $n=5{,}000$).}
+  \item \textbf{Three-way stability decomposition \rev{and \lime{} budget Pareto.}} We
+    separate re-run variance, local Lipschitz robustness, and bootstrap model-retraining
+    variance, showing deterministic \textsc{TreeSHAP} still drifts under retraining
+    ($\rho=\RetrainShap{}$), \rev{and chart \lime{}'s runtime--stability--fidelity frontier
+    across five sampling budgets ($500$--$10{,}000$) on tree and stacking models.}
+  \item \textbf{\rev{Dependence-aware fidelity dissociation and fusion diagnosis.}}
+    \rev{Combining on-manifold conditional $k$-NN deletion with global Remove-And-Retrain
+    (\textsc{roar})~\cite{hooker2019benchmark} reveals a sharp split between local
+    fixed-model and global retrained faithfulness. Evaluating static, calibration-tuned,
+    and \lime{} $R^2$-adaptive rank fusion against the best single explainer and oracle
+    upper bound explains why aggregation fails.}
 \end{enumerate}
-
-Section~\ref{sec:method} states the protocol, including four methodological traps that
-silently invalidate comparisons of this kind. Section~\ref{sec:results} reports one
-subsection per research question.

@@ -19,3 +19,5 @@ logs/*.log
 *.fls
 *.synctex.gz
 *.vrb
+00_Conditionally_Accepted/
+paper/main_highlighted.pdf

@@ -1,37 +1,32 @@
 \section{Related Work}\label{sec:related}
 
-\shap{} assigns each feature the Shapley value of its marginal contribution, with
-\textsc{TreeSHAP} making this tractable for tree
-ensembles~\cite{lundberg2017unified,lundberg2020local}. \lime{} perturbs the instance,
-weights the perturbations by proximity, and fits a sparse linear surrogate whose
-coefficients are the explanation~\cite{ribeiro2016why}. The difference is not cosmetic:
-one attributes the model's output, the other approximates its local function.
+\shap{} computes Shapley attributions, with \textsc{TreeSHAP} enabling polynomial-time
+evaluation on trees~\cite{lundberg2017unified,lundberg2020local}; \lime{} fits a weighted
+local ridge surrogate over perturbed samples~\cite{ribeiro2016why}. \rev{Han et
+al.~\cite{han2022which} unified both as local function approximations differing in
+neighbourhood and loss, and Krishna et al.~\cite{krishna2024disagreement} documented the
+resulting practitioner disagreement problem. OpenXAI~\cite{agarwal2022openxai} standardised
+evaluation axes}, whereas clinical tabular comparisons \rev{and healthcare \textsc{xai}
+studies~\cite{salih2024perspective,duell2021comparison,jahin2025ckd}} typically omit
+random controls, output-space checks, and pre-registered tests.
 
-Because there is no ground-truth attribution, evaluation is indirect. Perturbation tests
-delete features in explanation order and measure how fast the prediction degrades,
-summarised as area over the perturbation curve~\cite{samek2017evaluating}; \textsc{eraser}
-formalised comprehensiveness and sufficiency~\cite{deyoung2020eraser}. Hooker et
-al.~\cite{hooker2019benchmark} showed such tests are confounded by the off-manifold
-inputs perturbation creates, which we address directly in Section~\ref{sec:pitfalls}.
-Robustness is usually estimated as a local Lipschitz
-constant~\cite{alvarezmelis2018robustness}, and rank-biased overlap compares ranked lists
-without requiring a cut-off~\cite{webber2010similarity}. Neither method is as strong in
-practice as in theory --- the background distribution changes \shap{}'s attributions,
-which Section~\ref{sec:pitfalls} treats as a design decision --- and both can be
-deliberately fooled~\cite{slack2020fooling}. We take these as reasons for careful measurement rather
-than settled verdicts.
+\rev{On stability, Garreau and von Luxburg~\cite{garreau2020explaining} showed finite
+sampling and bandwidth choices inject variance into \lime{}; Visani et
+al.~\cite{visani2022statistical} and Amparore et al.~\cite{amparore2021trust} formalised
+re-run stability and local fidelity indices}, Alvarez-Melis and
+Jaakkola~\cite{alvarezmelis2018robustness} introduced local Lipschitz robustness, and Slack
+et al.~\cite{slack2020fooling} demonstrated adversarial fragility. \rev{Yet tabular
+benchmarks rarely separate re-run, perturbation, and retraining variance alongside \lime{}'s
+sampling budget.}
 
-Combining several explainers has been proposed before, both as an ensemble of
-attributions and as a framework for aggregating explanation
-outputs~\cite{bhatt2020aggregating}; rank fusion itself is standard in information
-retrieval, where reciprocal-rank fusion is a strong and very simple
-baseline~\cite{cormack2009reciprocal}. We therefore claim no priority for the idea of
-aggregation, and use both of those rules as baselines. What is new here is weighting the
-two explainers by their \emph{measured} fidelity rather than equally, fitting that weight
-on a disjoint calibration split so the rule cannot be tuned on its own test set, and
-testing the result against the better of the two rather than their mean.
-
-Several studies contrast \shap{} and \lime{} on tabular and clinical
-data~\cite{salih2024perspective,duell2021comparison}. Most vary a single axis, none we
-surveyed reports a random-ranking control or states its attribution space, and none
-pre-registers its hypotheses.
+Faithfulness tests delete ranked features and measure prediction drop via
+\aopc{}~\cite{samek2017evaluating} and \textsc{eraser}'s comprehensiveness and
+sufficiency~\cite{deyoung2020eraser}, \rev{unified as removal-based explanations by Covert
+et al.~\cite{covert2021explaining}. Unconditional median or marginal replacement breaks
+feature correlations~\cite{hooker2019benchmark,aas2021explaining}, reflecting the
+\emph{true-to-the-model} vs.\ \emph{true-to-the-data} split~\cite{chen2020truemodel};
+\textsc{roar}~\cite{hooker2019benchmark} and consistent removal~\cite{rong2022consistent}
+retrain models to remove off-manifold bias.} Finally, explanation
+aggregation~\cite{bhatt2020aggregating}, reciprocal-rank
+fusion~\cite{cormack2009reciprocal}, and \rbo{}~\cite{webber2010similarity} motivate our
+leakage-safe evaluation of \rev{static and adaptive} rank fusion.

@@ -1,0 +1,42 @@
+\begin{table*}[t]
+\centering
+\ifhighlight\color{blue!80!black}\fi
+\caption{Post-review validation summary (Amendment A8): feature-dependence fidelity (A), static vs.\ calibration-tuned/adaptive rank fusion against the calibration-selected best single explainer (B), and external scalability datasets (C).}
+\label{tab:revision}
+\footnotesize
+\renewcommand{\arraystretch}{0.92}
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{llrrrr}
+\toprule
+\multicolumn{6}{l}{\textbf{(A) Feature-dependence-aware fidelity across the 18 primary cells} (higher drop = more faithful)} \\
+\cmidrule(lr){1-6}
+Validation protocol & Granularity & SHAP & LIME & Random & SHAP $>$ LIME ($p_{\text{adj}}<0.05$) \\
+\midrule
+Median replacement (primary) & Local (1,746 inst.) & 0.260 & 0.224 & 0.075 & 13/18 ($<$0.001) \\
+Marginal draw (5 draws) & Local (1,746 inst.) & 0.285 & 0.244 & 0.118 & 15/18 ($<$0.001) \\
+Conditional $k$-NN ($M=10$) & Local, on-manifold & 0.211 & 0.167 & 0.070 & 13/18 ($<$0.001) \\
+ROAR $\Delta$ROC-AUC (5-fold CV) & Global, retrained & 0.062 & 0.064 & 0.030 & tie ($p=0.252$) \\
+ROAR $\Delta$Log-Loss (5-fold CV) & Global, retrained & 0.103 & 0.105 & 0.033 & tie ($p=0.632$) \\
+\midrule
+\multicolumn{6}{l}{\textbf{(B) Static vs.\ calibration-tuned \& instance-adaptive fusion} (70\,\% eval split vs.\ calibration-best single)} \\
+\cmidrule(lr){1-6}
+Fusion rule & Weight / parameter & Median AOPC & Med.\ $\Delta$mean & Med.\ $p_{\text{adj}}$ & Wins ($p_{\text{adj}}<0.05$) \\
+\midrule
+\quad Mean-rank (Borda) & $w=0.50$ & 0.178 & -0.0108 & 1.000 & 0/18 \\
+\quad Proportional AOPC & $w \in [0.50, 0.65]$ & 0.197 & -0.0070 & 1.000 & 0/18 \\
+\quad Calib.-tuned grid $w^*$ & $w^* \in [0.60, 1.00]$ (med.\ 0.88) & 0.218 & 0.0000 & 1.000 & 0/18 \\
+\quad LIME $R^2$-adaptive & $\gamma=0$ in 14/18 cells & 0.220 & 0.0000 & 1.000 & 0/18 \\
+\quad LIME $R^2$ selective gate & always SHAP in 16/18 cells & 0.219 & 0.0000 & 1.000 & 0/18 \\
+\quad Per-instance Oracle (upper bound) & $\max(\text{SHAP},\text{LIME})$ & -- & +0.007 (headroom) & -- & SHAP wins 66.1\% \\
+\midrule
+\multicolumn{6}{l}{\textbf{(C) External scalability validation} (12 additional cells across 6 models, same Track B protocol)} \\
+\cmidrule(lr){1-6}
+External dataset & Scale ($n \times d$) & Local $\rho$ (H1) & Cond.\ AOPC (S / L) & SHAP$>$LIME & Fusion wins \\
+\midrule
+\quad Breast Cancer Wisconsin & 569 $\times$ 30 & $\rho=0.77$ (6/6) & 0.003 / 8.1e-4 & 6/6 & 0/6 \\
+\quad CDC Diabetes (stratified) & 5,000 $\times$ 21 & $\rho=0.61$ (5/6) & 0.148 / 0.102 & 6/6 & 0/6 \\
+\bottomrule
+\end{tabular}
+}
+\par\vspace{2pt}\footnotesize All tests are Wilcoxon signed-rank with Holm--Bonferroni adjustment within family ($\alpha=0.05$). In (A), both SHAP and LIME beat Random in 18/18 cells for conditional $k$-NN ($p_{\text{adj}} \le 0.0005$) and in ROAR ($p_{\text{adj}} < 10^{-4}$). In (C), both external datasets replicate SHAP's conditional fidelity lead (12/12 cells, $p_{\text{adj}} < 0.05$) and zero fusion wins (0/12).
+\end{table*}

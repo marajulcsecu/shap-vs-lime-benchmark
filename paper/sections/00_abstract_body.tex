@@ -1,28 +1,21 @@
-SHAP and LIME are the two tools most often used to explain what a model has learned from a
-table of data. Both take one prediction and rank the features by how much each one
-mattered. They work in different ways and often disagree about the same prediction, which
-leaves anyone who runs both with two answers and no way to choose. Earlier comparisons do
-not settle the question: they change one thing at a time, and none checks its scores
-against a random list of features. This paper compares the two on four things a user would
-care about. Do the two agree, does the same answer come back, does the answer match what
-the model really uses, and how long does each one take? The rules were fixed first, and
-the study is wide: six classifiers, three public clinical datasets, eighteen
-model--dataset pairs, and eleven predictions written into version control before any
-result existed. We also split explanation stability, usually reported as one number, into
-three separate things: chance inside the tool, small changes to the input, and training
-the model again. Alongside the comparison we propose a hybrid method, and test it fairly.
-Rather than trust the two tools equally, we trust each one as much as it earns. An
-explanation is faithful when deleting the features it puts on top makes the prediction
-fall fastest. We measure that on a slice of data that is never used for testing, and it
-sets the weight. We compare our rule with two published ways of merging explanations, and
-set a strict test: a merged ranking must beat the better of the two tools, not their
-average. The two tools largely agree but are not interchangeable. In the typical pair they
-share four of their five most important features and disagree on the fifth, and they agree
-least on the \emph{easiest} dataset rather than the hardest. SHAP is the more faithful, is
-far steadier when the input is nudged, and is about \SpeedFactor{} times faster whenever
-the model is a tree. Repeating exactly is not the same as being stable, because SHAP's
-ranking still moves when the model is trained again on a slightly different sample.
-Merging the two, our own rule included, never beat the better single tool. This is a real
-finding, not a failed experiment: merging pays off when the inputs cover each other's
-mistakes, and these two do not. Every number here is produced by code, and the study
-re-runs with one command.
+\shap{} and \lime{} dominate tabular explainability yet frequently disagree on the same
+prediction. We present a pre-registered, leakage-safe benchmark comparing \shap{}, \lime{},
+rank-level fusion rules, and a random control across six classifiers and three public
+clinical datasets (\NumCells{} cells, \NumExplained{} instances, eleven hypotheses tested
+at \rev{Holm-adjusted $p_{\text{adj}}<0.05$}), \rev{complemented by post-review validations
+spanning five \lime{} sampling budgets ($500$--$10{,}000$), on-manifold conditional $k$-NN
+and retraining-based (\textsc{roar}) fidelity, adaptive fusion, and two larger external
+clinical datasets (up to $5{,}000$ rows, $30$ features).} \shap{} and \lime{} agree
+substantially (median Spearman $\rho=\MedianRho{}$, top-5 Jaccard \MedianJaccardFive{},
+\rev{$p_{\text{adj}}<10^{-3}$} in \HOneRejected{}/\HOneTotal{} cells) yet differ on one
+top-five feature, agreeing least on \rev{feature-redundant} CKD ($\rho=\RhoCkd{}$).
+Three-way stability decomposition shows determinism is not robustness: \textsc{TreeSHAP}'s
+re-run variance is zero, yet retraining drops agreement to $\RetrainShap{}$.
+\rev{Increasing \lime{}'s budget $20\times$ cuts re-run CV from $\LimeCvFiveH{}$ to
+$\LimeCvTenK{}$, but \aopc{} plateaus at $\LimeAopcTwoHalfK{}$ below \shap{} ($\AopcShap{}$)
+and \lime{} stays $\ge\TreeRatioFiveH{}\times$ slower on trees while beating permutation
+\shap{} on stacking. \shap{} leads local median, marginal, and conditional $k$-NN fidelity
+(\CondShapWins{}/18 primary, \ScaleCondWins{}/12 external, $p_{\text{adj}}<0.05$), whereas
+global \textsc{roar} retraining removes their gap ($p=\RoarAucP{}$). Static,
+calibration-tuned, and $R^2$-adaptive fusion win \FusionMaxWins{}/18 cells due to minimal
+oracle headroom ($\OracleHeadroomMed{}$ \aopc{}).} Every result regenerates from code.

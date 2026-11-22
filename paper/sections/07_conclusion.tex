@@ -1,11 +1,14 @@
 \section{Conclusion}\label{sec:conclusion}
 
-Across \NumCells{} model--dataset cells, \shap{} and \lime{} agree substantially on
-feature rankings (median $\rho = \MedianRho{}$) without being interchangeable: at the
-median, one of the five features in each top-five list differs. Where a tree backend exists \shap{} is the more
-faithful, roughly \SpeedFactor{}$\times$ cheaper, and markedly more perturbation-robust.
-Explanation stability separates into three sources, and the one a deterministic explainer
-cannot address --- variance from retraining the model --- is the one that persists.
-Rank-level fusion did not clear the pre-registered bar of beating the better of the two in
-any cell, which follows from that combination: substantial agreement leaves little
-complementary signal, and a consistent advantage can only be diluted by averaging.
+Across \NumCells{} pre-registered clinical cells \rev{and $12$ external validation cells},
+\shap{} and \lime{} agree substantially ($\rho=\MedianRho{}$,
+\rev{$p_{\text{adj}}<10^{-3}$}) without being interchangeable, \rev{with disagreement
+heightened by feature redundancy rather than task difficulty.} On tree models,
+\textsc{TreeSHAP} dominates speed \rev{across all \lime{} budgets ($500$--$10{,}000$)},
+local robustness, and local faithfulness---\rev{including conditional $k$-NN deletion
+(\CondShapWins{}/18 primary, \ScaleCondWins{}/12 external, $p_{\text{adj}}<0.05$)---while
+\lime{} is faster on stacking and ties \shap{} under global \textsc{roar} retraining
+($p=\RoarAucP{}$).} Stability must be reported across all three axes because retraining
+shifts deterministic \textsc{TreeSHAP} ($\rho=\RetrainShap{}$), and rank fusion never beats
+the best single explainer (\FusionMaxWins{}/18 primary, \rev{\ScaleFusWins{}/12 external})
+given minimal oracle headroom.

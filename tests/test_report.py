@@ -89,8 +89,9 @@ def _generated_tables():
 def test_generated_table_files_match_the_manifest():
     from xaibench.stats.report import TABLES
     on_disk = {p.stem for p in _generated_tables()}
-    assert on_disk == set(TABLES), (
-        f"missing: {set(TABLES) - on_disk}; unexpected: {on_disk - set(TABLES)}")
+    optional_revision = {"T13_revision"}
+    assert set(TABLES) <= on_disk <= (set(TABLES) | optional_revision), (
+        f"missing: {set(TABLES) - on_disk}; unexpected: {on_disk - set(TABLES) - optional_revision}")
 
 
 def test_no_generated_table_contains_a_leaked_missing_value():

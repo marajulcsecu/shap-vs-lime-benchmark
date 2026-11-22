@@ -1,96 +1,137 @@
 \section{Results}\label{sec:results}
 
-Table~\ref{tab:hypotheses} collects the decision for all eleven pre-registered
-hypotheses; each subsection below states the finding, the effect size, and the interval.
+Table~\ref{tab:hypotheses} summarises all eleven pre-registered hypotheses at
+\rev{Holm-adjusted $\alpha=0.05$; Table~\ref{tab:revision} collects the post-review
+validations (Amendment A8).}
 
 \input{../tables/T10}
 
-\subsection{RQ1: substantial agreement, but not interchangeable}\label{sec:rq1}
-Median per-instance rank agreement is \MedianRho{} (Spearman $\rho$) with top-5 Jaccard
-overlap \MedianJaccardFive{}, clearing the pre-registered bar of $\rho>0.50$ in
-\HOneRejected{} of \HOneTotal{} cells. The two methods therefore agree more than a reader
-of the disagreement literature might expect --- and still disagree, at the median, on one
-of the five features in each top-five list, which is not a margin a practitioner can
-ignore.
-Fig.~\ref{fig:agreement-heatmap} shows the per-cell picture.
+\subsection{RQ1: substantial agreement, \rev{driven by redundancy not difficulty}}\label{sec:rq1}
+Median local rank agreement is $\rho=\MedianRho{}$ (top-5 Jaccard \MedianJaccardFive{},
+floor-normalised \rbo{} \MedianRboNorm{}), significantly exceeding the pre-registered bar
+$\rho>0.50$ in \HOneRejected{}/\HOneTotal{} cells (\rev{$p_{\text{adj}}<10^{-3}$, median
+rank-biserial $r=0.81$}; Fig.~\ref{fig:agreement-heatmap}). Thus \shap{} and \lime{} agree
+substantially yet still disagree, at the median, on one of the five features in every
+top-five list. \rev{Neither model complexity (H1b, $p=\POneB{}$) nor task difficulty (H1c,
+$p=\POneC{}$) significantly explains cross-cell variation.}
 
-Agreement is not uniform, and it does not follow task difficulty in the direction one
-might guess: \RhoPima{} on PIMA, \RhoHeart{} on Heart, but only \RhoCkd{} on Chronic
-Kidney Disease --- the \emph{easiest} task, at ROC-AUC \AucCkd{}. The reading we favour is
-that agreement depends less on how hard a task is than on how \emph{redundant} its
-features are: when several features are individually sufficient, two explainers can both
-be locally faithful while nominating different ones.
+Strikingly, concordance is \emph{lowest} on the easiest task: $\rho=\RhoPima{}$ on PIMA
+(ROC-AUC \AucPima{}) and $\rho=\RhoHeart{}$ on Heart (\AucHeart{}), but $\rho=\RhoCkd{}$ on
+CKD (\AucCkd{}). \rev{Our feature-redundancy audit quantifies the mechanism: whereas PIMA
+(effective-rank ratio \EffRankPima{}) and Heart (\EffRankHeart{}) have zero individual
+features reaching univariate ROC-AUC $\ge 0.80$, CKD drops to effective-rank ratio
+\EffRankCkd{} ($\max |r|=\CkdMaxCorr{}$) with \CkdUniEighty{} features individually
+exceeding $0.80$ AUC (\CkdUniNinety{} exceeding $0.90$).} When multiple correlated features
+are individually sufficient, two locally faithful explainers legitimately nominate
+different subsets.
 
 \begin{figure}[t]\centering
-  \includegraphics[width=\columnwidth]{F4.pdf}
-  \caption{Global rank agreement between \shap{} and \lime{} for every dataset--model
-  cell, as Spearman $\rho$ on rankings derived from mean $|\phi|$ over the explained
-  instances.}
+  \includegraphics[width=0.76\columnwidth]{F4.pdf}
+  \caption{Global \shap{} vs.\ \lime{} rank agreement (Spearman $\rho$ on mean $|\phi|$).
+  \rev{Asterisks ($*$) mark the \HOneRejected{}/\HOneTotal{} cells where per-instance H1
+  ($\rho>0.50$) is significant ($p_{\text{adj}}<0.05$).}}
   \label{fig:agreement-heatmap}
 \end{figure}
 
-\subsection{RQ2: reproducible is not the same as robust}\label{sec:rq2}
-The decomposition is the point. On \emph{re-run variance}, \shap{} with a tree backend
-scores exactly zero: given a fixed background it returns bit-identical attributions. We
-state that as a property of the method, declared in the protocol before running, not as a
-discovery; \lime{}'s median coefficient of variation is \RerunCvLime{}, and it shrinks as
-the sampling budget grows, so \lime{}'s reproducibility is a budget the user chooses
-rather than a property they get.
+\subsection{RQ2 \rev{and LIME budget sweep}: reproducible is not robust}\label{sec:rq2}
+Decomposing stability separates three distinct phenomena. On \emph{re-run variance} (H2a),
+tree \shap{} is deterministic by construction ($\text{CV}=0$), whereas \lime{} exhibits
+significant stochastic variance in all $18/18$ cells (\rev{$p_{\text{adj}}<10^{-3}$},
+median CV \RerunCvLime{} \rev{at $N_{\text{samples}}=5{,}000$}). Under \emph{input
+perturbation} (H2b), \shap{} is markedly more locally robust (median Lipschitz
+$\LipschitzShap{}$ vs.\ $\LipschitzLime{}$, differing in $15/18$ cells,
+\rev{$p_{\text{adj}}<10^{-3}$}). Under \emph{model retraining} (H2c), however, even
+deterministic tree \shap{} drops to cross-refit agreement $\RetrainShap{}$ (vs.\
+$\RetrainLime{}$ for \lime{}, $9/9$ cells, \rev{$p_{\text{adj}}<10^{-3}$}): instability in
+the fitted model cannot be eliminated by a deterministic explainer.
 
-Determinism buys less than it appears to. Under \emph{input perturbation}, median local
-Lipschitz estimates are \LipschitzShap{} for \shap{} against \LipschitzLime{} for \lime{}
-(differing in 15 of 18 cells): \shap{} is markedly the more robust, but neither is
-insensitive to a small move in the input. Under \emph{retraining}, cross-refit rank
-agreement is \RetrainShap{} for \shap{} and \RetrainLime{} for \lime{} --- so an
-explanation that is bit-identical against a fixed model still shifts when that model is
-refitted on a bootstrap resample of the same data. A study reporting a single stability
-number would have recorded \shap{} as perfectly stable and stopped there.
+\rev{Fig.~\ref{fig:lime-budget} reports the five-budget \lime{} sweep ($N_{\text{samples}}
+\in \{500,\dots,10{,}000\}$) across all \NumCells{} cells. Raising the budget $20\times$
+scales median runtime nearly linearly from \LimeRtFiveH{}\,s to \LimeRtTenK{}\,s while
+cutting \lime{}'s re-run CV $4.1\times$ from \LimeCvFiveH{} to \LimeCvTenK{} (Wilcoxon
+$p<10^{-36}$, $r=-0.63$; repeat-pair $\rho$ rises from \LimePairRhoFiveH{} to
+\LimePairRhoTenK{}). Crucially, the budget comparison reveals two opposing regimes:
+(i)~on the $12$ tree-model cells, \lime{} remains \TreeRatioFiveH{}$\times$ slower than
+\textsc{TreeSHAP} even at $N=500$ ($0/12$ cells faster) and \TreeRatioTenK{}$\times$ slower
+at $N=10{,}000$, while its median \aopc{} rises modestly from \LimeAopcFiveH{} ($500$) to a
+plateau of \LimeAopcTwoHalfK{} by $N=2{,}500$---never closing the gap to \shap{}
+(\AopcShap{}, which still beats \lime{}@$10{,}000$ in \ShapBeatsLimeTenK{}/18 cells,
+$p_{\text{adj}}<0.05$); (ii)~on the $3$ model-agnostic stacking cells, \lime{} is
+consistently \emph{faster} than permutation \shap{} across every budget
+(\StackRatioFiveH{}$\times$ at $500$, \StackRatioFiveK{}$\times$ at $5{,}000$,
+\StackRatioTenK{}$\times$ at $10{,}000$).}
 
-\subsection{RQ3--RQ4: SHAP is both more faithful and cheaper}\label{sec:rq3}
-Median \aopc{} is \AopcShap{} for \shap{} and \AopcLime{} for \lime{}, against
-\AopcRandom{} for the random control. The control is what makes the first two numbers
-mean anything: both explainers exceed it in \HThreeBRejected{} of \HThreeBTotal{} tested
-comparisons after Holm correction --- deleting the features an explainer ranks first
-collapses the prediction while deleting a random few barely moves it, which is why an
-\aopc{} value cannot be read without the control. The marginal-baseline sensitivity check does not reverse the
-ordering, which matters given that median replacement pushes instances off the
-manifold~\cite{hooker2019benchmark}.
+\begin{figure*}[t]\centering
+  \includegraphics[width=0.96\textwidth]{F15_lime_budget.pdf}
+  \caption{\rev{\lime{} sampling budget Pareto analysis across all \NumCells{} primary cells
+  ($N_{\text{samples}}\in\{500,1{,}000,2{,}500,5{,}000,10{,}000\}$). (a)~Median wall-clock
+  runtime vs.\ \textsc{TreeSHAP} and stacking permutation \shap{}: \lime{} never matches
+  \textsc{TreeSHAP} speed even at $N=500$, but beats permutation \shap{} on stacking at all
+  budgets. (b)~Re-run CV drops $4.1\times$ with budget, while \lime{} deletion \aopc{}
+  plateaus by $N=2{,}500$ below \shap{}.}}
+  \label{fig:lime-budget}
+\end{figure*}
 
-Median cost is \SecondsShap{}\,s per explanation for \shap{} against \SecondsLime{}\,s for
-\lime{}, a factor of roughly \SpeedFactor{}. The gap is structural rather than an
-implementation detail: \textsc{TreeSHAP} exploits tree structure while \lime{} must
-evaluate the model on thousands of perturbed rows. On these models \shap{} is therefore
-simultaneously the more faithful and the cheaper option, so \lime{}'s case rests on
-model-agnosticism rather than on measured quality --- and our stacking cells, which admit
-no tree explainer, show what that is worth.
+\subsection{RQ3--RQ4: \rev{local vs.\ retrained fidelity}, and cost}\label{sec:rq3}
+Under pre-registered median deletion (H3a--H3b), median \aopc{} is \AopcShap{} for \shap{}
+and \AopcLime{} for \lime{} versus \AopcRandom{} for random rankings; both exceed the
+control in \HThreeBRejected{}/\HThreeBTotal{} tests (\rev{$p_{\text{adj}}<10^{-3}$}), and
+\shap{} leads \lime{} in $13/18$ cells (\rev{$p_{\text{adj}}<10^{-3}$}). Median overall
+runtime is \SecondsShap{}\,s vs.\ \SecondsLime{}\,s (\SpeedFactor{}$\times$, \rev{H4
+rejected in $15/18$ cells, $p_{\text{adj}}<10^{-3}$; the three non-rejected cells are the
+stacking cells}).
 
-\begin{figure}[t]\centering
-  \includegraphics[width=\columnwidth]{F13.pdf}
-  \caption{Per-cell difference between the best fusion rule and the better of \shap{} and
-  \lime{}, on evaluation instances only. Every cell falls left of zero: the hybrid never
-  clears the bar. Labels give the rule that scored best in that cell.}
-  \label{fig:consensus}
-\end{figure}
+\rev{Table~\ref{tab:revision}(A) resolves the off-manifold perturbation concern. Under
+\emph{on-manifold conditional $k$-NN replacement}, absolute \aopc{} drops slightly as
+correlated features cushion deletions (\CondAopcShap{} \shap{}, \CondAopcLime{} \lime{},
+\CondAopcRand{} random), yet both explainers beat random in $18/18$ cells
+($p_{\text{adj}}<10^{-3}$) and \shap{} still significantly outperforms \lime{} in
+\CondShapWins{}/18 cells ($p_{\text{adj}}<10^{-3}$; \CondLimeWins{}/18 for \lime{}). By
+contrast, under \emph{global \textsc{roar} retraining} ($5$-fold CV, $10$--$50\,\%$ feature
+removal), both \shap{} and \lime{} strongly outperform random rankings (mean $\Delta$AUC
+\RoarAucShap{} and \RoarAucLime{} vs.\ \RoarAucRand{}, $p_{\text{adj}}$ \RoarRandP{},
+$r=1.00$), \emph{but the gap between \shap{} and \lime{} vanishes} ($p=\RoarAucP{}$ on
+$\Delta$AUC; $p=\RoarLlP{}$ on $\Delta$Log-Loss). Thus \shap{}'s fidelity advantage holds
+specifically for \emph{local explanations of a fixed model}, whereas retraining allows
+correlated features to compensate and equalises both explainers' global rankings.}
 
-\subsection{RQ5: the plausibility check does not discriminate}\label{sec:rq5}
-Overlap with the pre-registered reference sets is similar for both explainers; both
-clearly exceed the random control but do not separate from each other. We report this as a
-null finding about the \emph{metric}, not the methods: literature-derived reference sets
-are not ground truth, they are incomplete, and top-5 overlap on an 8-feature dataset has
-little room to vary. \RQ{5} is the weakest measurement here, and we said so before running
-it.
+\input{../tables/T13_revision}
 
-\subsection{RQ6: fusion does not clear the bar}\label{sec:rq6}
-Rank fusion --- including our fidelity-weighted rule --- improved on the better of
-\shap{} and \lime{} in \HSixRejected{} of \HSixTotal{} cells, with a median rank-biserial
-effect of $-0.80$ (Fig.~\ref{fig:consensus}); the best rule reaches median \aopc{}
-\AopcBestFusion{} against \AopcShap{} for \shap{} alone. The outcome was pre-registered as
-valid and it follows from \RQ{1}. Fusion pays off when its
-inputs are individually noisy but their errors are uncorrelated. Here neither holds: the
-two agree substantially, so there is little independent signal to recover, and one is
-consistently better, so averaging its ranks with a weaker and largely redundant signal can
-only dilute it. The fidelity-weighted rule was designed to counter exactly that and was
-usually the best of the three, but a weight fitted per cell on a small calibration sample
-cannot recover the gap. We read this as evidence that explanation aggregation needs
-\emph{complementary} base explainers, and that \shap{} and \lime{} on tree models are not
-complementary enough.
+\subsection{RQ5: plausibility does not discriminate}\label{sec:rq5}
+Top-5 overlap with frozen literature sets exceeds random for both explainers but does not
+separate them (\rev{H5, $p=\PFive{}$}). As pre-registered, literature lists are incomplete
+corroboration rather than ground truth.
+
+\subsection{RQ6: \rev{fusion failure diagnosed beyond proportional weighting}}\label{sec:rq6}
+Pre-registered rank fusion beat the better explainer in \HSixRejected{}/\HSixTotal{} cells
+(\rev{$p_{\text{adj}}=1.00$}, $r=-0.80$). \rev{Table~\ref{tab:revision}(B) confirms and
+extends this result. First, proportional weighting $w_{\text{prop}}$ indeed remained
+compressed near equal averaging ($[\WPropMin{},\WPropMax{}]$, median \WPropMed{}). Second,
+removing that constraint via calibration-tuned grid search pushes $w^*$ sharply toward pure
+\shap{} (median \WOptMed{}, range $[\WOptMin{},\WOptMax{}]$), yet neither \code{grid\_opt},
+nor instance-level \lime{} $R^2$-adaptive weighting ($\gamma=0$ selected in
+\RTwoGammaZeroCells{}/18 cells), nor $R^2$ selective gating (always \shap{} in
+\RTwoGateAlwaysShap{}/18 cells) significantly beats the calibration-selected single
+explainer in any cell (\FusionMaxWins{}/18, all Holm $p_{\text{adj}}\ge 0.38$). Two
+structural factors explain why: (i)~per-instance oracle headroom
+$\mathbb{E}[\max(\aopc{}_S,\aopc{}_L)]-\mathbb{E}[\aopc{}_{\text{best}}]$ is tiny (median
+\OracleHeadroomMed{}, max \OracleHeadroomMax{}; \shap{} wins \ShapWinPct{}\,\% of
+evaluation instances vs.\ \LimeWinPct{}\,\% for \lime{}), and (ii)~\lime{}'s local surrogate
+$R^2$ correlates only weakly and inconsistently with \lime{}'s advantage over \shap{}
+(median $\rho=\RTwoCorrMed{}$, negative on all six Heart cells), preventing reliable
+inference-time routing.}
+
+\subsection{\rev{External scalability validation (BCWD and CDC Diabetes)}}\label{sec:scalability}
+\rev{Table~\ref{tab:revision}(C) validates our conclusions on $12$ additional cells spanning
+higher dimensionality (BCWD, $569\times 30$, ROC-AUC \BcwdAucMed{}, extreme collinearity
+effective-rank ratio \EffRankBcwd{} with \BcwdUniNinety{} features $\ge 0.90$ AUC) and
+larger scale (CDC Diabetes, $5{,}000\times 21$, ROC-AUC \CdcAucMed{}, low collinearity
+\EffRankCdc{}). Every main pattern replicates: local concordance clears $\rho>0.50$ in
+\ScaleHOneWins{}/12 cells ($p_{\text{adj}}<10^{-4}$; median $\rho=\BcwdRhoMed{}$ on BCWD,
+$\CdcRhoMed{}$ on CDC), \shap{} significantly outperforms \lime{} under conditional $k$-NN
+fidelity in all \ScaleCondWins{}/12 cells ($p_{\text{adj}}<0.05$; e.g., \CdcCondShap{} vs.\
+\CdcCondLime{} on CDC, where conditional replacement also removes majority-class median
+baseline distortion), \shap{} is more perturbation-robust in \ScaleLipWins{}/12 cells,
+\textsc{TreeSHAP} is faster on all $8/8$ tree cells ($p_{\text{adj}}<10^{-19}$) while
+\lime{} is faster on both stacking cells, deterministic \textsc{TreeSHAP} still degrades
+under retraining, and rank fusion wins \ScaleFusWins{}/12 cells ($p_{\text{adj}}=1.00$).}

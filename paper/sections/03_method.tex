@@ -1,141 +1,103 @@
 \section{Method}\label{sec:method}
 
-\subsection{Datasets, models, and protocol}\label{sec:method-data}
-Three public, de-identified tabular datasets: PIMA Indian Diabetes
-(768 rows, 8 features, 34.9\,\% positive)~\cite{smith1988using}, the Cleveland subset of
-UCI Heart Disease (303, 13, 45.9\,\%)~\cite{detrano1989international}, and UCI Chronic
-Kidney Disease (400, 24, 62.5\,\%)~\cite{rubini2015ckd}; all are redistributable under CC0
-or CC BY 4.0 and are vendored with verified checksums. They span a \emph{difficulty gradient} ---
-nested-CV ROC-AUC of \AucPima{}, \AucHeart{}, and \AucCkd{} --- because a single-dataset
-study cannot ask whether agreement depends on how hard the boundary is. The diseases are
-benchmarks; no medical claim is made. In PIMA, biologically impossible zeros in glucose,
-blood pressure, skin thickness, insulin, and BMI are recoded as missing while legitimate
-zeros in \emph{pregnancies} are retained; the Heart target is binarised at $>0$ with its
-nominal codes carried as categories, so the linear model cannot read an ordering into
-them.
-
+\subsection{Datasets, models, and separated tracks}\label{sec:method-data}
+Our pre-registered primary benchmark spans three public, de-identified clinical datasets
+vendored with verified SHA-256 checksums: PIMA Indian Diabetes ($768\times 8$,
+$34.9\,\%$ positive)~\cite{smith1988using}, UCI Heart Disease Cleveland ($303\times 13$,
+$45.9\,\%$)~\cite{detrano1989international}, and UCI Chronic Kidney Disease ($400\times 24$,
+$62.5\,\%$)~\cite{rubini2015ckd}. They form a difficulty gradient (nested-CV ROC-AUC
+\AucPima{}, \AucHeart{}, \AucCkd{}). Biologically impossible zeros in PIMA (glucose, blood
+pressure, skin thickness, insulin, BMI) are recoded as missing while retaining legitimate
+zeros in \emph{pregnancies}; Heart targets are binarised at $>0$ with nominal codes
+one-hot encoded. \rev{To test generalisation beyond small cohorts (Post-Review Amendment
+A8), we add an \emph{external scalability check} on two larger or higher-dimensional
+clinical benchmarks: Breast Cancer Wisconsin Diagnostic (BCWD, $569\times 30$, $37.3\,\%$
+malignant)~\cite{street1993nuclear} and a seeded class-stratified cohort of CDC Diabetes
+Health Indicators ($5{,}000\times 21$ from $N=253{,}680$, $13.9\,\%$
+positive)~\cite{cdc2017diabetes}.}
 
 Six classifiers span linear, single-tree, bagged, boosted, and stacked families: logistic
-regression, a decision tree, a random forest, XGBoost, LightGBM, and a stacking ensemble.
-Stacking is included because it admits no tree-specific explainer, making it the one family
-where \shap{}'s own re-run variance is a non-trivial measurement.
+regression, decision tree, random forest, XGBoost, LightGBM, and a logistic-regression
+stacking ensemble over the three tree ensembles. \textbf{Track A} estimates predictive
+performance via nested $5\times 3$ stratified CV with all preprocessing inside the
+pipeline. \textbf{Track B} fixes those inner-loop hyperparameters, refits once on a
+stratified $80/20$ split (seed $42$), and runs every explainer on up to $150$ stratified
+test instances per cell ($150$ PIMA, $61$ Heart, $80$ CKD; \NumExplained{} primary
+instances, \rev{plus $114$ BCWD and $150$ CDC instances per model externally}). No
+synthetic oversampling is applied because altering the training manifold would confound
+both explainers~\rev{\cite{niaz2022imbalance}}; \code{class\_weight=balanced} is used where
+supported.
 
-Performance and explanation analysis run on separated tracks. \textbf{Track A} estimates
-performance by nested cross-validation, five outer folds for estimation and three inner for
-tuning, with every transformer inside the pipeline so imputation and scaling are fitted on
-inner-training rows only. \textbf{Track B} takes those hyperparameters, refits once on a
-stratified 80/20 split, and runs every explainer against that one model per cell. The
-separation prevents a specific leak: the partition the explainers see must never have
-participated in tuning. We apply \emph{no} synthetic resampling --- imbalance is mild, and
-oversampling would alter the data manifold that \lime{}'s sampler and \shap{}'s background
-both draw from, confounding the comparison under study.
+\subsection{Explainers, budget sweep, and metrics}\label{sec:method-metrics}
+\shap{} uses exact \textsc{TreeExplainer} for decision tree and random forest,
+interventional probability-space \textsc{TreeExplainer} ($50$ seeded stratified real
+training rows) for XGBoost and LightGBM, and model-agnostic \textsc{PermutationExplainer}
+($10$ passes) for logistic regression and stacking. \lime{} uses
+\code{LimeTabularExplainer} with one-hot columns declared categorical,
+\rev{\code{discretize\_continuous=True}, default kernel width $0.75\sqrt{d_{\text{enc}}}$,
+and primary budget $N_{\text{samples}}=5{,}000$. To evaluate sensitivity to sampling budget
+fairly, Amendment A8 sweeps $N_{\text{samples}}\in\{500, 1{,}000, 2{,}500, 5{,}000,
+10{,}000\}$ across all \NumCells{} primary cells, recording runtime, re-run stability,
+\aopc{}, and agreement with \shap{}.} A uniformly random ranking ($20$ draws) is the
+mandatory control.
 
-\subsection{Explainers and metrics}\label{sec:method-metrics}
-\shap{} uses \textsc{TreeExplainer} for the four tree models and a model-agnostic
-permutation sampler for logistic regression and stacking; \lime{} uses
-\code{LimeTabularExplainer} with one-hot columns declared categorical. A uniformly random ranking is the control.
+Let $\phi(x)\in\mathbb{R}^{d}$ denote aggregated original-feature attributions and $\pi(x)$
+their descending $|\phi(x)|$ ranking. \textbf{Agreement (\RQ{1})} measures local and global
+Spearman $\rho$, Kendall $\tau_b$, top-$k$ Jaccard, and floor-normalised \rbo{} ($p=0.90$;
+raw floors \RboFloorEight{} at $d=8$ to \RboFloorTwentyFour{} at $d=24$). \rev{To diagnose
+disagreement drivers, we compute each dataset's correlation effective-rank ratio
+($\exp(H(\tilde{\lambda}))/d$) and count of features achieving univariate ROC-AUC
+$\ge 0.80$.} \textbf{Stability (\RQ{2})} decomposes into: (2a) \emph{re-run variance}
+across $R=10$ seeds (CV and repeat-pair $\rho$); (2b) \emph{local robustness} via local
+Lipschitz $\hat{L}(x)=\max_{x'}\lVert\phi(x)-\phi(x')\rVert_2/\lVert x-x'\rVert_2$ over
+$m=5$ Gaussian neighbours ($0.1\sigma$)~\cite{alvarezmelis2018robustness}; and (2c)
+\emph{retraining stability} as cross-refit global Spearman $\rho$ across $B=10$ stratified
+bootstrap resamples of the three tree ensembles. \textbf{Fidelity (\RQ{3})} evaluates
+deletion $\aopc{}=\frac{1}{K}\sum_{k=1}^{K}[f_c(x)-f_c(x_{\setminus\text{top-}k})]$
+($K=\min(d,10)$) alongside insertion AUC, comprehensiveness, and
+sufficiency~\cite{deyoung2020eraser} under three local baselines: primary training median,
+$5$-draw independent marginal, \rev{and \emph{on-manifold conditional $k$-NN replacement}
+(replacing deleted columns $S_k$ jointly from the $M=10$ nearest training rows matched on
+the retained columns $\bar{S}_k$). To eliminate fixed-model perturbation bias altogether,
+we further run global \textsc{roar}~\cite{hooker2019benchmark}: removing the top
+$10,20,30,40,50\,\%$ globally ranked features and retraining each pipeline from scratch
+under $5$-fold CV (mean $\Delta\text{ROC-AUC}$ and $\Delta\text{Log-Loss}$ vs.\ five random
+permutations).} \textbf{Cost (\RQ{4})} is single-threaded wall-clock seconds
+(\code{OMP\_NUM\_THREADS=1}). \textbf{Plausibility (\RQ{5})} is top-5 overlap with a
+frozen literature reference set (corroborating only).
 
-\subsection{The hybrid consensus method}\label{sec:method-hybrid}
-Both explainers produce a ranking over the same $d$ original features, so they can be
-combined at the level of ranks without either having to be rescaled. We evaluate three
-fusion rules (Algorithm~\ref{alg:fusion}).
+\subsection{Static, calibration-tuned, and adaptive rank fusion}\label{sec:method-hybrid}
+Given normalised ranks $r^{A}, r^{B}\in[0,1]^d$ of $|\phi^{\shap}|$ and $|\phi^{\lime}|$,
+our pre-registered study tests three rules: \emph{mean-rank (Borda)}
+$r=\tfrac{1}{2}(r^{A}+r^{B})$, \emph{reciprocal-rank fusion} (\textsc{rrf})
+$s_j=(60+r^{A}_j)^{-1}+(60+r^{B}_j)^{-1}$~\cite{cormack2009reciprocal}, and
+\emph{proportional fidelity-weighted fusion} $r=w\,r^{A}+(1-w)\,r^{B}$ with
+$w=\aopc{}^{\text{cal}}_{\shap}/(\aopc{}^{\text{cal}}_{\shap}+\aopc{}^{\text{cal}}_{\lime})$
+fitted on a disjoint $30\,\%$ calibration split per cell and tested on the remaining
+$70\,\%$. \rev{Because proportional normalisation naturally stays near $0.50$, Amendment A8
+adds three stronger calibration-fitted variants on the exact same $30/70$ split:
+(i)~\emph{grid-tuned weight} $w^*\in\{0,0.05,\dots,1\}$ maximising calibration \aopc{};
+(ii)~\emph{instance-level \lime{} $R^2$-adaptive fusion}
+$w(x)=\operatorname{clip}(w_0-\gamma z(R^2_{\lime}(x)),0,1)$ using \lime{}'s inference-time
+local surrogate fit $R^2$ (\code{exp.score}); and (iii)~\emph{$R^2$ selective gating}
+(routing to \lime{} when $R^2_{\lime}(x)\ge\tau^*$, else \shap{}). Every rule is tested
+against both the calibration-selected best single explainer (deployable bar) and the
+per-instance oracle $\max(\aopc{}_{\shap}(x),\aopc{}_{\lime}(x))$.}
 
-\begin{algorithm}[t]
-\caption{Rank-level fusion of two explanations}\label{alg:fusion}
-\KwIn{attributions $\phi^{A}, \phi^{B} \in \mathbb{R}^{d}$; rule; weight $w$}
-\KwOut{fused ranking over the $d$ original features}
-$r^{A} \gets$ normalised ranks of $|\phi^{A}|$\;
-$r^{B} \gets$ normalised ranks of $|\phi^{B}|$\;
-\Switch{rule}{
-  \Case{mean-rank (baseline)}{$r \gets \tfrac{1}{2}(r^{A} + r^{B})$\;}
-  \Case{RRF (baseline)}{$s_j \gets \tfrac{1}{60+r^{A}_j} + \tfrac{1}{60+r^{B}_j}$;
-        $r \gets$ ranks of $-s$\;}
-  \Case{fidelity-weighted (ours)}{$r \gets w\,r^{A} + (1-w)\,r^{B}$\;}
-}
-\Return{$\operatorname{argsort}(r)$}\;
-\end{algorithm}
-
-Two are published baselines: \emph{mean-rank}
-fusion, which averages the normalised ranks, and \emph{reciprocal-rank fusion}, standard in
-information retrieval, where each list contributes $1/(60+r_j)$ so one badly wrong ranking
-degrades the result less than an arithmetic mean would~\cite{cormack2009reciprocal}.
-
-The third rule is ours. \emph{Fidelity-weighted fusion} does not treat the two explainers
-as equally trustworthy. It weights them by the faithfulness each actually demonstrates:
-$w = \aopc{}^{\text{cal}}_{\shap} / (\aopc{}^{\text{cal}}_{\shap} +
-\aopc{}^{\text{cal}}_{\lime})$, so the explainer whose rankings move the model's
-prediction more on held-out instances carries more of the fused rank. The weight is
-estimated \emph{once per cell} on a calibration split of 30\,\% of the explained
-instances, and \RQ{6} is then tested on the remaining 70\,\% only. That disjointness is
-the point: a weight fitted on the same instances the hypothesis is tested on would make the
-rule win by construction, and the split is recorded per cell so the separation is auditable
-rather than asserted.
-
-The bar for all three rules is deliberately strict. A fused ranking must beat the
-\emph{better} of \shap{} and \lime{} on the same cell --- not their average, which any
-sensible combination would beat, and not the weaker of the two.
-
-Let $\phi(x) \in \mathbb{R}^{d}$ be an attribution vector over original features and
-$\pi(x)$ the ranking by $|\phi(x)|$. \emph{Agreement} (\RQ{1}) is Spearman $\rho$, Kendall
-$\tau_b$, top-$k$ Jaccard, and rank-biased overlap between $\pi_{\shap}$ and
-$\pi_{\lime}$. Because both rankings permute the \emph{same} feature set, \rbo{}'s
-extrapolation term is a hard floor scaling with $d$ (\RboFloorEight{} at $d=8$ but
-\RboFloorTwentyFour{} at $d=24$), so we also report a floor-normalised variant comparable
-across datasets. \emph{Stability} (\RQ{2}) is decomposed: re-run variance repeats an
-explainer $R=10$ times under different seeds; local robustness draws $m=5$ Gaussian
-neighbours at $0.1\sigma$ and estimates $\hat{L}(x)=\max_{x'} \lVert
-\phi(x)-\phi(x')\rVert_2 / \lVert x-x'\rVert_2$~\cite{alvarezmelis2018robustness};
-retraining stability refits each ensemble on $B=10$ bootstrap resamples and reports
-cross-refit rank agreement. \emph{Fidelity} (\RQ{3}) deletes features in ranked order,
-replacing them with the training median, and records the fall in the model's probability
-for \emph{its own} predicted class: $\aopc{} =
-\frac{1}{K}\sum_{k=1}^{K}[f_c(x)-f_c(x_{\setminus \text{top-}k})]$, $K=\min(d,10)$, with
-insertion AUC, comprehensiveness, and sufficiency
-alongside~\cite{deyoung2020eraser} and a marginal-draw baseline as a sensitivity check.
-\emph{Cost} (\RQ{4}) is single-threaded wall-clock seconds around the explainer call.
-\emph{Plausibility} (\RQ{5}) is top-5 overlap with a literature-derived reference set
-frozen before any explanation was computed.
-
-\subsection{Four traps this comparison had to avoid}\label{sec:pitfalls}
-Each of the following silently invalidates a \shap{}-versus-\lime{} comparison, and none
-is visible in the output when it goes wrong.
-
-\textbf{The two methods must explain the same quantity.} \lime{} explains predicted
-probability; \textsc{TreeExplainer} on boosted models returns log-odds margins by default,
-so a direct comparison contrasts different quantities on different scales. We require
-probability-space attributions and \emph{verify} it, by checking that
-$\text{base}+\sum_j \phi_j$ reproduces \code{predict\_proba}. Median additivity error
-across cells is \AdditivityMedianMax{}. In \AdditivityGateFailCells{} of \NumCells{} cells
-the pre-registered gate did not pass (PIMA/LightGBM: \AdditivityWorstOutliers{} of 150
-instances above the $5\times10^{-3}$ tolerance, worst \AdditivityWorstMax{}, against a
-cell median of $1.1\times10^{-9}$); Section~\ref{sec:limitations} states how that is
-handled.
-
-\textbf{The reference distribution must be real data.} Summarising the \shap{} background
-by $k$-means yields synthetic points, because averaging one-hot columns produces
-fractional values the model has never seen. Interventional \textsc{TreeSHAP} evaluated
-against such off-manifold references violates its own additivity --- we measured
-$9.9\times10^{-3}$ on Heart/LightGBM against $7\times10^{-9}$ with real training rows. The
-background is therefore a seeded, class-stratified subsample of actual rows, which also
-keeps tree \shap{} deterministic.
-
-\textbf{One-hot encoding fragments a feature across several model inputs.} Left
-unaggregated, rankings from different models would be over different vocabularies, and
-deleting ``the top five features'' would delete five \emph{columns} --- under-perturbing a
-13-feature dataset spread over 25 columns while leaving an 8-feature one untouched.
-Attributions are summed over each feature's columns before ranking, and perturbation
-operates on whole feature groups.
-
-\textbf{A fidelity score has no scale without a control.} Deleting any few of eight
-features moves a prediction, so an \aopc{} of $0.31$ is uninterpretable alone. Every
-fidelity number is reported against a random-ranking control.
+\subsection{Four methodological traps avoided}\label{sec:pitfalls}
+(1)~\emph{Same output space:} \shap{} and \lime{} both explain predicted probability,
+verified via $|\text{base}+\sum_j\phi_j - f_1(x)|$ (median error \AdditivityMedianMax{};
+one cell, PIMA/LightGBM, has \AdditivityWorstOutliers{}/150 outliers above $5\times 10^{-3}$,
+disclosed in Section~\ref{sec:limitations}). (2)~\emph{Real background rows:} $k$-means
+centroids create fractional one-hot values that broke LightGBM additivity
+($9.9\times 10^{-3}$ vs.\ $7\times 10^{-9}$ on real rows). (3)~\emph{One-hot group
+aggregation:} attributions are summed and features perturbed at original-feature
+granularity. (4)~\emph{Random control:} every fidelity score is benchmarked against random
+rankings.
 
 \subsection{Statistics}\label{sec:method-stats}
-Eleven hypotheses were registered in advance with their test, alternative, unit of
-analysis, and family (Table~\ref{tab:hypotheses}). All tests are non-parametric;
-\emph{p}-values are Holm-corrected within each family over the tests actually performed,
-with degenerate cells retained and reported but excluded from the divisor. Every test
-carries an effect size and every estimate a 95\,\% bootstrap interval: with hundreds of
-instances per cell significance is cheap and the effect size is the finding. \RQ{1} tests
-whether concordance exceeds $\rho=0.50$ rather than zero, because testing against zero
-would be a straw man; the threshold was fixed before any $\rho$ was computed.
+Eleven hypotheses were pre-registered in version control before any result existed
+(Table~\ref{tab:hypotheses}). All tests are non-parametric (Wilcoxon signed-rank,
+Mann--Whitney U, or permutation Spearman) at \rev{$\alpha=0.05$, with Holm--Bonferroni
+adjustment ($p_{\text{adj}}<0.05$)} within each family, rank-biserial effect sizes $r$, and
+$95\,\%$ percentile bootstrap intervals.
