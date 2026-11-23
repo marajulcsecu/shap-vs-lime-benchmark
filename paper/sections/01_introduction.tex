@@ -1,10 +1,10 @@
 \section{Introduction}\label{sec:intro}
 
-Tree ensembles dominate tabular prediction~\rev{\cite{grinsztajn2022why}}, yet their logic
-is opaque even as regulations such as the EU AI Act mandate interpretability for high-risk
-systems~\cite{euaiact2024}. Two post-hoc methods lead practice: \shap{} attributes
-predictions via cooperative game theory~\cite{lundberg2017unified,lundberg2020local}, while
-\lime{} fits a sparse local linear surrogate~\cite{ribeiro2016why}. \rev{Because they
+Tree ensembles dominate tabular \rev{and clinical} prediction~\rev{\cite{grinsztajn2022why,alam2021birth}},
+yet their logic is opaque even as regulations such as the EU AI Act (2024) mandate
+interpretability for high-risk systems. Two post-hoc methods lead practice: \shap{}
+attributes predictions via cooperative game theory~\cite{lundberg2017unified,lundberg2020local},
+while \lime{} fits a sparse local linear surrogate~\cite{ribeiro2016why}. \rev{Because they
 optimise different objectives over different neighbourhoods~\cite{han2022which},
 practitioners often face the \emph{disagreement problem}~\cite{krishna2024disagreement}}
 without a principled basis to choose.

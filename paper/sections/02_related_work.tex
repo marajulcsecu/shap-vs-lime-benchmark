@@ -6,27 +6,24 @@ local ridge surrogate over perturbed samples~\cite{ribeiro2016why}. \rev{Han et
 al.~\cite{han2022which} unified both as local function approximations differing in
 neighbourhood and loss, and Krishna et al.~\cite{krishna2024disagreement} documented the
 resulting practitioner disagreement problem. OpenXAI~\cite{agarwal2022openxai} standardised
-evaluation axes}, whereas clinical tabular comparisons \rev{and healthcare \textsc{xai}
-studies~\cite{salih2024perspective,duell2021comparison,jahin2025ckd}} typically omit
-random controls, output-space checks, and pre-registered tests.
+evaluation axes, whereas applied clinical and healthcare \textsc{xai}
+studies~\cite{jahin2025ckd,rahman2024dengue,emran2025healthcare}} typically focus on
+predictive deployment and omit random controls, output-space checks, and pre-registered
+hypothesis tests.
 
 \rev{On stability, Garreau and von Luxburg~\cite{garreau2020explaining} showed finite
-sampling and bandwidth choices inject variance into \lime{}; Visani et
-al.~\cite{visani2022statistical} and Amparore et al.~\cite{amparore2021trust} formalised
-re-run stability and local fidelity indices}, Alvarez-Melis and
-Jaakkola~\cite{alvarezmelis2018robustness} introduced local Lipschitz robustness, and Slack
-et al.~\cite{slack2020fooling} demonstrated adversarial fragility. \rev{Yet tabular
-benchmarks rarely separate re-run, perturbation, and retraining variance alongside \lime{}'s
-sampling budget.}
+sampling and bandwidth choices inject variance into \lime{}, and Visani et
+al.~\cite{visani2022statistical} formalised statistical stability indices for \lime{}},
+while Alvarez-Melis and Jaakkola~\cite{alvarezmelis2018robustness} introduced local
+Lipschitz robustness. \rev{Yet tabular benchmarks rarely separate re-run, perturbation, and
+retraining variance alongside \lime{}'s sampling budget.}
 
 Faithfulness tests delete ranked features and measure prediction drop via
-\aopc{}~\cite{samek2017evaluating} and \textsc{eraser}'s comprehensiveness and
-sufficiency~\cite{deyoung2020eraser}, \rev{unified as removal-based explanations by Covert
-et al.~\cite{covert2021explaining}. Unconditional median or marginal replacement breaks
-feature correlations~\cite{hooker2019benchmark,aas2021explaining}, reflecting the
-\emph{true-to-the-model} vs.\ \emph{true-to-the-data} split~\cite{chen2020truemodel};
-\textsc{roar}~\cite{hooker2019benchmark} and consistent removal~\cite{rong2022consistent}
-retrain models to remove off-manifold bias.} Finally, explanation
-aggregation~\cite{bhatt2020aggregating}, reciprocal-rank
+\aopc{}~\cite{samek2017evaluating}, comprehensiveness, and sufficiency. \rev{Unconditional
+median or marginal replacement breaks feature
+correlations~\cite{hooker2019benchmark,aas2021explaining}, reflecting the
+\emph{true-to-the-model} vs.\ \emph{true-to-the-data} split~\cite{chen2020truemodel}, while
+\textsc{roar}~\cite{hooker2019benchmark} retrains models to remove off-manifold bias.}
+Finally, explanation aggregation~\cite{bhatt2020aggregating}, reciprocal-rank
 fusion~\cite{cormack2009reciprocal}, and \rbo{}~\cite{webber2010similarity} motivate our
 leakage-safe evaluation of \rev{static and adaptive} rank fusion.

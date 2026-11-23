@@ -118,10 +118,10 @@ def test_the_paper_inputs_generated_tables_rather_than_inlining_them():
 
 
 def test_bibliography_is_sized_for_a_six_page_paper():
-    """Post-review revision (ICCIT 2026, R1.5) expanded the literature review to
-    incorporate recent disagreement, LIME stability, and conditional/ROAR fidelity works."""
+    """Post-review revision (ICCIT 2026, R1.5) targets a concise 20-22 reference list
+    covering recent disagreement, LIME stability, conditional/ROAR fidelity, and clinical XAI."""
     bbl = ROOT / "paper" / "main.bbl"
     if not bbl.exists():
         pytest.skip("main.bbl absent; run `make paper`")
     cited = bbl.read_text().count("\\bibitem")
-    assert 24 <= cited <= 36, f"{cited} references cited; expected 24-36 post-revision"
+    assert 18 <= cited <= 24, f"{cited} references cited; expected 18-24 for a 6-page IEEE paper"

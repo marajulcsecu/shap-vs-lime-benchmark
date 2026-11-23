@@ -2,19 +2,18 @@
 
 \subsection{Datasets, models, and separated tracks}\label{sec:method-data}
 Our pre-registered primary benchmark spans three public, de-identified clinical datasets
-vendored with verified SHA-256 checksums: PIMA Indian Diabetes ($768\times 8$,
-$34.9\,\%$ positive)~\cite{smith1988using}, UCI Heart Disease Cleveland ($303\times 13$,
-$45.9\,\%$)~\cite{detrano1989international}, and UCI Chronic Kidney Disease ($400\times 24$,
-$62.5\,\%$)~\cite{rubini2015ckd}. They form a difficulty gradient (nested-CV ROC-AUC
-\AucPima{}, \AucHeart{}, \AucCkd{}). Biologically impossible zeros in PIMA (glucose, blood
-pressure, skin thickness, insulin, BMI) are recoded as missing while retaining legitimate
-zeros in \emph{pregnancies}; Heart targets are binarised at $>0$ with nominal codes
-one-hot encoded. \rev{To test generalisation beyond small cohorts (Post-Review Amendment
-A8), we add an \emph{external scalability check} on two larger or higher-dimensional
-clinical benchmarks: Breast Cancer Wisconsin Diagnostic (BCWD, $569\times 30$, $37.3\,\%$
-malignant)~\cite{street1993nuclear} and a seeded class-stratified cohort of CDC Diabetes
-Health Indicators ($5{,}000\times 21$ from $N=253{,}680$, $13.9\,\%$
-positive)~\cite{cdc2017diabetes}.}
+vendored with verified SHA-256 checksums: PIMA Indian Diabetes (UCI/NIDDK, $768\times 8$,
+$34.9\,\%$ positive), UCI Heart Disease Cleveland (UCI~\#45, $303\times 13$, $45.9\,\%$),
+and UCI Chronic Kidney Disease (UCI~\#336, $400\times 24$, $62.5\,\%$). They form a
+difficulty gradient (nested-CV ROC-AUC \AucPima{}, \AucHeart{}, \AucCkd{}). Biologically
+impossible zeros in PIMA (glucose, blood pressure, skin thickness, insulin, BMI) are
+recoded as missing while retaining legitimate zeros in \emph{pregnancies}; Heart targets
+are binarised at $>0$ with nominal codes one-hot encoded. \rev{To test generalisation
+beyond small cohorts (Post-Review Amendment A8), we add an \emph{external scalability check}
+on two larger or higher-dimensional clinical benchmarks: Breast Cancer Wisconsin Diagnostic
+(BCWD, UCI~\#17, $569\times 30$, $37.3\,\%$ malignant) and a seeded class-stratified cohort
+of CDC Diabetes Health Indicators (UCI~\#891, $5{,}000\times 21$ from $N=253{,}680$,
+$13.9\,\%$ positive).}
 
 Six classifiers span linear, single-tree, bagged, boosted, and stacked families: logistic
 regression, decision tree, random forest, XGBoost, LightGBM, and a logistic-regression
@@ -55,7 +54,7 @@ $m=5$ Gaussian neighbours ($0.1\sigma$)~\cite{alvarezmelis2018robustness}; and (
 bootstrap resamples of the three tree ensembles. \textbf{Fidelity (\RQ{3})} evaluates
 deletion $\aopc{}=\frac{1}{K}\sum_{k=1}^{K}[f_c(x)-f_c(x_{\setminus\text{top-}k})]$
 ($K=\min(d,10)$) alongside insertion AUC, comprehensiveness, and
-sufficiency~\cite{deyoung2020eraser} under three local baselines: primary training median,
+sufficiency under three local baselines: primary training median,
 $5$-draw independent marginal, \rev{and \emph{on-manifold conditional $k$-NN replacement}
 (replacing deleted columns $S_k$ jointly from the $M=10$ nearest training rows matched on
 the retained columns $\bar{S}_k$). To eliminate fixed-model perturbation bias altogether,
