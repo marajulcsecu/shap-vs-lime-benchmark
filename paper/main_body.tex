@@ -12,6 +12,10 @@ University of Chittagong, Chittagong-4331, Bangladesh\\
 \fi
 
 \maketitle
+\ifdefined\CameraReadyMode
+\thispagestyle{IEEEtitlepagestyle}
+\pagestyle{empty}
+\fi
 
 \input{sections/00_abstract}
 
@@ -29,6 +33,6 @@ interpretability, tabular data, reproducibility, pre-registration
 \input{sections/07_conclusion}
 \input{sections/08_backmatter}
 
-\IEEEtriggeratref{12}
+\IEEEtriggeratref{11}
 \bibliographystyle{IEEEtran}
 \bibliography{refs}

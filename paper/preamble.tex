@@ -25,7 +25,23 @@
 % Identifiers must not hyphenate: "LimeTab-ularExplainer" reads as part
 % of the name. Paths still break, which is what \file is for.
 \newcommand{\code}[1]{\texttt{\nohyphens{#1}}}
-\usepackage[hidelinks]{hyperref}
+\ifdefined\CameraReadyMode
+  % IEEE PDF eXpress forbids PDF bookmarks, hyperlinks, and annotations.
+  \pagestyle{empty}
+  \IEEEpubid{\makebox[\columnwidth]{979-8-3195-0171-4/26/\$31.00~\copyright 2026 IEEE\hfill}\hspace{\columnsep}\makebox[\columnwidth]{}}
+  \makeatletter
+  \def\ps@IEEEtitlepagestyle{%
+    \def\@oddhead{\raisebox{-4pt}[0pt][0pt]{\parbox[t]{\textwidth}{\footnotesize\normalfont
+      2026 29th International Conference on Computer and Information Technology (ICCIT)\\
+      18-20 December 2026, Cox's Bazar, Bangladesh}}\hfill}%
+    \def\@evenhead{\@oddhead}%
+    \def\@oddfoot{\hbox{}\hss\@IEEEfooterstyle\footnotesize\raisebox{\footskip}[0pt][0pt]{\@IEEEpubid}\hss\hbox{}}%
+    \def\@evenfoot{\@oddfoot}%
+  }
+  \makeatother
+\else
+  \usepackage[hidelinks]{hyperref}
+\fi
 \usepackage{cite}
 \usepackage{xcolor}
 \newif\ifhighlight
